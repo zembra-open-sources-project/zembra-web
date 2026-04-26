@@ -30,7 +30,7 @@
 - docs/exec-plans/tech-debt-tracker.md 记录项目的技术债。
 - docs/references/ 存放外部依赖、协议、框架和工具参考资料摘要。
 - docs/generated/ 存放自动生成文档；默认只读，不手工维护。
-- docs/PROGRESS.md 记录当前专注任务、流程记录、最近验证结果和归档索引。
+- `docs/PROGRESS.md` 项目进度追踪文件，包含两个章节。`项目流程记录` 章节记录项目计划与阶段推进状态，针对每个需求，记录需求编号、git HEAD id（保留前八位），然后使用连续的、不超过200字的简体中文描述本次开发实现的计划以及实现情况，每个需求只允许记录一个条目，如果存在该条目，则在已有内容基础上追加。`当前专注任务` 章节记录项目当前任务所造的模块。
 - docs/DESIGN.md 记录项目的设计规则，包括 UI 设计、功能设计规范。
 - docs/FRONTEND.md 记录项目的前端设计架构。
 - docs/PRODUCT_SENSE.md 记录产品判断和体验原则。
@@ -45,6 +45,12 @@
 - 前端代码只能通过 API Client 或 Repository 层消费业务数据，禁止让 UI 组件直接依赖 SQLite 表结构或未来 Supabase 的具体查询实现。
 - 涉及 schema 升级时，必须先确认兼容性；如果存在破坏性变化，需要同步更新前端数据访问逻辑和迁移策略说明。
 
+### 依赖约束
+- 新增前端依赖前必须先核对 `docs/references/dependency-constraints.md`。
+- 前端仓库默认禁止引入 SQLite driver、ORM、数据库 migration 运行时依赖，除非用户明确批准并同步更新约束文档。
+- Supabase SDK 只能在认证、实时订阅或明确直连场景中局部使用，禁止 UI 组件直接依赖 Supabase 查询实现。
+- 涉及数据库、schema、同步或持久化的新依赖，必须先记录到需求澄清文档，再进入设计或实现。
+
 阅读规则
 - 开始任何任务时先读 AGENTS.md。
 - 涉及结构、分层、依赖、模块边界时读 ARCHITECTURE.md 和相关 design docs。
@@ -52,6 +58,7 @@
 - 涉及功能目标、用户流程、验收条件时读 docs/product-specs/。
 - 涉及中大改动时先在 docs/exec-plans/active/ 创建或更新执行计划，再开始实施。
 - 涉及外部依赖、框架、协议时先读 docs/references/。
+- 涉及新增、升级或移除依赖时先读 `docs/references/dependency-constraints.md`。
 - 涉及数据表、SQLite、JSON Schema、migration 或 Supabase 迁移时先读 `docs/references/shared-schema.md` 和 `vendor/zembra-schema`。
 - 涉及生成物时只读 docs/generated/，不手工修改 generated 下的内容。
 
