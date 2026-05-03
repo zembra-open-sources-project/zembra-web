@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MeNote Static UI</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a20;
+      --panel-soft: #1c2027;
+      --panel-hover: #242a33;
+      --text: #e8edf3;
+      --text-muted: #94a0ae;
+      --text-dim: #667180;
+      --line: #2a313b;
+      --accent: #8fd3ff;
+      --accent-soft: rgba(143, 211, 255, 0.14);
+      --accent-line: rgba(143, 211, 255, 0.45);
+      --shadow: rgba(0, 0, 0, 0.36);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --sidebar: 300px;
+      --feed: 760px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 80% 90%, rgba(143, 211, 255, 0.08), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      letter-spacing: -0.01em;
+    }
+
+    .app {
+      width: calc(var(--sidebar) + var(--feed) + 96px);
+      min-height: 100vh;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: var(--sidebar) var(--feed);
+      gap: 64px;
+      padding: 34px 0 128px;
+      position: relative;
+    }
+
+    .sidebar {
+      padding-top: 4px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 28px;
+      font-size: 18px;
+      font-weight: 740;
+    }
+
+    .brand-badge {
+      border: 1px solid rgba(232, 237, 243, 0.68);
+      border-radius: 5px;
+      padding: 1px 5px;
+      font-size: 10px;
+      line-height: 1.3;
+      color: var(--text);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .stat-value {
+      font-size: 30px;
+      font-weight: 760;
+      color: #cdd4dc;
+      line-height: 1;
+    }
+
+    .stat-label {
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .heatmap {
+      display: grid;
+      grid-template-columns: repeat(12, 18px);
+      gap: 9px;
+      margin: 18px 0 8px;
+    }
+
+    .cell {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      background: #343941;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+
+    .cell.lv1 { background: #3f4852; }
+    .cell.lv2 { background: #4a6172; }
+    .cell.lv3 { background: #5f90ac; }
+    .cell.lv4 { background: #8fd3ff; }
+
+    .months {
+      display: flex;
+      justify-content: space-between;
+      width: 244px;
+      color: var(--text-muted);
+      font-size: 13px;
+      margin: 12px 0 26px;
+    }
+
+    .section {
+      margin-top: 26px;
+    }
+
+    .section-title {
+      color: #b89666;
+      font-size: 12px;
+      margin: 0 0 11px;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item {
+      min-height: 36px;
+      display: grid;
+      grid-template-columns: 24px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 9px;
+      color: #c9d0d8;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .nav-item:hover {
+      background: var(--panel-hover);
+    }
+
+    .nav-item.active {
+      background: var(--accent-soft);
+      color: #def4ff;
+      box-shadow: inset 0 0 0 1px rgba(143, 211, 255, 0.12);
+    }
+
+    .prefix {
+      color: var(--accent);
+      font-weight: 740;
+      font-size: 18px;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .count {
+      color: var(--text-dim);
+      font-size: 12px;
+    }
+
+    .main {
+      position: relative;
+      min-width: 0;
+    }
+
+    .topbar {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-bottom: 18px;
+    }
+
+    .search {
+      width: 320px;
+      height: 42px;
+      border-radius: 999px;
+      background: var(--panel-soft);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px;
+      font-size: 14px;
+    }
+
+    .search .shortcut {
+      margin-left: auto;
+      color: #9ea8b4;
+    }
+
+    .feed {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .note {
+      position: relative;
+      background: var(--panel-soft);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px 19px;
+      box-shadow: 0 10px 24px var(--shadow);
+      border: 1px solid rgba(255,255,255,0.025);
+    }
+
+    .note-menu {
+      position: absolute;
+      top: 17px;
+      right: 18px;
+      color: var(--text-muted);
+      font-size: 20px;
+      letter-spacing: 1px;
+    }
+
+    .meta {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+
+    .note-body {
+      color: #e3e8ee;
+      font-size: 16px;
+      line-height: 1.75;
+      font-weight: 560;
+      padding-right: 28px;
+    }
+
+    .note-body ul {
+      margin: 12px 0 0 22px;
+      padding: 0;
+    }
+
+    .note-body li {
+      margin: 4px 0;
+    }
+
+    .tag-pill {
+      display: inline-flex;
+      align-items: center;
+      height: 25px;
+      border-radius: 7px;
+      padding: 0 8px;
+      margin-right: 6px;
+      background: rgba(143, 211, 255, 0.18);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 660;
+    }
+
+    .expand {
+      color: var(--accent);
+      margin-top: 12px;
+      font-size: 14px;
+      font-weight: 620;
+    }
+
+    .reference {
+      color: var(--text-muted);
+      margin-top: 12px;
+      font-size: 13px;
+    }
+
+    .bottom-fade {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 154px;
+      background: linear-gradient(to top, rgba(15,17,21,0.98) 24%, rgba(15,17,21,0.82) 62%, rgba(15,17,21,0));
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .composer-wrap {
+      position: fixed;
+      left: 50%;
+      bottom: 26px;
+      transform: translateX(calc(-50% + 182px));
+      width: var(--feed);
+      z-index: 10;
+    }
+
+    .composer {
+      min-height: 76px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--accent-line);
+      background: rgba(28, 32, 39, 0.96);
+      box-shadow: 0 18px 46px rgba(0,0,0,0.44), 0 0 0 1px rgba(143, 211, 255, 0.04);
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+    }
+
+    .composer-text {
+      min-height: 38px;
+      padding: 16px 18px 6px;
+      color: var(--text-muted);
+      font-size: 16px;
+      font-weight: 560;
+    }
+
+    .composer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px 12px 16px;
+    }
+
+    .tools {
+      display: flex;
+      align-items: center;
+      gap: 19px;
+      color: #a6afba;
+      font-size: 19px;
+    }
+
+    .tool-aa {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .save-hint {
+      color: var(--text-dim);
+      font-size: 12px;
+      margin-left: 2px;
+      margin-top: 6px;
+    }
+
+    .send {
+      width: 48px;
+      height: 34px;
+      border-radius: 10px;
+      border: 0;
+      color: #11212d;
+      background: var(--accent);
+      font-size: 22px;
+      font-weight: 780;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 18px rgba(143, 211, 255, 0.16);
+      cursor: pointer;
+    }
+
+    .floating-help {
+      position: fixed;
+      right: 28px;
+      bottom: 32px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--panel-soft);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 720;
+      border: 1px solid rgba(255,255,255,0.04);
+      box-shadow: 0 14px 34px var(--shadow);
+      z-index: 11;
+    }
+
+    @media (max-width: 1120px) {
+      .app {
+        width: 100%;
+        grid-template-columns: 260px 1fr;
+        gap: 28px;
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+
+      .composer-wrap {
+        width: calc(100vw - 336px);
+        transform: none;
+        left: 308px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">MeNote <span class="brand-badge">LOCAL</span></div>
+
+      <div class="stats">
+        <div>
+          <div class="stat-value">2486</div>
+          <div class="stat-label">笔记</div>
+        </div>
+        <div>
+          <div class="stat-value">126</div>
+          <div class="stat-label">标签</div>
+        </div>
+        <div>
+          <div class="stat-value">942</div>
+          <div class="stat-label">天</div>
+        </div>
+      </div>
+
+      <div class="heatmap" aria-label="活跃热力图">
+        <span class="cell"></span><span class="cell lv1"></span><span class="cell"></span><span class="cell"></span><span class="cell lv2"></span><span class="cell"></span><span class="cell"></span><span class="cell lv1"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell lv3"></span>
+        <span class="cell"></span><span class="cell"></span><span class="cell lv1"></span><span class="cell"></span><span class="cell"></span><span class="cell lv2"></span><span class="cell"></span><span class="cell"></span><span class="cell lv1"></span><span class="cell"></span><span class="cell lv4"></span><span class="cell"></span>
+        <span class="cell lv1"></span><span class="cell"></span><span class="cell"></span><span class="cell lv3"></span><span class="cell"></span><span class="cell"></span><span class="cell lv2"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell lv1"></span><span class="cell"></span>
+        <span class="cell"></span><span class="cell lv2"></span><span class="cell"></span><span class="cell"></span><span class="cell lv1"></span><span class="cell"></span><span class="cell"></span><span class="cell lv3"></span><span class="cell"></span><span class="cell lv2"></span><span class="cell"></span><span class="cell"></span>
+        <span class="cell"></span><span class="cell"></span><span class="cell lv1"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell lv2"></span><span class="cell"></span><span class="cell lv1"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span>
+        <span class="cell"></span><span class="cell lv1"></span><span class="cell"></span><span class="cell"></span><span class="cell lv2"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell lv1"></span><span class="cell"></span><span class="cell lv3"></span><span class="cell"></span>
+      </div>
+      <div class="months"><span>一月</span><span>二月</span><span>三月</span></div>
+
+      <section class="section">
+        <p class="section-title">Fields</p>
+        <div class="nav-list">
+          <div class="nav-item active"><span class="prefix">@</span><span>灵感收集</span><span class="count">428</span></div>
+          <div class="nav-item"><span class="prefix">@</span><span>项目推进</span><span class="count">301</span></div>
+          <div class="nav-item"><span class="prefix">@</span><span>研究摘录</span><span class="count">186</span></div>
+          <div class="nav-item"><span class="prefix">@</span><span>写作草稿</span><span class="count">154</span></div>
+          <div class="nav-item"><span class="prefix">@</span><span>产品观察</span><span class="count">92</span></div>
+          <div class="nav-item"><span class="prefix">@</span><span>生活片段</span><span class="count">247</span></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <p class="section-title">Tags</p>
+        <div class="nav-list">
+          <div class="nav-item"><span class="prefix">#</span><span>AI</span><span class="count">134</span></div>
+          <div class="nav-item"><span class="prefix">#</span><span>界面设计</span><span class="count">57</span></div>
+          <div class="nav-item"><span class="prefix">#</span><span>阅读清单</span><span class="count">49</span></div>
+          <div class="nav-item"><span class="prefix">#</span><span>任务拆解</span><span class="count">76</span></div>
+          <div class="nav-item"><span class="prefix">#</span><span>工具体验</span><span class="count">33</span></div>
+          <div class="nav-item"><span class="prefix">#</span><span>长期想法</span><span class="count">61</span></div>
+        </div>
+      </section>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="search">
+          <span>⌕</span>
+          <span>搜索笔记、Field、Tag</span>
+          <span class="shortcut">⌘+K</span>
+        </div>
+      </header>
+
+      <section class="feed">
+        <article class="note">
+          <div class="note-menu">···</div>
+          <div class="meta">置顶 · 2026-04-26 08:40</div>
+          <div class="note-body">
+            一个成熟的笔记首页不应该急着展示复杂能力，而应该先保证三个动作最顺手：
+            <ul>
+              <li>快速记录</li>
+              <li>快速筛选</li>
+              <li>快速回看</li>
+            </ul>
+            底部输入框的意义，就是把“记录”这个动作变成页面里最自然的事情。
+          </div>
+          <div class="expand">展开</div>
+          <div class="reference">被 3 条笔记引用</div>
+        </article>
+
+        <article class="note">
+          <div class="note-menu">···</div>
+          <div class="meta">2026-04-25 21:15</div>
+          <div class="note-body">
+            <span class="tag-pill">#界面设计</span>
+            <span class="tag-pill">#任务拆解</span>
+            左侧的 Fields 和 Tags 使用同一套列表组件，只通过 <strong>@</strong> 与 <strong>#</strong> 区分语义，这样界面会更统一，也更利于后续扩展搜索和快捷输入。
+          </div>
+        </article>
+
+        <article class="note">
+          <div class="note-menu">···</div>
+          <div class="meta">2026-04-24 10:08</div>
+          <div class="note-body">
+            在本地优先的笔记应用里，输入区应该固定在用户视线最后停留的位置，因此底部悬浮输入比顶部大输入框更适合高频记录场景。
+          </div>
+        </article>
+
+        <article class="note">
+          <div class="note-menu">···</div>
+          <div class="meta">2026-04-22 18:32</div>
+          <div class="note-body">
+            @研究摘录 #AI 当一个页面同时承担输入与阅读两种任务时，强调色应该只服务于少数关键状态：当前筛选、输入聚焦、可点击反馈、主要发送动作。
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div class="bottom-fade"></div>
+
+  <div class="composer-wrap">
+    <div class="composer">
+      <div class="composer-text">现在的想法是...</div>
+      <div class="composer-bar">
+        <div>
+          <div class="tools">
+            <span>#</span>
+            <span>@</span>
+            <span>▧</span>
+            <span class="tool-aa">Aa</span>
+            <span>☷</span>
+            <span>☰</span>
+          </div>
+          <div class="save-hint">将保存到 @灵感收集</div>
+        </div>
+        <button class="send" aria-label="发送">➜</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="floating-help">?</div>
+</body>
+</html>
