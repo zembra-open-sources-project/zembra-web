@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import { notesClient, taxonomyClient } from "../../api/client";
-import type { FieldDto, NoteDto, TagDto } from "../../api/types";
+import type {
+  CreateNoteInput,
+  FieldDto,
+  NoteDto,
+  TagDto,
+} from "../../api/types";
 
 interface NotesState {
   /** Recent notes currently visible in the home feed. */
@@ -23,6 +28,8 @@ interface NotesState {
   setSelectedField: (field?: string) => void;
   /** Loads recent notes from the home feed endpoint. */
   loadRecentNotes: () => Promise<void>;
+  /** Creates a note and places it at the top of the recent feed. */
+  createNote: (input: CreateNoteInput) => Promise<void>;
   /** Loads fields from the active taxonomy client. */
   loadFields: () => Promise<void>;
   /** Loads tags from the active taxonomy client. */
@@ -43,6 +50,21 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   loadRecentNotes: async () => {
     const notes = await notesClient.listRecentNotes({ limit: 50 });
     set({ notes });
+  },
+  createNote: async (input) => {
+    const note = await notesClient.createNote(input);
+    set((state) => ({
+      notes: [note, ...state.notes.filter((item) => item.id !== note.id)].slice(
+        0,
+        50,
+      ),
+    }));
+
+    const [fields, tags] = await Promise.all([
+      taxonomyClient.listFields(),
+      taxonomyClient.listTags(),
+    ]);
+    set({ fields, tags });
   },
   loadFields: async () => {
     const existingFields = get().fields;

@@ -46,6 +46,7 @@ const heatmapLevels = [
 /** Renders the redesigned Zembra note workspace shell. */
 export function HomePage() {
   const [draft, setDraft] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const {
     notes,
@@ -57,6 +58,7 @@ export function HomePage() {
     setKeyword,
     setSelectedTag,
     setSelectedField,
+    createNote,
     loadFields,
     loadRecentNotes,
     loadTags,
@@ -86,10 +88,31 @@ export function HomePage() {
     void loadRecentNotes();
   }, [loadFields, loadRecentNotes, loadTags]);
 
-  /** Handles the visual-only composer submission for the current placeholder phase. */
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  /** Persists the current composer draft as a new note. */
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setDraft("");
+    const content = draft.trim();
+
+    if (!content) {
+      return;
+    }
+
+    const field =
+      fields.find((item) => item.id === selectedField)?.name ?? "inbox";
+    const tags = parseTagNames(content);
+
+    setIsSubmitting(true);
+    try {
+      await createNote({
+        content,
+        field,
+        role: "Human",
+        tags,
+      });
+      setDraft("");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   /** Inserts a composer tool snippet at the current textarea selection. */
@@ -277,9 +300,10 @@ export function HomePage() {
                   </div>
                 </div>
                 <button
-                  className="flex h-[34px] w-12 items-center justify-center rounded-[10px] bg-[#8fd3ff] text-[#11212d] shadow-[0_8px_18px_rgba(143,211,255,0.16)] hover:bg-[#b8e4ff]"
+                  className="flex h-[34px] w-12 items-center justify-center rounded-[10px] bg-[#8fd3ff] text-[#11212d] shadow-[0_8px_18px_rgba(143,211,255,0.16)] hover:bg-[#b8e4ff] disabled:cursor-not-allowed disabled:opacity-50"
                   type="submit"
                   aria-label="发送"
+                  disabled={isSubmitting || draft.trim().length === 0}
                 >
                   <SendHorizontal className="size-5" aria-hidden="true" />
                 </button>
@@ -462,6 +486,14 @@ function countTags(notes: NoteDto[]): Map<string, number> {
   });
 
   return counts;
+}
+
+/** Extracts inline tag names from composer content. */
+function parseTagNames(content: string): string[] {
+  return Array.from(
+    content.matchAll(/(?:^|\s)#([^\s#@]+)/g),
+    (match) => match[1],
+  );
 }
 
 /** Formats a Unix timestamp for note card metadata. */

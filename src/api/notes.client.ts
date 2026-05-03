@@ -86,7 +86,7 @@ export function createNotesHttpClient(
           content: input.content,
           device_id: input.deviceId,
           field: input.field,
-          role: input.role ?? "user",
+          role: input.role ?? "Human",
           tags: input.tags ?? [],
         },
       });

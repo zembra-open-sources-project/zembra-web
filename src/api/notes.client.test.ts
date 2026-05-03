@@ -107,7 +107,7 @@ describe("createNotesHttpClient", () => {
       expect(JSON.parse(String(init?.body))).toEqual({
         content: "new note",
         field: undefined,
-        role: "user",
+        role: "Human",
         tags: ["api"],
       });
 
