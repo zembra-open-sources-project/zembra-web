@@ -53,7 +53,7 @@
 | 统计第三项 | 先占位 |
 | 卡片扩展功能 | 只做视觉表现 |
 | Composer 工具栏 | 实现插入 `#`、`@` 和基础 Markdown 格式片段 |
-| Notes 数据 | 本轮先占位；后续后端提供 `POST /notes/recent` 后，再接入最近 50 条笔记 |
+| Notes 数据 | 已确认后端提供 `POST /notes/recent`，本轮接入最近 50 条笔记作为首页 feed |
 
 ## 暂不默认纳入
 
@@ -61,4 +61,4 @@
 - 不引入富文本编辑器。
 - 不实现全局 Command Palette，除非用户确认 `⌘+K` 要可用。
 - 不新增 UI 自动化测试，除非用户明确允许。
-- 不接当前 `/notes` 作为首页 feed 数据源；首页 notes 后续以 `POST /notes/recent` 为准。
+- 不接当前 `/notes` 作为首页 feed 数据源；首页 notes 使用 `POST /notes/recent`。

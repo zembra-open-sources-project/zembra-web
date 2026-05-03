@@ -21,23 +21,7 @@ import {
   useState,
 } from "react";
 import { useNotesStore } from "../../features/notes/noteStore";
-
-interface PlaceholderNote {
-  /** Stable placeholder note identifier. */
-  id: string;
-  /** Visual metadata shown above the note body. */
-  meta: string;
-  /** Main note body used while the recent notes API is pending. */
-  content: string;
-  /** Tag names rendered as preview pills. */
-  tags: string[];
-  /** Optional field label rendered in note text. */
-  field?: string;
-  /** Whether the note shows the expand affordance. */
-  hasExpand?: boolean;
-  /** Optional reference count text rendered as visual placeholder. */
-  reference?: string;
-}
+import type { NoteDto } from "../../api/types";
 
 interface ComposerTool {
   /** Stable tool identifier. */
@@ -54,49 +38,6 @@ interface ComposerTool {
   cursorOffset?: number;
 }
 
-const placeholderNotes: PlaceholderNote[] = [
-  {
-    id: "placeholder-1",
-    meta: "置顶 · 2026-04-26 08:40",
-    content:
-      "一个成熟的笔记首页不应该急着展示复杂能力，而应该先保证三个动作最顺手：快速记录、快速筛选、快速回看。",
-    tags: [],
-    hasExpand: true,
-    reference: "被 3 条笔记引用",
-  },
-  {
-    id: "placeholder-2",
-    meta: "2026-04-25 21:15",
-    content:
-      "左侧的 Fields 和 Tags 使用同一套列表组件，只通过 @ 与 # 区分语义，这样界面会更统一，也更利于后续扩展搜索和快捷输入。",
-    tags: ["界面设计", "任务拆解"],
-  },
-  {
-    id: "placeholder-3",
-    meta: "2026-04-24 10:08",
-    content:
-      "在本地优先的笔记应用里，输入区应该固定在用户视线最后停留的位置，因此底部悬浮输入比顶部大输入框更适合高频记录场景。",
-    tags: [],
-  },
-  {
-    id: "placeholder-4",
-    meta: "2026-04-22 18:32",
-    content:
-      "当一个页面同时承担输入与阅读两种任务时，强调色应该只服务于少数关键状态：当前筛选、输入聚焦、可点击反馈、主要发送动作。",
-    tags: ["AI"],
-    field: "研究摘录",
-  },
-];
-
-const placeholderTags = [
-  { name: "AI", count: 134 },
-  { name: "界面设计", count: 57 },
-  { name: "阅读清单", count: 49 },
-  { name: "任务拆解", count: 76 },
-  { name: "工具体验", count: 33 },
-  { name: "长期想法", count: 61 },
-];
-
 const heatmapLevels = [
   0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 0, 3, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 4, 0,
   1, 0, 0, 3, 0, 0, 2, 0, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 3, 0, 2, 0, 0,
@@ -108,6 +49,7 @@ export function HomePage() {
   const [draft, setDraft] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const {
+    notes,
     fields,
     keyword,
     selectedTag,
@@ -116,16 +58,31 @@ export function HomePage() {
     setSelectedTag,
     setSelectedField,
     loadFields,
+    loadRecentNotes,
   } = useNotesStore();
 
   const composerTools = useMemo(
     () => createComposerTools(),
     [],
   );
+  const fieldNameById = useMemo(
+    () => new Map(fields.map((field) => [field.id, field.name])),
+    [fields],
+  );
+  const visibleNotes = useMemo(
+    () => filterVisibleNotes(notes, {
+      fieldId: selectedField,
+      keyword,
+      tag: selectedTag,
+    }),
+    [keyword, notes, selectedField, selectedTag],
+  );
+  const tags = useMemo(() => countTags(notes), [notes]);
 
   useEffect(() => {
     void loadFields();
-  }, [loadFields]);
+    void loadRecentNotes();
+  }, [loadFields, loadRecentNotes]);
 
   /** Handles the visual-only composer submission for the current placeholder phase. */
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -176,8 +133,8 @@ export function HomePage() {
           </div>
 
           <div className="mb-5 grid grid-cols-3 gap-4">
-            <StatBlock label="笔记" value="--" />
-            <StatBlock label="标签" value="--" />
+            <StatBlock label="笔记" value={String(notes.length)} />
+            <StatBlock label="标签" value={String(tags.length)} />
             <StatBlock label="天" value="942" />
           </div>
 
@@ -217,7 +174,17 @@ export function HomePage() {
           </SidebarSection>
 
           <SidebarSection title="Tags">
-            {placeholderTags.map((tag) => (
+            {tags.length === 0 ? (
+              <NavItem
+                active={false}
+                count={0}
+                disabled
+                label="暂无标签"
+                prefix="#"
+                onClick={() => undefined}
+              />
+            ) : null}
+            {tags.map((tag) => (
               <NavItem
                 active={selectedTag === tag.name}
                 count={tag.count}
@@ -247,45 +214,17 @@ export function HomePage() {
           </header>
 
           <div className="flex flex-col gap-3.5">
-            {placeholderNotes.map((note) => (
-              <article
-                className="relative rounded-[18px] border border-white/[0.025] bg-[#1c2027] px-5 py-[18px] shadow-[0_10px_24px_rgba(0,0,0,0.36)]"
-                key={note.id}
-              >
-                <MoreHorizontal
-                  className="absolute right-[18px] top-[17px] size-5 text-[#94a0ae]"
-                  aria-hidden="true"
-                />
-                <div className="mb-3.5 text-[13px] text-[#94a0ae]">
-                  {note.meta}
-                </div>
-                <p className="whitespace-pre-wrap pr-7 text-base font-medium leading-7 text-[#e3e8ee]">
-                  {note.field ? (
-                    <span className="mr-2 font-semibold text-[#8fd3ff]">
-                      @{note.field}
-                    </span>
-                  ) : null}
-                  {note.tags.map((tag) => (
-                    <span
-                      className="mr-1.5 inline-flex h-[25px] items-center rounded-[7px] bg-[#8fd3ff]/20 px-2 text-[13px] font-semibold text-[#8fd3ff]"
-                      key={tag}
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                  {note.content}
-                </p>
-                {note.hasExpand ? (
-                  <div className="mt-3 text-sm font-semibold text-[#8fd3ff]">
-                    展开
-                  </div>
-                ) : null}
-                {note.reference ? (
-                  <div className="mt-3 text-[13px] text-[#94a0ae]">
-                    {note.reference}
-                  </div>
-                ) : null}
+            {visibleNotes.length === 0 ? (
+              <article className="rounded-[18px] border border-dashed border-[#2a313b] bg-[#1c2027]/60 px-5 py-8 text-[#94a0ae]">
+                暂无最近笔记
               </article>
+            ) : null}
+            {visibleNotes.map((note) => (
+              <NoteCard
+                fieldName={note.fieldId ? fieldNameById.get(note.fieldId) : undefined}
+                key={note.id}
+                note={note}
+              />
             ))}
           </div>
         </section>
@@ -353,6 +292,45 @@ export function HomePage() {
   );
 }
 
+/** Renders one recent note in the home feed. */
+function NoteCard({
+  fieldName,
+  note,
+}: {
+  fieldName?: string;
+  note: NoteDto;
+}) {
+  return (
+    <article className="relative rounded-[18px] border border-white/[0.025] bg-[#1c2027] px-5 py-[18px] shadow-[0_10px_24px_rgba(0,0,0,0.36)]">
+      <MoreHorizontal
+        className="absolute right-[18px] top-[17px] size-5 text-[#94a0ae]"
+        aria-hidden="true"
+      />
+      <div className="mb-3.5 text-[13px] text-[#94a0ae]">
+        {formatNoteTimestamp(note.updatedAt)}
+      </div>
+      <p className="whitespace-pre-wrap pr-7 text-base font-medium leading-7 text-[#e3e8ee]">
+        {fieldName ? (
+          <span className="mr-2 font-semibold text-[#8fd3ff]">
+            @{fieldName}
+          </span>
+        ) : null}
+        {note.tags.map((tag) => (
+          <span
+            className="mr-1.5 inline-flex h-[25px] items-center rounded-[7px] bg-[#8fd3ff]/20 px-2 text-[13px] font-semibold text-[#8fd3ff]"
+            key={tag}
+          >
+            #{tag}
+          </span>
+        ))}
+        {note.content}
+      </p>
+      <div className="mt-3 text-sm font-semibold text-[#8fd3ff]">展开</div>
+      <div className="mt-3 text-[13px] text-[#94a0ae]">引用信息待接入</div>
+    </article>
+  );
+}
+
 /** Renders a single statistic block in the sidebar. */
 function StatBlock({ label, value }: { label: string; value: string }) {
   return (
@@ -387,20 +365,23 @@ function SidebarSection({
 function NavItem({
   active,
   count,
+  disabled = false,
   label,
   onClick,
   prefix,
 }: {
   active: boolean;
   count: number;
+  disabled?: boolean;
   label: string;
   onClick: () => void;
   prefix: string;
 }) {
   return (
     <button
-      className="grid min-h-9 grid-cols-[24px_1fr_auto] items-center gap-2.5 rounded-[9px] px-3 py-2 text-left text-[15px] text-[#c9d0d8] hover:bg-[#242a33] data-[active=true]:bg-[#8fd3ff]/15 data-[active=true]:text-[#def4ff] data-[active=true]:shadow-[inset_0_0_0_1px_rgba(143,211,255,0.12)]"
+      className="grid min-h-9 grid-cols-[24px_1fr_auto] items-center gap-2.5 rounded-[9px] px-3 py-2 text-left text-[15px] text-[#c9d0d8] hover:bg-[#242a33] disabled:cursor-default disabled:opacity-45 disabled:hover:bg-transparent data-[active=true]:bg-[#8fd3ff]/15 data-[active=true]:text-[#def4ff] data-[active=true]:shadow-[inset_0_0_0_1px_rgba(143,211,255,0.12)]"
       data-active={active}
+      disabled={disabled}
       type="button"
       onClick={onClick}
     >
@@ -411,6 +392,54 @@ function NavItem({
       <span className="text-xs text-[#667180]">{count}</span>
     </button>
   );
+}
+
+/** Applies current home feed filters to recent notes. */
+function filterVisibleNotes(
+  notes: NoteDto[],
+  query: { fieldId?: string; keyword: string; tag?: string },
+): NoteDto[] {
+  const keyword = query.keyword.trim();
+
+  return notes.filter((note) => {
+    const keywordMatched = !keyword || note.content.includes(keyword);
+    const tagMatched = !query.tag || note.tags.includes(query.tag);
+    const fieldMatched = !query.fieldId || note.fieldId === query.fieldId;
+    return keywordMatched && tagMatched && fieldMatched;
+  });
+}
+
+/** Counts tag usage in recent notes for the sidebar tag navigation. */
+function countTags(notes: NoteDto[]): Array<{ name: string; count: number }> {
+  const counts = new Map<string, number>();
+
+  notes.forEach((note) => {
+    note.tags.forEach((tag) => {
+      counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    });
+  });
+
+  return Array.from(counts.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((left, right) => left.name.localeCompare(right.name, "zh-CN"));
+}
+
+/** Formats a Unix timestamp for note card metadata. */
+function formatNoteTimestamp(timestamp: number): string {
+  const date = new Date(timestamp * 1000);
+  const parts = new Intl.DateTimeFormat("zh-CN", {
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).formatToParts(date);
+  const value = (type: string) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+
+  return `${value("year")}-${value("month")}-${value("day")} ${value(
+    "hour",
+  )}:${value("minute")}`;
 }
 
 /** Creates toolbar definitions for the composer insertion buttons. */

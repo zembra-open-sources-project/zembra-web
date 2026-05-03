@@ -20,6 +20,16 @@ export interface NotesQuery {
   keyword?: string;
   /** Optional tag name used for filtering. */
   tag?: string;
+  /** Optional field identifier used for filtering. */
+  fieldId?: string;
+}
+
+/** Defines options supported by the recent notes endpoint. */
+export interface RecentNotesQuery {
+  /** Maximum number of recent notes to return. */
+  limit?: number;
+  /** Optional full note ID used as a pagination cursor. */
+  noteUuid?: string;
 }
 
 /** Describes input required to create a note through the API boundary. */

@@ -18,6 +18,49 @@ function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
 }
 
 describe("createNotesHttpClient", () => {
+  test("lists recent notes with the recent notes endpoint", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+
+      if (url.endsWith("/notes/recent")) {
+        expect(init?.method).toBe("POST");
+        expect(JSON.parse(String(init?.body))).toEqual({ limit: 50 });
+
+        return jsonResponse({
+          notes: [
+            {
+              id: "recent-1",
+              content: "recent note",
+              role: "Human",
+              field_id: "field-1",
+              created_at: 1,
+              updated_at: 2,
+            },
+          ],
+        });
+      }
+
+      return jsonResponse({
+        tags: [{ id: "tag-1", name: "recent", created_at: 1 }],
+      });
+    });
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+
+    await expect(client.listRecentNotes()).resolves.toEqual([
+      {
+        id: "recent-1",
+        content: "recent note",
+        fieldId: "field-1",
+        createdAt: 1,
+        updatedAt: 2,
+        tags: ["recent"],
+      },
+    ]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   test("lists notes using backend records and note tag endpoints", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);

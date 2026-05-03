@@ -6,27 +6,27 @@
 
 ## 核心功能（WHAT）
 
-将首页调整为接近 `preview.html` 的深色笔记工作台。首页保留 `Zembra` 品牌，本轮接入真实 fields 数据，notes feed 先做视觉占位，后续等待后端 `POST /notes/recent` 提供最近 50 条笔记后再接入。
+将首页调整为接近 `preview.html` 的深色笔记工作台。首页保留 `Zembra` 品牌，接入真实 fields 数据和 `POST /notes/recent` 最近笔记数据，渲染真实 note feed。
 
 ### 需求背景（WHY）
 
-当前首页已能通过 OpenAPI client 读取和创建笔记，但后续首页最近笔记数据源会切换为 `POST /notes/recent`。本轮先把视觉结构和 Fields 数据边界搭好，避免围绕即将变化的 notes API 做重复实现。
+当前首页已完成视觉结构和 Fields 数据边界，后端已提供 `POST /notes/recent`。本轮将首页 feed 从占位数据切换为最近 50 条真实笔记。
 
 ### 需求目标（GOAL）
 
 - 还原预览稿的深色布局、卡片层次、侧栏导航、右上搜索和底部 composer。
 - 接入后端 `/fields`，在侧栏展示真实 Field 列表。
-- 保持 notes 功能占位，不把首页 feed 绑定到当前 `/notes`。
+- 保持首页 feed 不绑定当前 `/notes`，改用 `POST /notes/recent`。
 - composer 工具栏支持常用插入能力，降低输入 `#tag`、`@field` 和 Markdown 格式的成本。
 
 ### 范围边界
 
 | 类型 | 内容 |
 | --- | --- |
-| In Scope | 深色首页布局、Zembra 品牌、真实 fields 列表、notes 占位 feed、tag 导航占位、keyword 搜索占位、底部 composer、工具栏插入格式 |
+| In Scope | 深色首页布局、Zembra 品牌、真实 fields 列表、真实 recent notes feed、tag 导航、keyword 搜索、底部 composer、工具栏插入格式 |
 | In Scope | 笔记卡片展示 meta、菜单占位、展开占位、引用占位 |
 | In Scope | 统计区先使用视觉占位，第三项使用占位 |
-| Out of Scope | 首页接入当前 `/notes`；首页 notes 数据后续使用 `POST /notes/recent` |
+| Out of Scope | 首页接入当前 `/notes`；真实置顶、引用统计和展开折叠仍保持视觉占位 |
 | Out of Scope | Command Palette、真实置顶、真实引用统计、真实展开折叠、菜单操作、热力图真实统计 |
 | Out of Scope | 富文本编辑器、新 UI 套件、UI 自动化测试 |
 
@@ -40,9 +40,9 @@
 | Fields client | 新建 `src/api/taxonomy.client.ts`，封装 `GET /fields` |
 | 默认 client | `src/api/client.ts` 同时导出 `fieldsClient` |
 | Store | 新增或扩展 store 状态，至少提供 `fields`、`selectedField`、`loadFields`、`setSelectedField` |
-| Notes 占位 | 首页不调用当前 `/notes` 作为 feed；保留后续 `POST /notes/recent` 接入位置 |
+| Recent Notes | `NotesClient.listRecentNotes()` 调用 `POST /notes/recent`，body 默认 `{ "limit": 50 }`，返回 `ListNotesResponse` |
 
-说明：后端 `/fields` 返回 `id` 和 `name`。本轮只在侧栏展示真实 field 列表并支持选中态；notes feed、field 过滤和创建笔记的数据写入等待 `POST /notes/recent` 及后续 notes 写入流程稳定后接入。
+说明：后端 `/fields` 返回 `id` 和 `name`。后端 `POST /notes/recent` 请求体包含可选 `limit` 和 `note_uuid`，默认 50，limit 范围 1 到 100，响应为 `{ notes: NoteRecord[] }`。前端首页本轮只接首屏最近 50 条；游标翻页后续再扩展。
 
 ### 首页布局
 
@@ -51,7 +51,7 @@
 | 根布局 | 深色全屏背景，桌面端两栏居中，左侧约 300px，feed 约 760px |
 | 侧栏 | 品牌、统计、热力图占位、Fields、Tags |
 | 顶栏 | 右对齐胶囊搜索框，绑定 `keyword` |
-| Feed | 使用占位笔记卡片列表，卡片显示 meta、正文、标签 pill 和视觉占位 |
+| Feed | 使用 recent notes 渲染卡片，卡片显示更新时间、正文、标签 pill 和视觉占位 |
 | Composer | 底部固定悬浮输入区，textarea + 工具栏 + 发送按钮视觉；工具按钮支持插入文本 |
 | 响应式 | 中等宽度缩小侧栏和间距；移动端改为单列，composer 固定在底部全宽范围内 |
 
@@ -79,5 +79,5 @@
 | --- | --- |
 | 编译检查 | `npm run build` 通过 |
 | 单元测试 | `npm run test` 通过，保留 client 测试 |
-| 回归检查 | 首页能加载 fields；notes feed 使用占位数据；测试模式不访问真实后端 |
-| 手工检查 | 访问 `http://127.0.0.1:5173/`，确认深色布局、Fields、Tags 占位、搜索占位和 composer 插入行为 |
+| 回归检查 | 首页能加载 fields 和 recent notes；测试模式不访问真实后端 |
+| 手工检查 | 访问 `http://127.0.0.1:5173/`，确认深色布局、Fields、Tags、搜索和真实 note feed |

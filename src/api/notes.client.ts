@@ -7,11 +7,14 @@ import type {
   NoteRecord,
   NoteResponse,
   NotesQuery,
+  RecentNotesQuery,
   UpdateNoteInput,
 } from "./types";
 
 /** Defines the frontend note data access boundary. */
 export interface NotesClient {
+  /** Lists recent notes ordered by update time for the home feed. */
+  listRecentNotes(query?: RecentNotesQuery): Promise<NoteDto[]>;
   /** Lists notes using the provided query filters. */
   listNotes(query: NotesQuery): Promise<NoteDto[]>;
   /** Reads a single note by full ID or unique prefix. */
@@ -37,6 +40,26 @@ export function createNotesHttpClient(
   const { baseUrl } = options;
 
   return {
+    async listRecentNotes(query = {}) {
+      const response = await requestJson<ListNotesResponse>(
+        baseUrl,
+        "/notes/recent",
+        {
+          method: "POST",
+          body: {
+            limit: query.limit ?? 50,
+            note_uuid: query.noteUuid,
+          },
+        },
+      );
+      const notes = await Promise.all(
+        response.notes.map(async (note) =>
+          mapNoteRecordToDto(note, await listTagNames(baseUrl, note.id)),
+        ),
+      );
+
+      return notes;
+    },
     async listNotes(query) {
       const response = await requestJson<ListNotesResponse>(baseUrl, "/notes", {
         query: { limit: undefined },
@@ -114,6 +137,9 @@ export function createMockNotesClient(): NotesClient {
   ];
 
   return {
+    async listRecentNotes(query = {}) {
+      return filterNotes(notes.slice(0, query.limit ?? 50), {});
+    },
     async listNotes(query) {
       return notes.filter((note) => {
         const keywordMatched =
@@ -198,6 +224,7 @@ function filterNotes(notes: NoteDto[], query: NotesQuery): NoteDto[] {
     const keywordMatched =
       !query.keyword || note.content.includes(query.keyword);
     const tagMatched = !query.tag || note.tags.includes(query.tag);
-    return keywordMatched && tagMatched;
+    const fieldMatched = !query.fieldId || note.fieldId === query.fieldId;
+    return keywordMatched && tagMatched && fieldMatched;
   });
 }

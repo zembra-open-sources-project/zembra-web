@@ -78,3 +78,34 @@
 - 2026-05-03：已按 `preview.html` 重构首页为深色工作台；notes、Tags、统计和卡片扩展功能按要求保持占位。
 - 2026-05-03：已实现底部 composer 的 `#`、`@`、加粗、列表、引用、分隔线、段落插入工具。
 - 2026-05-03：已通过 `npm run test` 和 `npm run build`。
+
+## Stage #4: Recent Notes Feed 接入
+
+### Task #6: 接入 `POST /notes/recent`
+
+**Status:** Finished
+
+**Files:** Modify `src/api/types.ts`, `src/api/notes.client.ts`, `src/api/notes.client.test.ts`
+
+**Function:** 新增 `RecentNotesQuery` 和 `NotesClient.listRecentNotes()`，按后端文档调用 `POST /notes/recent`，默认 body 为 `{ "limit": 50 }`，响应复用 `ListNotesResponse`。
+
+**Implementation Notes:** recent endpoint 返回 `NoteRecord[]`，client 继续通过 `/notes/{note_ref}/tags` 补齐标签；保留现有 `/notes` client 能力，不作为首页数据源。
+
+**Expected Verification Result:** recent notes client 单元测试通过。
+
+### Task #7: 首页 feed 切换为真实 recent notes
+
+**Status:** Finished
+
+**Files:** Modify `src/features/notes/noteStore.ts`, `src/pages/home/HomePage.tsx`
+
+**Function:** 首页加载最近 50 条笔记，使用真实 notes 渲染卡片，并基于 recent notes 派生 tag 导航、笔记数和标签数。
+
+**Implementation Notes:** keyword、tag、field 筛选在前端本地作用于 recent notes；置顶、展开和引用统计仍保持视觉占位。
+
+**Expected Verification Result:** `npm run test` 和 `npm run build` 通过；当前会话后端 3000 未响应，live curl 验证待后端进程恢复后执行。
+
+## Stage #4 开发记录
+
+- 2026-05-03：查阅后端 `r006 Recent Notes API` 文档和 Rust handler，确认 `POST /notes/recent` 请求体支持 `limit` 与 `note_uuid`，默认返回最近 50 条，响应为 `{ notes: [...] }`。
+- 2026-05-03：已完成 recent notes client、store 和首页 feed 接入，新增单元测试并通过 `npm run test`、`npm run build`。
