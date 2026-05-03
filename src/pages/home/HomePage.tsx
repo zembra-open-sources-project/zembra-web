@@ -293,50 +293,54 @@ export function HomePage() {
 
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-10 h-[154px] bg-gradient-to-t from-[#0f1115] from-[24%] via-[#0f1115]/80 via-[62%] to-transparent" />
 
-      <form
-        className="fixed bottom-6 left-5 right-5 z-20 lg:left-1/2 lg:right-auto lg:w-[760px] lg:translate-x-[-198px]"
-        onSubmit={handleSubmit}
-      >
-        <div className="overflow-hidden rounded-[18px] border border-[#8fd3ff]/45 bg-[#1c2027]/95 shadow-[0_18px_46px_rgba(0,0,0,0.44),0_0_0_1px_rgba(143,211,255,0.04)] backdrop-blur">
-          <textarea
-            className="min-h-[54px] w-full resize-none bg-transparent px-[18px] pb-1.5 pt-4 text-base font-medium leading-6 text-[#e8edf3] outline-none placeholder:text-[#94a0ae]"
-            placeholder="现在的想法是..."
-            ref={textareaRef}
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-          />
-          <div className="flex items-end justify-between px-4 pb-3">
-            <div>
-              <div className="flex items-center gap-4 text-[#a6afba]">
-                {composerTools.map((tool) => (
-                  <button
-                    className="flex size-7 items-center justify-center rounded-md hover:bg-[#242a33] hover:text-[#e8edf3]"
-                    key={tool.id}
-                    type="button"
-                    aria-label={tool.label}
-                    title={tool.label}
-                    onClick={(event) => handleToolClick(event, tool)}
-                  >
-                    {tool.icon}
-                  </button>
-                ))}
-              </div>
-              <div className="mt-1.5 text-xs text-[#667180]">
-                将保存到 @
-                {fields.find((field) => field.id === selectedField)?.name ??
-                  "inbox"}
+      <div className="fixed inset-x-0 bottom-6 z-20 px-5 lg:px-0">
+        <form
+          className="mx-auto grid w-full max-w-[1156px] grid-cols-1 lg:grid-cols-[300px_760px] lg:gap-16"
+          onSubmit={handleSubmit}
+        >
+          <div className="min-w-0 lg:col-start-2">
+            <div className="overflow-hidden rounded-[18px] border border-[#8fd3ff]/45 bg-[#1c2027]/95 shadow-[0_18px_46px_rgba(0,0,0,0.44),0_0_0_1px_rgba(143,211,255,0.04)] backdrop-blur">
+              <textarea
+                className="min-h-[54px] w-full resize-none bg-transparent px-[18px] pb-1.5 pt-4 text-base font-medium leading-6 text-[#e8edf3] outline-none placeholder:text-[#94a0ae]"
+                placeholder="现在的想法是..."
+                ref={textareaRef}
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+              />
+              <div className="flex items-end justify-between px-4 pb-3">
+                <div>
+                  <div className="flex items-center gap-4 text-[#a6afba]">
+                    {composerTools.map((tool) => (
+                      <button
+                        className="flex size-7 items-center justify-center rounded-md hover:bg-[#242a33] hover:text-[#e8edf3]"
+                        key={tool.id}
+                        type="button"
+                        aria-label={tool.label}
+                        title={tool.label}
+                        onClick={(event) => handleToolClick(event, tool)}
+                      >
+                        {tool.icon}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-1.5 text-xs text-[#667180]">
+                    将保存到 @
+                    {fields.find((field) => field.id === selectedField)?.name ??
+                      "inbox"}
+                  </div>
+                </div>
+                <button
+                  className="flex h-[34px] w-12 items-center justify-center rounded-[10px] bg-[#8fd3ff] text-[#11212d] shadow-[0_8px_18px_rgba(143,211,255,0.16)] hover:bg-[#b8e4ff]"
+                  type="submit"
+                  aria-label="发送"
+                >
+                  <SendHorizontal className="size-5" aria-hidden="true" />
+                </button>
               </div>
             </div>
-            <button
-              className="flex h-[34px] w-12 items-center justify-center rounded-[10px] bg-[#8fd3ff] text-[#11212d] shadow-[0_8px_18px_rgba(143,211,255,0.16)] hover:bg-[#b8e4ff]"
-              type="submit"
-              aria-label="发送"
-            >
-              <SendHorizontal className="size-5" aria-hidden="true" />
-            </button>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
 
       <button
         className="fixed bottom-8 right-7 z-20 flex size-[46px] items-center justify-center rounded-full border border-white/[0.04] bg-[#1c2027] text-[#94a0ae] shadow-[0_14px_34px_rgba(0,0,0,0.36)]"
