@@ -15,7 +15,9 @@ import {
   FormEvent,
   MouseEvent,
   ReactNode,
+  useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -309,6 +311,29 @@ function NoteCard({
   fieldName?: string;
   note: NoteDto;
 }) {
+  const [expanded, setExpanded] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const contentRef = useRef<HTMLParagraphElement>(null);
+  const measureOverflow = useCallback(() => {
+    const element = contentRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    setHasOverflow(element.scrollHeight > element.clientHeight + 1);
+  }, []);
+
+  useLayoutEffect(() => {
+    measureOverflow();
+  }, [measureOverflow, note.content, note.tags, fieldName]);
+
+  useEffect(() => {
+    window.addEventListener("resize", measureOverflow);
+
+    return () => window.removeEventListener("resize", measureOverflow);
+  }, [measureOverflow]);
+
   return (
     <article className="relative rounded-[18px] border border-white/[0.025] bg-[#1c2027] px-5 py-[18px] shadow-[0_10px_24px_rgba(0,0,0,0.36)]">
       <MoreHorizontal
@@ -318,7 +343,11 @@ function NoteCard({
       <div className="mb-3.5 text-[13px] text-[#94a0ae]">
         {formatNoteTimestamp(note.updatedAt)}
       </div>
-      <p className="whitespace-pre-wrap pr-7 text-base font-medium leading-7 text-[#e3e8ee]">
+      <p
+        className="overflow-hidden whitespace-pre-wrap pr-7 text-base font-medium leading-7 text-[#e3e8ee]"
+        ref={contentRef}
+        style={expanded ? undefined : { maxHeight: "5.25rem" }}
+      >
         {fieldName ? (
           <span className="mr-2 font-semibold text-[#8fd3ff]">
             @{fieldName}
@@ -334,7 +363,15 @@ function NoteCard({
         ))}
         {note.content}
       </p>
-      <div className="mt-3 text-sm font-semibold text-[#8fd3ff]">展开</div>
+      {hasOverflow || expanded ? (
+        <button
+          className="mt-3 text-sm font-semibold text-[#8fd3ff]"
+          type="button"
+          onClick={() => setExpanded((current) => !current)}
+        >
+          {expanded ? "收起" : "展开"}
+        </button>
+      ) : null}
       <div className="mt-3 text-[13px] text-[#94a0ae]">引用信息待接入</div>
     </article>
   );
