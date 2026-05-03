@@ -6,5 +6,5 @@ import { App } from "./App";
 test("renders the card note workspace", async () => {
   render(<App />);
 
-  expect(await screen.findByText("卡片笔记")).not.toBeNull();
+  expect(await screen.findByText("Zembra")).not.toBeNull();
 });
