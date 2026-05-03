@@ -28,4 +28,90 @@ export interface CreateNoteInput {
   content: string;
   /** Tag names parsed or selected by the user. */
   tags?: string[];
+  /** Optional field name associated with the note. */
+  field?: string;
+  /** Optional role used when creating the note. */
+  role?: string;
+  /** Optional device identifier used for revision tracking. */
+  deviceId?: string;
+}
+
+/** Describes input required to update a note through the API boundary. */
+export interface UpdateNoteInput {
+  /** New main note body. */
+  content: string;
+  /** Optional device identifier used for revision tracking. */
+  deviceId?: string;
+}
+
+/** Represents structured error details returned by the backend. */
+export interface ApiErrorBody {
+  /** Machine-readable error code. */
+  code: string;
+  /** Human-readable error message. */
+  message: string;
+  /** Additional backend-specific error details. */
+  details: Record<string, unknown>;
+}
+
+/** Represents the backend note database record shape. */
+export interface NoteRecord {
+  /** Stable note identifier. */
+  id: string;
+  /** Note body content. */
+  content: string;
+  /** Role that created the note. */
+  role: string;
+  /** Unix timestamp for note creation. */
+  created_at: number;
+  /** Unix timestamp for the latest note update. */
+  updated_at: number;
+  /** Optional field identifier for this note. */
+  field_id?: string | null;
+  /** Optional current revision identifier. */
+  current_revision_id?: string | null;
+  /** Optional archived timestamp. */
+  archived_at?: number | null;
+  /** Optional deleted timestamp. */
+  deleted_at?: number | null;
+}
+
+/** Represents user-facing note metadata resolved by the backend. */
+export interface NoteMetadata {
+  /** Resolved tag names. */
+  tags: string[];
+  /** Role that created the note. */
+  role: string;
+  /** Optional resolved field name. */
+  field?: string | null;
+}
+
+/** Represents the backend single-note response wrapper. */
+export interface NoteResponse {
+  /** Persisted note record. */
+  note: NoteRecord;
+  /** User-facing metadata for the note. */
+  metadata: NoteMetadata;
+}
+
+/** Represents the backend list-notes response wrapper. */
+export interface ListNotesResponse {
+  /** Active note records. */
+  notes: NoteRecord[];
+}
+
+/** Represents a backend tag database record. */
+export interface TagRecord {
+  /** Stable tag identifier. */
+  id: string;
+  /** Human-readable tag name. */
+  name: string;
+  /** Unix timestamp for tag creation. */
+  created_at: number;
+}
+
+/** Represents the backend note-tags response wrapper. */
+export interface ListNoteTagsResponse {
+  /** Tags associated with a note. */
+  tags: TagRecord[];
 }

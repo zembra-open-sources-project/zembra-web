@@ -1,8 +1,6 @@
 import { create } from "zustand";
-import { createMockNotesClient } from "../../api/notes.client";
+import { notesClient } from "../../api/client";
 import type { CreateNoteInput, NoteDto } from "../../api/types";
-
-const notesClient = createMockNotesClient();
 
 interface NotesState {
   /** Notes currently visible in the UI. */
