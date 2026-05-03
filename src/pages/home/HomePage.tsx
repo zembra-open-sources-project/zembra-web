@@ -128,23 +128,23 @@ export function HomePage() {
 
   return (
     <main className="h-screen overflow-hidden bg-[#0f1115] text-[#e8edf3]">
-      <div className="mx-auto grid h-full w-full max-w-[1156px] grid-cols-1 gap-8 px-5 pt-8 lg:grid-cols-[300px_760px] lg:gap-16 lg:px-0">
-        <aside className="flex min-h-0 min-w-0 flex-col">
+      <div className="mx-auto grid h-full w-full max-w-[1156px] grid-cols-1 gap-4 px-5 pt-6 lg:grid-cols-[300px_760px] lg:gap-16 lg:px-0 lg:pt-8">
+        <aside className="flex min-h-0 min-w-0 flex-col lg:min-h-0">
           <div className="shrink-0">
-            <div className="mb-7 flex items-center gap-2 text-lg font-bold">
+            <div className="mb-2 flex items-center gap-2 text-lg font-bold lg:mb-7">
               <span>Zembra</span>
               <span className="rounded-[5px] border border-[#e8edf3]/70 px-1.5 py-0.5 text-[10px] leading-tight">
                 LOCAL
               </span>
             </div>
 
-            <div className="mb-5 grid grid-cols-3 gap-4">
+            <div className="mb-5 hidden grid-cols-3 gap-4 lg:grid">
               <StatBlock label="笔记" value={String(notes.length)} />
               <StatBlock label="标签" value={String(tags.length)} />
               <StatBlock label="天" value="942" />
             </div>
 
-            <div className="mb-3 grid w-fit grid-cols-12 gap-[9px]" aria-label="活跃热力图占位">
+            <div className="mb-3 hidden w-fit grid-cols-12 gap-[9px] lg:grid" aria-label="活跃热力图占位">
               {heatmapLevels.map((level, index) => (
                 <span
                   className="size-[18px] rounded bg-[#343941] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] data-[level='1']:bg-[#3f4852] data-[level='2']:bg-[#4a6172] data-[level='3']:bg-[#5f90ac] data-[level='4']:bg-[#8fd3ff]"
@@ -153,14 +153,14 @@ export function HomePage() {
                 />
               ))}
             </div>
-            <div className="mb-7 flex w-[244px] justify-between text-[13px] text-[#94a0ae]">
+            <div className="mb-7 hidden w-[244px] justify-between text-[13px] text-[#94a0ae] lg:flex">
               <span>一月</span>
               <span>二月</span>
               <span>三月</span>
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto pb-44 pr-1">
+          <div className="hidden min-h-0 flex-1 overflow-y-auto pb-44 pr-1 lg:block">
             <SidebarSection title="Fields">
               <NavItem
                 active={selectedField === undefined}
@@ -209,8 +209,8 @@ export function HomePage() {
         </aside>
 
         <section className="flex min-h-0 min-w-0 flex-col">
-          <header className="mb-5 flex min-h-11 shrink-0 items-center justify-end">
-            <label className="flex h-[42px] w-full max-w-80 items-center gap-2.5 rounded-full bg-[#1c2027] px-4 text-sm text-[#94a0ae]">
+          <header className="mb-4 flex min-h-11 shrink-0 items-center justify-end lg:mb-5">
+            <label className="flex h-[42px] w-full items-center gap-2.5 rounded-full bg-[#1c2027] px-4 text-sm text-[#94a0ae] lg:max-w-80">
               <Search className="size-4" aria-hidden="true" />
               <input
                 className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#94a0ae]"
