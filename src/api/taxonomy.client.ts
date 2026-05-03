@@ -21,7 +21,9 @@ export function createTaxonomyHttpClient(
 
   return {
     async listFields() {
-      const response = await requestJson<ListFieldsResponse>(baseUrl, "/fields");
+      const response = await requestJson<ListFieldsResponse>(baseUrl, "/fields", {
+        query: { all: true },
+      });
       return response.fields.map(mapFieldRecordToDto);
     },
   };

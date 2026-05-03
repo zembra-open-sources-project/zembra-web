@@ -20,7 +20,7 @@ function jsonResponse(body: unknown): Response {
 }
 
 describe("createTaxonomyHttpClient", () => {
-  test("lists fields from the OpenAPI fields endpoint", async () => {
+  test("lists all fields from the OpenAPI fields endpoint", async () => {
     const fetchMock = vi.fn(async (_input: RequestInfo | URL) =>
       jsonResponse({
         fields: [
@@ -39,7 +39,7 @@ describe("createTaxonomyHttpClient", () => {
       { id: "field-2", name: "project", createdAt: 20 },
     ]);
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
-      "http://server.test/fields",
+      "http://server.test/fields?all=true",
     );
   });
 });
