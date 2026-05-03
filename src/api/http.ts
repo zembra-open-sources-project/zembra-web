@@ -31,13 +31,16 @@ export interface ApiRequestOptions {
   signal?: AbortSignal;
 }
 
-/** Creates an absolute API URL from a base URL, path, and optional query values. */
+/** Creates an API URL from a base URL, path, and optional query values. */
 export function createApiUrl(
   baseUrl: string,
   path: string,
   query: ApiRequestOptions["query"] = {},
 ): URL {
-  const url = new URL(path, normalizeBaseUrl(baseUrl));
+  const url = new URL(
+    joinApiPath(baseUrl, path),
+    globalThis.location?.origin ?? "http://127.0.0.1",
+  );
 
   Object.entries(query).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") {
@@ -74,9 +77,14 @@ export async function requestJson<T>(
   return data as T;
 }
 
-/** Normalizes the configured base URL so relative paths resolve consistently. */
-function normalizeBaseUrl(baseUrl: string): string {
-  return baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+/** Joins the configured base URL and request path for absolute or same-origin APIs. */
+function joinApiPath(baseUrl: string, path: string): string {
+  const normalizedBaseUrl = baseUrl.endsWith("/")
+    ? baseUrl.slice(0, -1)
+    : baseUrl;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  return `${normalizedBaseUrl}${normalizedPath}`;
 }
 
 /** Reads a JSON response body, returning undefined when no body is present. */
