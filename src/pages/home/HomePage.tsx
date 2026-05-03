@@ -125,85 +125,89 @@ export function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0f1115] text-[#e8edf3]">
-      <div className="mx-auto grid min-h-screen w-full max-w-[1156px] grid-cols-1 gap-8 px-5 pb-44 pt-8 lg:grid-cols-[300px_760px] lg:gap-16 lg:px-0">
-        <aside className="min-w-0">
-          <div className="mb-7 flex items-center gap-2 text-lg font-bold">
-            <span>Zembra</span>
-            <span className="rounded-[5px] border border-[#e8edf3]/70 px-1.5 py-0.5 text-[10px] leading-tight">
-              LOCAL
-            </span>
+    <main className="h-screen overflow-hidden bg-[#0f1115] text-[#e8edf3]">
+      <div className="mx-auto grid h-full w-full max-w-[1156px] grid-cols-1 gap-8 px-5 pt-8 lg:grid-cols-[300px_760px] lg:gap-16 lg:px-0">
+        <aside className="flex min-h-0 min-w-0 flex-col">
+          <div className="shrink-0">
+            <div className="mb-7 flex items-center gap-2 text-lg font-bold">
+              <span>Zembra</span>
+              <span className="rounded-[5px] border border-[#e8edf3]/70 px-1.5 py-0.5 text-[10px] leading-tight">
+                LOCAL
+              </span>
+            </div>
+
+            <div className="mb-5 grid grid-cols-3 gap-4">
+              <StatBlock label="笔记" value={String(notes.length)} />
+              <StatBlock label="标签" value={String(tags.length)} />
+              <StatBlock label="天" value="942" />
+            </div>
+
+            <div className="mb-3 grid w-fit grid-cols-12 gap-[9px]" aria-label="活跃热力图占位">
+              {heatmapLevels.map((level, index) => (
+                <span
+                  className="size-[18px] rounded bg-[#343941] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] data-[level='1']:bg-[#3f4852] data-[level='2']:bg-[#4a6172] data-[level='3']:bg-[#5f90ac] data-[level='4']:bg-[#8fd3ff]"
+                  data-level={level}
+                  key={`${level}-${index}`}
+                />
+              ))}
+            </div>
+            <div className="mb-7 flex w-[244px] justify-between text-[13px] text-[#94a0ae]">
+              <span>一月</span>
+              <span>二月</span>
+              <span>三月</span>
+            </div>
           </div>
 
-          <div className="mb-5 grid grid-cols-3 gap-4">
-            <StatBlock label="笔记" value={String(notes.length)} />
-            <StatBlock label="标签" value={String(tags.length)} />
-            <StatBlock label="天" value="942" />
-          </div>
-
-          <div className="mb-3 grid w-fit grid-cols-12 gap-[9px]" aria-label="活跃热力图占位">
-            {heatmapLevels.map((level, index) => (
-              <span
-                className="size-[18px] rounded bg-[#343941] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] data-[level='1']:bg-[#3f4852] data-[level='2']:bg-[#4a6172] data-[level='3']:bg-[#5f90ac] data-[level='4']:bg-[#8fd3ff]"
-                data-level={level}
-                key={`${level}-${index}`}
-              />
-            ))}
-          </div>
-          <div className="mb-7 flex w-[244px] justify-between text-[13px] text-[#94a0ae]">
-            <span>一月</span>
-            <span>二月</span>
-            <span>三月</span>
-          </div>
-
-          <SidebarSection title="Fields">
-            <NavItem
-              active={selectedField === undefined}
-              count={fields.length}
-              label="全部"
-              prefix="@"
-              onClick={() => setSelectedField(undefined)}
-            />
-            {fields.map((field) => (
+          <div className="min-h-0 flex-1 overflow-y-auto pb-44 pr-1">
+            <SidebarSection title="Fields">
               <NavItem
-                active={selectedField === field.id}
-                count={0}
-                key={field.id}
-                label={field.name}
+                active={selectedField === undefined}
+                count={fields.length}
+                label="全部"
                 prefix="@"
-                onClick={() => setSelectedField(field.id)}
+                onClick={() => setSelectedField(undefined)}
               />
-            ))}
-          </SidebarSection>
+              {fields.map((field) => (
+                <NavItem
+                  active={selectedField === field.id}
+                  count={0}
+                  key={field.id}
+                  label={field.name}
+                  prefix="@"
+                  onClick={() => setSelectedField(field.id)}
+                />
+              ))}
+            </SidebarSection>
 
-          <SidebarSection title="Tags">
-            {tags.length === 0 ? (
-              <NavItem
-                active={false}
-                count={0}
-                disabled
-                label="暂无标签"
-                prefix="#"
-                onClick={() => undefined}
-              />
-            ) : null}
-            {tags.map((tag) => (
-              <NavItem
-                active={selectedTag === tag.name}
-                count={tagUsage.get(tag.name) ?? 0}
-                key={tag.name}
-                label={tag.name}
-                prefix="#"
-                onClick={() =>
-                  setSelectedTag(selectedTag === tag.name ? undefined : tag.name)
-                }
-              />
-            ))}
-          </SidebarSection>
+            <SidebarSection title="Tags">
+              {tags.length === 0 ? (
+                <NavItem
+                  active={false}
+                  count={0}
+                  disabled
+                  label="暂无标签"
+                  prefix="#"
+                  onClick={() => undefined}
+                />
+              ) : null}
+              {tags.map((tag) => (
+                <NavItem
+                  active={selectedTag === tag.name}
+                  count={tagUsage.get(tag.name) ?? 0}
+                  key={tag.name}
+                  label={tag.name}
+                  prefix="#"
+                  onClick={() =>
+                    setSelectedTag(selectedTag === tag.name ? undefined : tag.name)
+                  }
+                />
+              ))}
+            </SidebarSection>
+          </div>
         </aside>
 
-        <section className="min-w-0">
-          <header className="mb-5 flex min-h-11 items-center justify-end">
+        <section className="flex min-h-0 min-w-0 flex-col">
+          <header className="mb-5 flex min-h-11 shrink-0 items-center justify-end">
             <label className="flex h-[42px] w-full max-w-80 items-center gap-2.5 rounded-full bg-[#1c2027] px-4 text-sm text-[#94a0ae]">
               <Search className="size-4" aria-hidden="true" />
               <input
@@ -216,7 +220,8 @@ export function HomePage() {
             </label>
           </header>
 
-          <div className="flex flex-col gap-3.5">
+          <div className="min-h-0 flex-1 overflow-y-auto pb-44">
+            <div className="flex flex-col gap-3.5">
             {visibleNotes.length === 0 ? (
               <article className="rounded-[18px] border border-dashed border-[#2a313b] bg-[#1c2027]/60 px-5 py-8 text-[#94a0ae]">
                 暂无最近笔记
@@ -229,6 +234,7 @@ export function HomePage() {
                 note={note}
               />
             ))}
+            </div>
           </div>
         </section>
       </div>
