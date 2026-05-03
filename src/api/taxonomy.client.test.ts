@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import {
   createTaxonomyHttpClient,
   mapFieldRecordToDto,
+  mapTagRecordToDto,
 } from "./taxonomy.client";
 
 const originalFetch = globalThis.fetch;
@@ -42,6 +43,29 @@ describe("createTaxonomyHttpClient", () => {
       "http://server.test/fields?all=true",
     );
   });
+
+  test("lists all tags from the OpenAPI tags endpoint", async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL) =>
+      jsonResponse({
+        tags: [
+          { id: "tag-1", name: "Agents", created_at: 10 },
+          { id: "tag-2", name: "hermes", created_at: 20 },
+        ],
+        names: ["Agents", "hermes"],
+      }),
+    );
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    const client = createTaxonomyHttpClient({ baseUrl: "http://server.test" });
+
+    await expect(client.listTags()).resolves.toEqual([
+      { id: "tag-1", name: "Agents", createdAt: 10 },
+      { id: "tag-2", name: "hermes", createdAt: 20 },
+    ]);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+      "http://server.test/tags?all=true",
+    );
+  });
 });
 
 describe("mapFieldRecordToDto", () => {
@@ -55,6 +79,22 @@ describe("mapFieldRecordToDto", () => {
     ).toEqual({
       id: "field-1",
       name: "inbox",
+      createdAt: 10,
+    });
+  });
+});
+
+describe("mapTagRecordToDto", () => {
+  test("maps backend snake_case tag records to frontend tag DTOs", () => {
+    expect(
+      mapTagRecordToDto({
+        id: "tag-1",
+        name: "Agents",
+        created_at: 10,
+      }),
+    ).toEqual({
+      id: "tag-1",
+      name: "Agents",
       createdAt: 10,
     });
   });

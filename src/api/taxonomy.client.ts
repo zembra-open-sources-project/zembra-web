@@ -1,10 +1,19 @@
 import { requestJson } from "./http";
-import type { FieldDto, FieldRecord, ListFieldsResponse } from "./types";
+import type {
+  FieldDto,
+  FieldRecord,
+  ListFieldsResponse,
+  ListTagsResponse,
+  TagDto,
+  TagRecord,
+} from "./types";
 
 /** Defines the frontend taxonomy data access boundary. */
 export interface TaxonomyClient {
   /** Lists fields available for note organization. */
   listFields(): Promise<FieldDto[]>;
+  /** Lists tags available for note organization. */
+  listTags(): Promise<TagDto[]>;
 }
 
 /** Defines configuration for the HTTP taxonomy client. */
@@ -26,6 +35,12 @@ export function createTaxonomyHttpClient(
       });
       return response.fields.map(mapFieldRecordToDto);
     },
+    async listTags() {
+      const response = await requestJson<ListTagsResponse>(baseUrl, "/tags", {
+        query: { all: true },
+      });
+      return response.tags.map(mapTagRecordToDto);
+    },
   };
 }
 
@@ -38,6 +53,12 @@ export function createMockTaxonomyClient(): TaxonomyClient {
         { id: "mock-field-projects", name: "projects", createdAt: 2 },
       ];
     },
+    async listTags() {
+      return [
+        { id: "mock-tag-product", name: "产品", createdAt: 1 },
+        { id: "mock-tag-architecture", name: "架构", createdAt: 2 },
+      ];
+    },
   };
 }
 
@@ -47,5 +68,14 @@ export function mapFieldRecordToDto(field: FieldRecord): FieldDto {
     id: field.id,
     name: field.name,
     createdAt: field.created_at,
+  };
+}
+
+/** Maps a backend tag record to the frontend tag DTO. */
+export function mapTagRecordToDto(tag: TagRecord): TagDto {
+  return {
+    id: tag.id,
+    name: tag.name,
+    createdAt: tag.created_at,
   };
 }

@@ -51,6 +51,7 @@ export function HomePage() {
   const {
     notes,
     fields,
+    tags,
     keyword,
     selectedTag,
     selectedField,
@@ -59,6 +60,7 @@ export function HomePage() {
     setSelectedField,
     loadFields,
     loadRecentNotes,
+    loadTags,
   } = useNotesStore();
 
   const composerTools = useMemo(
@@ -77,12 +79,13 @@ export function HomePage() {
     }),
     [keyword, notes, selectedField, selectedTag],
   );
-  const tags = useMemo(() => countTags(notes), [notes]);
+  const tagUsage = useMemo(() => countTags(notes), [notes]);
 
   useEffect(() => {
     void loadFields();
+    void loadTags();
     void loadRecentNotes();
-  }, [loadFields, loadRecentNotes]);
+  }, [loadFields, loadRecentNotes, loadTags]);
 
   /** Handles the visual-only composer submission for the current placeholder phase. */
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -187,7 +190,7 @@ export function HomePage() {
             {tags.map((tag) => (
               <NavItem
                 active={selectedTag === tag.name}
-                count={tag.count}
+                count={tagUsage.get(tag.name) ?? 0}
                 key={tag.name}
                 label={tag.name}
                 prefix="#"
@@ -410,7 +413,7 @@ function filterVisibleNotes(
 }
 
 /** Counts tag usage in recent notes for the sidebar tag navigation. */
-function countTags(notes: NoteDto[]): Array<{ name: string; count: number }> {
+function countTags(notes: NoteDto[]): Map<string, number> {
   const counts = new Map<string, number>();
 
   notes.forEach((note) => {
@@ -419,9 +422,7 @@ function countTags(notes: NoteDto[]): Array<{ name: string; count: number }> {
     });
   });
 
-  return Array.from(counts.entries())
-    .map(([name, count]) => ({ name, count }))
-    .sort((left, right) => left.name.localeCompare(right.name, "zh-CN"));
+  return counts;
 }
 
 /** Formats a Unix timestamp for note card metadata. */

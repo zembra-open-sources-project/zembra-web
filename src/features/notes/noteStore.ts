@@ -1,12 +1,14 @@
 import { create } from "zustand";
 import { notesClient, taxonomyClient } from "../../api/client";
-import type { FieldDto, NoteDto } from "../../api/types";
+import type { FieldDto, NoteDto, TagDto } from "../../api/types";
 
 interface NotesState {
   /** Recent notes currently visible in the home feed. */
   notes: NoteDto[];
   /** Fields available for note organization. */
   fields: FieldDto[];
+  /** Tags available for note organization. */
+  tags: TagDto[];
   /** Search keyword entered by the user. */
   keyword: string;
   /** Tag selected by the user. */
@@ -23,12 +25,15 @@ interface NotesState {
   loadRecentNotes: () => Promise<void>;
   /** Loads fields from the active taxonomy client. */
   loadFields: () => Promise<void>;
+  /** Loads tags from the active taxonomy client. */
+  loadTags: () => Promise<void>;
 }
 
 /** Stores note list state for the card note interface. */
 export const useNotesStore = create<NotesState>((set, get) => ({
   notes: [],
   fields: [],
+  tags: [],
   keyword: "",
   selectedTag: undefined,
   selectedField: undefined,
@@ -48,5 +53,15 @@ export const useNotesStore = create<NotesState>((set, get) => ({
 
     const fields = await taxonomyClient.listFields();
     set({ fields });
+  },
+  loadTags: async () => {
+    const existingTags = get().tags;
+
+    if (existingTags.length > 0) {
+      return;
+    }
+
+    const tags = await taxonomyClient.listTags();
+    set({ tags });
   },
 }));
