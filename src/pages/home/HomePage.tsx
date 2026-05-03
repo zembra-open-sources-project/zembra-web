@@ -4,10 +4,7 @@ import {
   CircleHelp,
   Hash,
   List,
-  Minus,
   MoreHorizontal,
-  Pilcrow,
-  Quote,
   Search,
   SendHorizontal,
 } from "lucide-react";
@@ -514,24 +511,6 @@ function createComposerTools(): ComposerTool[] {
       label: "插入列表",
       icon: <List className="size-5" aria-hidden="true" />,
       before: "\n- ",
-    },
-    {
-      id: "quote",
-      label: "插入引用",
-      icon: <Quote className="size-5" aria-hidden="true" />,
-      before: "\n> ",
-    },
-    {
-      id: "divider",
-      label: "插入分隔线",
-      icon: <Minus className="size-5" aria-hidden="true" />,
-      before: "\n---\n",
-    },
-    {
-      id: "paragraph",
-      label: "插入段落标记",
-      icon: <Pilcrow className="size-5" aria-hidden="true" />,
-      before: "\n\n",
     },
   ];
 }
