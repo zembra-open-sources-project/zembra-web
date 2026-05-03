@@ -369,7 +369,6 @@ function NoteCard({
           {expanded ? "收起" : "展开"}
         </button>
       ) : null}
-      <div className="mt-3 text-[13px] text-[#94a0ae]">引用信息待接入</div>
     </article>
   );
 }
