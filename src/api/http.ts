@@ -1,4 +1,5 @@
 import type { ApiErrorBody } from "./types";
+import { notifyBackendConnectionFailed } from "../app/backendConnectionToast";
 
 /** Error thrown when the backend returns a non-successful HTTP response. */
 export class ApiError extends Error {
@@ -57,15 +58,7 @@ export async function requestJson<T>(
   path: string,
   options: ApiRequestOptions = {},
 ): Promise<T> {
-  const response = await fetch(createApiUrl(baseUrl, path, options.query), {
-    method: options.method ?? "GET",
-    headers: {
-      Accept: "application/json",
-      ...(options.body === undefined ? {} : { "Content-Type": "application/json" }),
-    },
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
-    signal: options.signal,
-  });
+  const response = await fetchJsonResponse(baseUrl, path, options);
 
   const data = await readJsonBody(response);
 
@@ -75,6 +68,30 @@ export async function requestJson<T>(
   }
 
   return data as T;
+}
+
+/** Sends the underlying fetch request and notifies the app on network failure. */
+async function fetchJsonResponse(
+  baseUrl: string,
+  path: string,
+  options: ApiRequestOptions,
+): Promise<Response> {
+  try {
+    return await fetch(createApiUrl(baseUrl, path, options.query), {
+      method: options.method ?? "GET",
+      headers: {
+        Accept: "application/json",
+        ...(options.body === undefined
+          ? {}
+          : { "Content-Type": "application/json" }),
+      },
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      signal: options.signal,
+    });
+  } catch (error) {
+    notifyBackendConnectionFailed();
+    throw error;
+  }
 }
 
 /** Joins the configured base URL and request path for absolute or same-origin APIs. */

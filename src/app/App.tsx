@@ -4,7 +4,10 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { HomePage } from "../pages/home/HomePage";
+import { BackendConnectionToast } from "./BackendStatusToast";
+import { subscribeBackendConnectionFailed } from "./backendConnectionToast";
 
 const rootRoute = createRootRoute();
 
@@ -26,5 +29,37 @@ declare module "@tanstack/react-router" {
 
 /** Renders the application router and global providers. */
 export function App() {
-  return <RouterProvider router={router} />;
+  const [showsBackendConnectionToast, setShowsBackendConnectionToast] =
+    useState(false);
+  const hideToastTimeoutRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    const unsubscribe = subscribeBackendConnectionFailed(() => {
+      setShowsBackendConnectionToast(true);
+
+      if (hideToastTimeoutRef.current !== undefined) {
+        window.clearTimeout(hideToastTimeoutRef.current);
+      }
+
+      hideToastTimeoutRef.current = window.setTimeout(() => {
+        setShowsBackendConnectionToast(false);
+        hideToastTimeoutRef.current = undefined;
+      }, 5000);
+    });
+
+    return () => {
+      unsubscribe();
+
+      if (hideToastTimeoutRef.current !== undefined) {
+        window.clearTimeout(hideToastTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <>
+      <RouterProvider router={router} />
+      {showsBackendConnectionToast ? <BackendConnectionToast /> : null}
+    </>
+  );
 }
