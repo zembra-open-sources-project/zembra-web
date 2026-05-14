@@ -173,7 +173,7 @@ export function HomePage() {
             <div className="mb-5 hidden grid-cols-3 gap-4 lg:grid">
               <StatBlock label="笔记" value={String(notes.length)} />
               <StatBlock label="标签" value={String(tags.length)} />
-              <StatBlock label="天" value="942" />
+              <StatBlock label="Fields" value={String(fields.length)} />
             </div>
 
             <div className="mb-3 hidden w-fit grid-cols-12 gap-[9px] lg:grid" aria-label="活跃热力图占位">
