@@ -73,7 +73,7 @@
 
 ### Task 3.1：执行自动化验证
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Verify `src/api/*`, `src/pages/*`, `src/app/*`
 
@@ -85,7 +85,7 @@
 
 ### Task 3.2：更新开发记录并提交 Stage
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `docs/exec-plans/active/sync/r004-supabase-config-page.md`; Git commit
 
@@ -100,3 +100,4 @@
 - 2026-05-14：已完成需求澄清、设计文档和执行计划；尚未进入代码实现。
 - 2026-05-14：已完成 Stage 1，新增 sync API 类型、HTTP client、默认 client 入口和 client 单元测试。
 - 2026-05-14：已完成 Stage 2，新增 `/settings/sync` 路由、首页 Settings 入口、Supabase 同步配置页和页面单元测试。
+- 2026-05-14：已完成 Stage 3，`npm test` 通过 6 个测试文件共 27 个测试，`npm run build` 通过。尝试使用 Playwright 做浏览器验证时当前 Node 环境缺少 `playwright` 模块，浏览器自动化检查未执行。
