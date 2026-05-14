@@ -171,3 +171,155 @@ export interface ListFieldsResponse {
   /** Field names in the same order as records. */
   names: string[];
 }
+
+/** Represents synchronization configuration shown at the frontend boundary. */
+export interface SyncConfigDto {
+  /** Whether background Supabase synchronization is enabled. */
+  enabled: boolean;
+  /** Delay in seconds between background synchronization attempts. */
+  intervalSeconds: number;
+  /** Supabase project URL used by the backend REST client. */
+  supabaseUrl: string;
+  /** Whether a service role key is configured on the backend. */
+  serviceRoleKeyConfigured: boolean;
+}
+
+/** Represents the backend synchronization configuration response shape. */
+export interface SyncConfigResponse {
+  /** Whether background Supabase synchronization is enabled. */
+  enabled: boolean;
+  /** Delay in seconds between background synchronization attempts. */
+  interval_seconds: number;
+  /** Supabase project URL used by the backend REST client. */
+  supabase_url: string;
+  /** Whether a service role key is configured on the backend. */
+  service_role_key_configured: boolean;
+}
+
+/** Describes input required to persist synchronization settings. */
+export interface UpdateSyncConfigInput {
+  /** Whether background Supabase synchronization should be enabled. */
+  enabled: boolean;
+  /** Delay in seconds between background synchronization attempts. */
+  intervalSeconds: number;
+  /** Supabase project URL used by the backend REST client. */
+  supabaseUrl: string;
+  /** Optional new service role key; blank values do not overwrite existing keys. */
+  serviceRoleKey?: string;
+}
+
+/** Represents the backend synchronization configuration update request shape. */
+export interface UpdateSyncConfigRequest {
+  /** Whether background Supabase synchronization should be enabled. */
+  enabled: boolean;
+  /** Delay in seconds between background synchronization attempts. */
+  interval_seconds: number;
+  /** Supabase project URL used by the backend REST client. */
+  supabase_url: string;
+  /** Optional new service role key. */
+  service_role_key?: string | null;
+}
+
+/** Describes input used to test synchronization settings without saving them. */
+export interface TestSyncConfigInput {
+  /** Optional Supabase project URL candidate. */
+  supabaseUrl?: string;
+  /** Optional service role key candidate. */
+  serviceRoleKey?: string;
+}
+
+/** Represents the backend synchronization configuration test request shape. */
+export interface TestSyncConfigRequest {
+  /** Optional Supabase project URL candidate. */
+  supabase_url?: string | null;
+  /** Optional service role key candidate. */
+  service_role_key?: string | null;
+}
+
+/** Represents a sanitized synchronization configuration test result. */
+export interface SyncConfigTestResultDto {
+  /** Whether the Supabase REST endpoint accepted the test request. */
+  ok: boolean;
+  /** Sanitized test result message. */
+  message: string;
+}
+
+/** Represents the backend synchronization configuration test response shape. */
+export interface SyncConfigTestResponse {
+  /** Whether the Supabase REST endpoint accepted the test request. */
+  ok: boolean;
+  /** Sanitized test result message. */
+  message: string;
+}
+
+/** Represents a synchronization cursor shown in status views. */
+export interface SyncStateDto {
+  /** Workspace that owns this cursor. */
+  workspaceId: string;
+  /** Device that owns this cursor. */
+  deviceId: string;
+  /** Cursor direction or synchronization scope. */
+  scope: string;
+  /** Last processed change timestamp. */
+  lastChangeCreatedAt: number;
+  /** Last processed change identifier. */
+  lastChangeId: string;
+  /** Last successful sync timestamp. */
+  lastSuccessAt?: number | null;
+  /** Last failed sync timestamp. */
+  lastErrorAt?: number | null;
+  /** Last failed sync message. */
+  lastErrorMessage?: string | null;
+}
+
+/** Represents the backend synchronization cursor response shape. */
+export interface SyncStateResponse {
+  /** Workspace that owns this cursor. */
+  workspace_id: string;
+  /** Device that owns this cursor. */
+  device_id: string;
+  /** Cursor direction or synchronization scope. */
+  scope: string;
+  /** Last processed change timestamp. */
+  last_change_created_at: number;
+  /** Last processed change identifier. */
+  last_change_id: string;
+  /** Last successful sync timestamp. */
+  last_success_at?: number | null;
+  /** Last failed sync timestamp. */
+  last_error_at?: number | null;
+  /** Last failed sync message. */
+  last_error_message?: string | null;
+}
+
+/** Represents synchronization status shown at the frontend boundary. */
+export interface SyncStatusDto {
+  /** Whether synchronization is enabled. */
+  enabled: boolean;
+  /** Local synchronization cursor rows. */
+  states: SyncStateDto[];
+}
+
+/** Represents the backend synchronization status response shape. */
+export interface SyncStatusResponse {
+  /** Whether synchronization is enabled. */
+  enabled: boolean;
+  /** Local synchronization cursor rows. */
+  states: SyncStateResponse[];
+}
+
+/** Represents the result of one manual synchronization run. */
+export interface SyncRunResultDto {
+  /** Number of local changes pushed remotely. */
+  pushed: number;
+  /** Number of remote changes pulled locally. */
+  pulled: number;
+}
+
+/** Represents the backend manual synchronization run response shape. */
+export interface SyncRunResponse {
+  /** Number of local changes pushed remotely. */
+  pushed: number;
+  /** Number of remote changes pulled locally. */
+  pulled: number;
+}

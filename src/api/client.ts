@@ -8,6 +8,11 @@ import {
   createTaxonomyHttpClient,
   type TaxonomyClient,
 } from "./taxonomy.client";
+import {
+  createMockSyncClient,
+  createSyncHttpClient,
+  type SyncClient,
+} from "./sync.client";
 
 const defaultApiBaseUrl =
   import.meta.env.VITE_ZEMBRA_API_BASE_URL ?? "/api";
@@ -30,8 +35,20 @@ export function createDefaultTaxonomyClient(): TaxonomyClient {
   return createTaxonomyHttpClient({ baseUrl: defaultApiBaseUrl });
 }
 
+/** Creates the default sync client configured for the current Vite environment. */
+export function createDefaultSyncClient(): SyncClient {
+  if (import.meta.env.MODE === "test") {
+    return createMockSyncClient();
+  }
+
+  return createSyncHttpClient({ baseUrl: defaultApiBaseUrl });
+}
+
 /** Default notes client shared by feature stores. */
 export const notesClient = createDefaultNotesClient();
 
 /** Default taxonomy client shared by feature stores. */
 export const taxonomyClient = createDefaultTaxonomyClient();
+
+/** Default sync client shared by settings pages. */
+export const syncClient = createDefaultSyncClient();
