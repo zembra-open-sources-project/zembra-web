@@ -153,20 +153,22 @@ export function HomePage() {
       <div className="mx-auto grid h-full w-full max-w-[1156px] grid-cols-1 gap-4 px-5 pt-6 lg:grid-cols-[300px_760px] lg:gap-16 lg:px-0 lg:pt-8">
         <aside className="flex min-h-0 min-w-0 flex-col lg:min-h-0">
           <div className="shrink-0">
-            <div className="mb-2 flex items-center gap-2 text-lg font-bold lg:mb-7">
-              <span>Zembra</span>
-              <span className="rounded-[5px] border border-[#e8edf3]/70 px-1.5 py-0.5 text-[10px] leading-tight">
-                LOCAL
-              </span>
+            <div className="mb-7 flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2 text-lg font-bold">
+                <span>Zembra</span>
+                <span className="rounded-[5px] border border-[#e8edf3]/70 px-1.5 py-0.5 text-[10px] leading-tight">
+                  LOCAL
+                </span>
+              </div>
+              <Link
+                className="flex size-[34px] shrink-0 items-center justify-center rounded-[9px] text-[#94a0ae] hover:bg-[#242a33] hover:text-[#def4ff]"
+                title="Settings"
+                to="/settings/sync"
+                aria-label="Settings"
+              >
+                <Settings className="size-4 text-[#8fd3ff]" aria-hidden="true" />
+              </Link>
             </div>
-
-            <Link
-              className="mb-5 flex min-h-9 items-center gap-2.5 rounded-[9px] px-3 py-2 text-[15px] text-[#c9d0d8] hover:bg-[#242a33] hover:text-[#def4ff]"
-              to="/settings/sync"
-            >
-              <Settings className="size-4 text-[#8fd3ff]" aria-hidden="true" />
-              <span>Settings</span>
-            </Link>
 
             <div className="mb-5 hidden grid-cols-3 gap-4 lg:grid">
               <StatBlock label="笔记" value={String(notes.length)} />
