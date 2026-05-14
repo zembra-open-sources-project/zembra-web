@@ -7,7 +7,9 @@ import {
   MoreHorizontal,
   Search,
   SendHorizontal,
+  Settings,
 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import {
   FormEvent,
   MouseEvent,
@@ -157,6 +159,14 @@ export function HomePage() {
                 LOCAL
               </span>
             </div>
+
+            <Link
+              className="mb-5 flex min-h-9 items-center gap-2.5 rounded-[9px] px-3 py-2 text-[15px] text-[#c9d0d8] hover:bg-[#242a33] hover:text-[#def4ff]"
+              to="/settings/sync"
+            >
+              <Settings className="size-4 text-[#8fd3ff]" aria-hidden="true" />
+              <span>Settings</span>
+            </Link>
 
             <div className="mb-5 hidden grid-cols-3 gap-4 lg:grid">
               <StatBlock label="笔记" value={String(notes.length)} />

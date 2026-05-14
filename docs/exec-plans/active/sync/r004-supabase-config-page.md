@@ -35,7 +35,7 @@
 
 ### Task 2.1：新增设置页路由和入口
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/app/App.tsx`; Modify `src/pages/home/HomePage.tsx`; Create `src/pages/settings/SyncSettingsPage.tsx`
 
@@ -47,7 +47,7 @@
 
 ### Task 2.2：实现配置表单和状态展示
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/settings/SyncSettingsPage.tsx`; Create `src/pages/settings/SyncSettingsPage.test.tsx`
 
@@ -59,7 +59,7 @@
 
 ### Task 2.3：实现测试连接和手动同步
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/settings/SyncSettingsPage.tsx`; Modify `src/pages/settings/SyncSettingsPage.test.tsx`
 
@@ -99,3 +99,4 @@
 
 - 2026-05-14：已完成需求澄清、设计文档和执行计划；尚未进入代码实现。
 - 2026-05-14：已完成 Stage 1，新增 sync API 类型、HTTP client、默认 client 入口和 client 单元测试。
+- 2026-05-14：已完成 Stage 2，新增 `/settings/sync` 路由、首页 Settings 入口、Supabase 同步配置页和页面单元测试。
