@@ -1,3 +1,7 @@
+import {
+  resolveBackendBaseUrl,
+  type BackendBaseUrlSource,
+} from "./backendConfig";
 import { requestJson } from "./http";
 import type {
   FieldDto,
@@ -19,7 +23,7 @@ export interface TaxonomyClient {
 /** Defines configuration for the HTTP taxonomy client. */
 export interface TaxonomyHttpClientOptions {
   /** Base URL for the Zembra backend API. */
-  baseUrl: string;
+  baseUrl: BackendBaseUrlSource;
 }
 
 /** Creates a taxonomy client backed by the Zembra OpenAPI HTTP server. */
@@ -30,15 +34,23 @@ export function createTaxonomyHttpClient(
 
   return {
     async listFields() {
-      const response = await requestJson<ListFieldsResponse>(baseUrl, "/fields", {
-        query: { all: true },
-      });
+      const response = await requestJson<ListFieldsResponse>(
+        resolveBackendBaseUrl(baseUrl),
+        "/fields",
+        {
+          query: { all: true },
+        },
+      );
       return response.fields.map(mapFieldRecordToDto);
     },
     async listTags() {
-      const response = await requestJson<ListTagsResponse>(baseUrl, "/tags", {
-        query: { all: true },
-      });
+      const response = await requestJson<ListTagsResponse>(
+        resolveBackendBaseUrl(baseUrl),
+        "/tags",
+        {
+          query: { all: true },
+        },
+      );
       return response.tags.map(mapTagRecordToDto);
     },
   };

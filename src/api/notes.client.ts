@@ -1,3 +1,7 @@
+import {
+  resolveBackendBaseUrl,
+  type BackendBaseUrlSource,
+} from "./backendConfig";
 import { requestJson } from "./http";
 import type {
   CreateNoteInput,
@@ -30,7 +34,7 @@ export interface NotesClient {
 /** Defines configuration for the HTTP notes client. */
 export interface NotesHttpClientOptions {
   /** Base URL for the Zembra backend API. */
-  baseUrl: string;
+  baseUrl: BackendBaseUrlSource;
 }
 
 /** Creates a notes client backed by the Zembra OpenAPI HTTP server. */
@@ -41,8 +45,9 @@ export function createNotesHttpClient(
 
   return {
     async listRecentNotes(query = {}) {
+      const resolvedBaseUrl = resolveBackendBaseUrl(baseUrl);
       const response = await requestJson<ListNotesResponse>(
-        baseUrl,
+        resolvedBaseUrl,
         "/notes/recent",
         {
           method: "POST",
@@ -54,48 +59,60 @@ export function createNotesHttpClient(
       );
       const notes = await Promise.all(
         response.notes.map(async (note) =>
-          mapNoteRecordToDto(note, await listTagNames(baseUrl, note.id)),
+          mapNoteRecordToDto(note, await listTagNames(resolvedBaseUrl, note.id)),
         ),
       );
 
       return notes;
     },
     async listNotes(query) {
-      const response = await requestJson<ListNotesResponse>(baseUrl, "/notes", {
-        query: { limit: undefined },
-      });
+      const resolvedBaseUrl = resolveBackendBaseUrl(baseUrl);
+      const response = await requestJson<ListNotesResponse>(
+        resolvedBaseUrl,
+        "/notes",
+        {
+          query: { limit: undefined },
+        },
+      );
       const notes = await Promise.all(
         response.notes.map(async (note) =>
-          mapNoteRecordToDto(note, await listTagNames(baseUrl, note.id)),
+          mapNoteRecordToDto(note, await listTagNames(resolvedBaseUrl, note.id)),
         ),
       );
 
       return filterNotes(notes, query);
     },
     async getNote(noteRef) {
+      const resolvedBaseUrl = resolveBackendBaseUrl(baseUrl);
       const note = await requestJson<NoteRecord>(
-        baseUrl,
+        resolvedBaseUrl,
         `/notes/${encodeURIComponent(noteRef)}`,
       );
-      return mapNoteRecordToDto(note, await listTagNames(baseUrl, note.id));
+      return mapNoteRecordToDto(note, await listTagNames(resolvedBaseUrl, note.id));
     },
     async createNote(input) {
-      const response = await requestJson<NoteResponse>(baseUrl, "/notes", {
-        method: "POST",
-        body: {
-          content: input.content,
-          device_id: input.deviceId,
-          field: input.field,
-          role: input.role ?? "Human",
-          tags: input.tags ?? [],
+      const resolvedBaseUrl = resolveBackendBaseUrl(baseUrl);
+      const response = await requestJson<NoteResponse>(
+        resolvedBaseUrl,
+        "/notes",
+        {
+          method: "POST",
+          body: {
+            content: input.content,
+            device_id: input.deviceId,
+            field: input.field,
+            role: input.role ?? "Human",
+            tags: input.tags ?? [],
+          },
         },
-      });
+      );
 
       return mapNoteResponseToDto(response);
     },
     async updateNote(noteRef, input) {
+      const resolvedBaseUrl = resolveBackendBaseUrl(baseUrl);
       const note = await requestJson<NoteRecord>(
-        baseUrl,
+        resolvedBaseUrl,
         `/notes/${encodeURIComponent(noteRef)}`,
         {
           method: "PATCH",
@@ -106,12 +123,17 @@ export function createNotesHttpClient(
         },
       );
 
-      return mapNoteRecordToDto(note, await listTagNames(baseUrl, note.id));
+      return mapNoteRecordToDto(note, await listTagNames(resolvedBaseUrl, note.id));
     },
     async deleteNote(noteRef) {
-      await requestJson<void>(baseUrl, `/notes/${encodeURIComponent(noteRef)}`, {
-        method: "DELETE",
-      });
+      const resolvedBaseUrl = resolveBackendBaseUrl(baseUrl);
+      await requestJson<void>(
+        resolvedBaseUrl,
+        `/notes/${encodeURIComponent(noteRef)}`,
+        {
+          method: "DELETE",
+        },
+      );
     },
   };
 }

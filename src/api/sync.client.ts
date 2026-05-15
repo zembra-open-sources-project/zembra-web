@@ -1,3 +1,7 @@
+import {
+  resolveBackendBaseUrl,
+  type BackendBaseUrlSource,
+} from "./backendConfig";
 import { requestJson } from "./http";
 import type {
   SyncConfigDto,
@@ -33,7 +37,7 @@ export interface SyncClient {
 /** Defines configuration for the HTTP synchronization client. */
 export interface SyncHttpClientOptions {
   /** Base URL for the Zembra backend API. */
-  baseUrl: string;
+  baseUrl: BackendBaseUrlSource;
 }
 
 /** Creates a synchronization client backed by the Zembra OpenAPI HTTP server. */
@@ -43,14 +47,14 @@ export function createSyncHttpClient(options: SyncHttpClientOptions): SyncClient
   return {
     async getConfig() {
       const response = await requestJson<SyncConfigResponse>(
-        baseUrl,
+        resolveBackendBaseUrl(baseUrl),
         "/sync/config",
       );
       return mapSyncConfigResponseToDto(response);
     },
     async updateConfig(input) {
       const response = await requestJson<SyncConfigResponse>(
-        baseUrl,
+        resolveBackendBaseUrl(baseUrl),
         "/sync/config",
         {
           method: "PUT",
@@ -61,7 +65,7 @@ export function createSyncHttpClient(options: SyncHttpClientOptions): SyncClient
     },
     async testConfig(input) {
       const response = await requestJson<SyncConfigTestResponse>(
-        baseUrl,
+        resolveBackendBaseUrl(baseUrl),
         "/sync/config/test",
         {
           method: "POST",
@@ -72,14 +76,14 @@ export function createSyncHttpClient(options: SyncHttpClientOptions): SyncClient
     },
     async getStatus() {
       const response = await requestJson<SyncStatusResponse>(
-        baseUrl,
+        resolveBackendBaseUrl(baseUrl),
         "/sync/status",
       );
       return mapSyncStatusResponseToDto(response);
     },
     async runSync() {
       const response = await requestJson<SyncRunResponse>(
-        baseUrl,
+        resolveBackendBaseUrl(baseUrl),
         "/sync/run",
         { method: "POST" },
       );

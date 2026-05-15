@@ -1,4 +1,8 @@
 import {
+  getEffectiveBackendBaseUrl,
+  type BackendBaseUrlResolver,
+} from "./backendConfig";
+import {
   createMockNotesClient,
   createNotesHttpClient,
   type NotesClient,
@@ -17,13 +21,17 @@ import {
 const defaultApiBaseUrl =
   import.meta.env.VITE_ZEMBRA_API_BASE_URL ?? "/api";
 
+/** Resolves the API base URL from saved user config or Vite defaults. */
+const resolveDefaultApiBaseUrl: BackendBaseUrlResolver = () =>
+  getEffectiveBackendBaseUrl(defaultApiBaseUrl);
+
 /** Creates the default notes client configured for the current Vite environment. */
 export function createDefaultNotesClient(): NotesClient {
   if (import.meta.env.MODE === "test") {
     return createMockNotesClient();
   }
 
-  return createNotesHttpClient({ baseUrl: defaultApiBaseUrl });
+  return createNotesHttpClient({ baseUrl: resolveDefaultApiBaseUrl });
 }
 
 /** Creates the default taxonomy client configured for the current Vite environment. */
@@ -32,7 +40,7 @@ export function createDefaultTaxonomyClient(): TaxonomyClient {
     return createMockTaxonomyClient();
   }
 
-  return createTaxonomyHttpClient({ baseUrl: defaultApiBaseUrl });
+  return createTaxonomyHttpClient({ baseUrl: resolveDefaultApiBaseUrl });
 }
 
 /** Creates the default sync client configured for the current Vite environment. */
@@ -41,7 +49,7 @@ export function createDefaultSyncClient(): SyncClient {
     return createMockSyncClient();
   }
 
-  return createSyncHttpClient({ baseUrl: defaultApiBaseUrl });
+  return createSyncHttpClient({ baseUrl: resolveDefaultApiBaseUrl });
 }
 
 /** Default notes client shared by feature stores. */
