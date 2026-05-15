@@ -7,18 +7,14 @@ import {
   useState,
 } from "react";
 import {
-  getSystemPrefersDark,
   readThemePreference,
-  resolveThemePreference,
   ThemePreference,
   writeThemePreference,
 } from "./theme";
 
 interface ThemeContextValue {
-  /** User-selected theme preference before system resolution. */
+  /** User-selected theme preference applied to the document. */
   preference: ThemePreference;
-  /** Concrete theme currently applied to the document. */
-  resolvedTheme: "light" | "dark";
   /** Updates and persists the user-selected theme preference. */
   setPreference: (preference: ThemePreference) => void;
 }
@@ -30,37 +26,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [preference, setPreferenceState] = useState<ThemePreference>(() =>
     readThemePreference(window.localStorage),
   );
-  const [systemPrefersDark, setSystemPrefersDark] = useState(() =>
-    getSystemPrefersDark(),
-  );
-  const resolvedTheme = resolveThemePreference(preference, systemPrefersDark);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = (event: MediaQueryListEvent) => {
-      setSystemPrefersDark(event.matches);
-    };
-
-    setSystemPrefersDark(mediaQuery.matches);
-    mediaQuery.addEventListener("change", handleChange);
-
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = resolvedTheme;
-  }, [resolvedTheme]);
+    document.documentElement.dataset.theme = preference;
+  }, [preference]);
 
   const value = useMemo<ThemeContextValue>(
     () => ({
       preference,
-      resolvedTheme,
       setPreference(nextPreference) {
         writeThemePreference(window.localStorage, nextPreference);
         setPreferenceState(nextPreference);
       },
     }),
-    [preference, resolvedTheme],
+    [preference],
   );
 
   return (

@@ -1,10 +1,10 @@
-export type ThemePreference = "system" | "light" | "dark";
+export type ThemePreference = "light" | "dark";
 
 export type ResolvedTheme = "light" | "dark";
 
 export const themePreferenceStorageKey = "zembra-theme-preference";
 
-const themePreferences = new Set<ThemePreference>(["system", "light", "dark"]);
+const themePreferences = new Set<ThemePreference>(["light", "dark"]);
 
 /** Returns whether a stored string is a supported theme preference. */
 export function isThemePreference(value: string | null): value is ThemePreference {
@@ -26,19 +26,7 @@ export function writeThemePreference(
   storage.setItem(themePreferenceStorageKey, preference);
 }
 
-/** Resolves a theme preference to the concrete theme applied to the DOM. */
-export function resolveThemePreference(
-  preference: ThemePreference,
-  systemPrefersDark: boolean,
-): ResolvedTheme {
-  if (preference === "system") {
-    return systemPrefersDark ? "dark" : "light";
-  }
-
-  return preference;
-}
-
-/** Returns the current system dark-mode preference. */
-export function getSystemPrefersDark(): boolean {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+/** Returns the opposite theme for single-click toggling. */
+export function getNextThemePreference(preference: ThemePreference): ThemePreference {
+  return preference === "light" ? "dark" : "light";
 }

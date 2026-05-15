@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import {
   readThemePreference,
-  resolveThemePreference,
+  getNextThemePreference,
   themePreferenceStorageKey,
   writeThemePreference,
 } from "./theme";
@@ -27,10 +27,8 @@ test("writes selected theme preferences", () => {
   expect(readThemePreference(window.localStorage)).toBe("dark");
 });
 
-/** Verifies concrete theme resolution from user and system preferences. */
-test("resolves system theme preferences", () => {
-  expect(resolveThemePreference("system", true)).toBe("dark");
-  expect(resolveThemePreference("system", false)).toBe("light");
-  expect(resolveThemePreference("light", true)).toBe("light");
-  expect(resolveThemePreference("dark", false)).toBe("dark");
+/** Verifies the next theme used by the single-click toggle. */
+test("returns the next theme preference", () => {
+  expect(getNextThemePreference("light")).toBe("dark");
+  expect(getNextThemePreference("dark")).toBe("light");
 });

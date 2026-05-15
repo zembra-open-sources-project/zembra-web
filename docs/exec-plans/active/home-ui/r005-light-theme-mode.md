@@ -15,9 +15,9 @@
 
 **Files:** Create `src/app/theme.ts`, `src/app/theme.test.ts`, `src/app/ThemeProvider.tsx`, `src/app/ThemeToggle.tsx`; Modify `src/app/App.tsx`
 
-**Function:** 提供浅色默认、深色、跟随系统、`localStorage` 记忆和 DOM `data-theme` 写入能力。
+**Function:** 提供浅色默认、深色、`localStorage` 记忆和 DOM `data-theme` 写入能力。
 
-**Implementation Notes:** 主题偏好类型限制为 `system | light | dark`；默认值为 `light`；系统主题只在偏好为 `system` 时参与实际主题解析；不新增依赖。
+**Implementation Notes:** 主题偏好类型限制为 `light | dark`；默认值为 `light`；主题控件使用纯图标按钮单击切换；不新增依赖。
 
 **Expected Verification Result:** `npm run test -- src/app/theme.test.ts` 通过；首次渲染时 `document.documentElement.dataset.theme` 为 `light`。
 
@@ -75,8 +75,10 @@
 
 ## 开发记录
 
-- 2026-05-15：已完成需求澄清、设计文档和执行计划，确认默认浅色、支持 system/light/dark、覆盖首页、同步设置页和 Toast。
+- 2026-05-15：已完成需求澄清、设计文档和执行计划，确认默认浅色、支持 light/dark、覆盖首页、同步设置页和 Toast。
 - 2026-05-15：已新增主题状态工具、Provider、主题切换控件和主题工具测试；App 已接入 ThemeProvider。
 - 2026-05-15：已在全局 CSS 中定义 light/dark 主题 token，浅色通过 `:root` 默认生效，深色通过 `html[data-theme="dark"]` 生效。
 - 2026-05-15：首页、同步设置页和 backend 连接失败 Toast 已迁移到主题 token；首页和设置页均已接入主题切换控件。
 - 2026-05-15：已通过 `npm run test -- src/app/theme.test.ts`、`npm run test`、`npm run build`；本地 Vite 服务运行在 `http://127.0.0.1:5174/`，浏览器验证默认浅色、深色切换、设置页主题继承均正常。
+- 2026-05-15：根据评审意见移除 system 选项和下拉菜单，主题控件改为纯图标按钮，单击直接在 light/dark 之间切换。
+- 2026-05-15：已新增 `ThemeToggle` 交互测试，验证纯图标按钮无文字且点击写入 dark 偏好；已通过 `npm run test -- src/app/theme.test.ts src/app/ThemeToggle.test.tsx`、`npm run test`、`npm run build`。
