@@ -6,9 +6,12 @@ import {
 import { afterEach, expect, test, vi } from "vitest";
 import { App } from "./App";
 import { notifyBackendConnectionFailed } from "./backendConnectionToast";
+import { i18next } from "../i18n";
 
 afterEach(() => {
   vi.useRealTimers();
+  window.localStorage.clear();
+  void i18next.changeLanguage("zh-CN");
 });
 
 /** Verifies that the initial note workspace renders. */

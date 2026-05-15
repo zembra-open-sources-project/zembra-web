@@ -10,6 +10,8 @@ import {
   Settings,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
+import { LanguageMenu } from "../../app/LanguageMenu";
 import { ThemeToggle } from "../../app/ThemeToggle";
 import {
   FormEvent,
@@ -48,6 +50,7 @@ const heatmapLevels = [
 
 /** Renders the redesigned Zembra note workspace shell. */
 export function HomePage() {
+  const { i18n, t } = useTranslation("home");
   const [draft, setDraft] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -68,8 +71,8 @@ export function HomePage() {
   } = useNotesStore();
 
   const composerTools = useMemo(
-    () => createComposerTools(),
-    [],
+    () => createComposerTools(t),
+    [t],
   );
   const fieldNameById = useMemo(
     () => new Map(fields.map((field) => [field.id, field.name])),
@@ -158,16 +161,17 @@ export function HomePage() {
               <div className="flex min-w-0 items-center gap-2 text-lg font-bold">
                 <span>Zembra</span>
                 <span className="rounded-[5px] border border-[var(--color-text-primary)]/70 px-1.5 py-0.5 text-[10px] leading-tight">
-                  LOCAL
+                  {t("badge.local")}
                 </span>
               </div>
               <div className="flex shrink-0 items-center gap-2">
+                <LanguageMenu />
                 <ThemeToggle />
                 <Link
                   className="flex size-[34px] shrink-0 items-center justify-center rounded-[9px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
-                  title="Settings"
+                  title={t("form.settings.title", { ns: "settings" })}
                   to="/settings/sync"
-                  aria-label="Settings"
+                  aria-label={t("form.settings.title", { ns: "settings" })}
                 >
                   <Settings
                     className="size-4 text-[var(--color-accent)]"
@@ -178,12 +182,12 @@ export function HomePage() {
             </div>
 
             <div className="mb-5 hidden grid-cols-3 gap-4 lg:grid">
-              <StatBlock label="笔记" value={String(notes.length)} />
-              <StatBlock label="标签" value={String(tags.length)} />
-              <StatBlock label="Fields" value={String(fields.length)} />
+              <StatBlock label={t("stats.notes")} value={String(notes.length)} />
+              <StatBlock label={t("stats.tags")} value={String(tags.length)} />
+              <StatBlock label={t("stats.fields")} value={String(fields.length)} />
             </div>
 
-            <div className="mb-3 hidden w-fit grid-cols-12 gap-[9px] lg:grid" aria-label="活跃热力图占位">
+            <div className="mb-3 hidden w-fit grid-cols-12 gap-[9px] lg:grid" aria-label={t("heatmap.ariaLabel")}>
               {heatmapLevels.map((level, index) => (
                 <span
                   className="size-[18px] rounded bg-[var(--color-surface-muted)] shadow-[inset_0_0_0_1px_var(--color-border-subtle)] data-[level='1']:bg-[color-mix(in_srgb,var(--color-accent)_18%,var(--color-surface-muted))] data-[level='2']:bg-[color-mix(in_srgb,var(--color-accent)_34%,var(--color-surface-muted))] data-[level='3']:bg-[color-mix(in_srgb,var(--color-accent)_58%,var(--color-surface-muted))] data-[level='4']:bg-[var(--color-accent)]"
@@ -193,18 +197,18 @@ export function HomePage() {
               ))}
             </div>
             <div className="mb-7 hidden w-[244px] justify-between text-[13px] text-[var(--color-text-muted)] lg:flex">
-              <span>一月</span>
-              <span>二月</span>
-              <span>三月</span>
+              <span>{t("heatmap.months.january")}</span>
+              <span>{t("heatmap.months.february")}</span>
+              <span>{t("heatmap.months.march")}</span>
             </div>
           </div>
 
           <div className="hidden min-h-0 flex-1 overflow-y-auto pb-44 pr-1 lg:block">
-            <SidebarSection title="Fields">
+            <SidebarSection title={t("sidebar.fields")}>
               <NavItem
                 active={selectedField === undefined}
                 count={fields.length}
-                label="全部"
+                label={t("sidebar.all")}
                 prefix="@"
                 onClick={() => setSelectedField(undefined)}
               />
@@ -220,13 +224,13 @@ export function HomePage() {
               ))}
             </SidebarSection>
 
-            <SidebarSection title="Tags">
+            <SidebarSection title={t("sidebar.tags")}>
               {tags.length === 0 ? (
                 <NavItem
                   active={false}
                   count={0}
                   disabled
-                  label="暂无标签"
+                  label={t("sidebar.emptyTags")}
                   prefix="#"
                   onClick={() => undefined}
                 />
@@ -253,7 +257,7 @@ export function HomePage() {
               <Search className="size-4" aria-hidden="true" />
               <input
                 className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[var(--color-text-muted)]"
-                placeholder="搜索笔记、Field、Tag"
+                placeholder={t("search.placeholder")}
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
               />
@@ -265,13 +269,14 @@ export function HomePage() {
             <div className="flex flex-col gap-3.5">
             {visibleNotes.length === 0 ? (
               <article className="rounded-[18px] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-raised)] px-5 py-8 text-[var(--color-text-muted)]">
-                暂无最近笔记
+                {t("note.empty")}
               </article>
             ) : null}
             {visibleNotes.map((note) => (
               <NoteCard
                 fieldName={note.fieldId ? fieldNameById.get(note.fieldId) : undefined}
                 key={note.id}
+                locale={i18n.resolvedLanguage}
                 note={note}
               />
             ))}
@@ -291,7 +296,7 @@ export function HomePage() {
             <div className="overflow-hidden rounded-[18px] border border-[var(--color-border-strong)] bg-[var(--color-surface-raised)] shadow-[var(--color-shadow-float)] backdrop-blur">
               <textarea
                 className="min-h-[54px] w-full resize-none bg-transparent px-[18px] pb-1.5 pt-4 text-base font-medium leading-6 text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
-                placeholder="现在的想法是..."
+                placeholder={t("composer.placeholder")}
                 ref={textareaRef}
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
@@ -313,15 +318,17 @@ export function HomePage() {
                     ))}
                   </div>
                   <div className="mt-1.5 text-xs text-[var(--color-text-muted)]">
-                    将保存到 @
-                    {fields.find((field) => field.id === selectedField)?.name ??
-                      "inbox"}
+                    {t("composer.saveTo", {
+                      field:
+                        fields.find((field) => field.id === selectedField)?.name ??
+                        "inbox",
+                    })}
                   </div>
                 </div>
                 <button
                   className="flex h-[34px] w-12 items-center justify-center rounded-[10px] bg-[var(--color-accent)] text-[var(--color-accent-contrast)] shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_18%,transparent)] hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
                   type="submit"
-                  aria-label="发送"
+                  aria-label={t("composer.send")}
                   disabled={isSubmitting || draft.trim().length === 0}
                 >
                   <SendHorizontal className="size-5" aria-hidden="true" />
@@ -335,7 +342,7 @@ export function HomePage() {
       <button
         className="fixed bottom-8 right-7 z-20 flex size-[46px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] shadow-[var(--color-help-shadow)]"
         type="button"
-        aria-label="帮助"
+        aria-label={t("composer.help")}
       >
         <CircleHelp className="size-5" aria-hidden="true" />
       </button>
@@ -346,11 +353,14 @@ export function HomePage() {
 /** Renders one recent note in the home feed. */
 function NoteCard({
   fieldName,
+  locale,
   note,
 }: {
   fieldName?: string;
+  locale?: string;
   note: NoteDto;
 }) {
+  const { t } = useTranslation("home");
   const [expanded, setExpanded] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
   const contentRef = useRef<HTMLParagraphElement>(null);
@@ -381,7 +391,7 @@ function NoteCard({
         aria-hidden="true"
       />
       <div className="mb-3.5 text-[13px] text-[var(--color-text-muted)]">
-        {formatNoteTimestamp(note.updatedAt)}
+        {formatNoteTimestamp(note.updatedAt, locale)}
         {fieldName ? (
           <span className="ml-1 font-bold text-[var(--color-text-secondary)]">@{fieldName}</span>
         ) : null}
@@ -407,7 +417,7 @@ function NoteCard({
           type="button"
           onClick={() => setExpanded((current) => !current)}
         >
-          {expanded ? "收起" : "展开"}
+          {expanded ? t("note.collapse") : t("note.expand")}
         </button>
       ) : null}
     </article>
@@ -514,9 +524,9 @@ function parseTagNames(content: string): string[] {
 }
 
 /** Formats a Unix timestamp for note card metadata. */
-function formatNoteTimestamp(timestamp: number): string {
+function formatNoteTimestamp(timestamp: number, locale = "zh-CN"): string {
   const date = new Date(timestamp * 1000);
-  const parts = new Intl.DateTimeFormat("zh-CN", {
+  const parts = new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
@@ -532,23 +542,23 @@ function formatNoteTimestamp(timestamp: number): string {
 }
 
 /** Creates toolbar definitions for the composer insertion buttons. */
-function createComposerTools(): ComposerTool[] {
+function createComposerTools(t: (key: string) => string): ComposerTool[] {
   return [
     {
       id: "tag",
-      label: "插入标签",
+      label: t("composer.tools.tag"),
       icon: <Hash className="size-5" aria-hidden="true" />,
       before: "#",
     },
     {
       id: "field",
-      label: "插入 Field",
+      label: t("composer.tools.field"),
       icon: <AtSign className="size-5" aria-hidden="true" />,
       before: "@",
     },
     {
       id: "bold",
-      label: "加粗",
+      label: t("composer.tools.bold"),
       icon: <Bold className="size-4" aria-hidden="true" />,
       before: "**",
       after: "**",
@@ -556,7 +566,7 @@ function createComposerTools(): ComposerTool[] {
     },
     {
       id: "list",
-      label: "插入列表",
+      label: t("composer.tools.list"),
       icon: <List className="size-5" aria-hidden="true" />,
       before: "\n- ",
     },

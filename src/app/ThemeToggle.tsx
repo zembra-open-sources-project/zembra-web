@@ -1,14 +1,16 @@
 import { Moon, Sun } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "./ThemeProvider";
 import { getNextThemePreference } from "./theme";
 
 /** Renders a single-click light and dark theme toggle. */
 export function ThemeToggle() {
+  const { t } = useTranslation("common");
   const { preference, setPreference } = useTheme();
   const nextPreference = getNextThemePreference(preference);
   const Icon = preference === "dark" ? Moon : Sun;
   const label =
-    preference === "dark" ? "Switch to light theme" : "Switch to dark theme";
+    preference === "dark" ? t("theme.switchToLight") : t("theme.switchToDark");
 
   return (
     <button

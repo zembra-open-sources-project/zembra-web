@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";
+import { i18next } from "../i18n";
 import { ThemeProvider } from "./ThemeProvider";
 import { themePreferenceStorageKey } from "./theme";
 import { ThemeToggle } from "./ThemeToggle";
@@ -7,6 +8,7 @@ import { ThemeToggle } from "./ThemeToggle";
 /** Verifies that the icon-only theme button toggles from light to dark. */
 test("toggles from light to dark on click", () => {
   window.localStorage.clear();
+  void i18next.changeLanguage("en-US");
   render(
     <ThemeProvider>
       <ThemeToggle />

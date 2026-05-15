@@ -3,11 +3,14 @@ import { ReactNode } from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import type { SyncClient } from "../../api/sync.client";
 import { ThemeProvider } from "../../app/ThemeProvider";
+import { i18next } from "../../i18n";
 import { SyncSettingsPage } from "./SyncSettingsPage";
 
 let client: SyncClient;
 
 beforeEach(() => {
+  window.localStorage.clear();
+  void i18next.changeLanguage("en-US");
   client = createMockPageClient();
 });
 

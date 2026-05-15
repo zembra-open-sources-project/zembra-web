@@ -10,8 +10,10 @@ import {
   XCircle,
 } from "lucide-react";
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { syncClient as defaultSyncClient } from "../../api/client";
 import { ApiError } from "../../api/http";
+import { LanguageMenu } from "../../app/LanguageMenu";
 import { ThemeToggle } from "../../app/ThemeToggle";
 import type { SyncClient } from "../../api/sync.client";
 import type {
@@ -49,6 +51,7 @@ const initialFormState: SyncSettingsFormState = {
 export function SyncSettingsPage({
   client = defaultSyncClient,
 }: SyncSettingsPageProps) {
+  const { i18n, t } = useTranslation("settings");
   const [config, setConfig] = useState<SyncConfigDto | undefined>(undefined);
   const [status, setStatus] = useState<SyncStatusDto | undefined>(undefined);
   const [formState, setFormState] =
@@ -63,8 +66,12 @@ export function SyncSettingsPage({
     useState<SyncConfigTestResultDto | undefined>();
   const [runResult, setRunResult] = useState<SyncRunResultDto | undefined>();
   const intervalValidation = useMemo(
-    () => validateIntervalSeconds(formState.intervalSeconds),
-    [formState.intervalSeconds],
+    () =>
+      validateIntervalSeconds(
+        formState.intervalSeconds,
+        t("form.intervalSeconds.errorPositiveInteger"),
+      ),
+    [formState.intervalSeconds, t],
   );
 
   useEffect(() => {
@@ -131,7 +138,7 @@ export function SyncSettingsPage({
       setConfig(nextConfig);
       setStatus(nextStatus);
       setFormState(createFormState(nextConfig));
-      setSuccessMessage("Settings saved");
+      setSuccessMessage(t("success.settingsSaved"));
     } catch (error) {
       setErrorMessage(formatErrorMessage(error));
     } finally {
@@ -177,7 +184,7 @@ export function SyncSettingsPage({
 
       setRunResult(result);
       setStatus(nextStatus);
-      setSuccessMessage("Manual sync finished");
+      setSuccessMessage(t("success.manualSyncFinished"));
     } catch (error) {
       setErrorMessage(formatErrorMessage(error));
     } finally {
@@ -195,18 +202,18 @@ export function SyncSettingsPage({
               href="/"
             >
               <ArrowLeft className="size-4" aria-hidden="true" />
-              Home
+              {t("home")}
             </a>
             <h1 className="text-3xl font-bold leading-tight text-[var(--color-text-primary)]">
-              Supabase Sync
+              {t("title")}
             </h1>
             <p className="mt-2 max-w-[620px] text-sm leading-6 text-[var(--color-text-muted)]">
-              Configure backend-managed Supabase synchronization without exposing
-              stored service role secrets.
+              {t("description")}
             </p>
           </div>
 
           <div className="flex items-center gap-3">
+            <LanguageMenu />
             <ThemeToggle />
             <StatusPill enabled={status?.enabled ?? config?.enabled ?? false} />
           </div>
@@ -225,9 +232,9 @@ export function SyncSettingsPage({
           >
             <div className="mb-5 flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold text-[var(--color-text-primary)]">Settings</h2>
+                <h2 className="text-lg font-bold text-[var(--color-text-primary)]">{t("form.settings.title")}</h2>
                 <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                  Values are saved by the backend sync service.
+                  {t("form.settings.description")}
                 </p>
               </div>
               {isLoading ? (
@@ -239,10 +246,10 @@ export function SyncSettingsPage({
               <label className="flex items-center justify-between gap-4 rounded-[12px] bg-[var(--color-surface-muted)] px-4 py-3">
                 <span>
                   <span className="block text-sm font-semibold text-[var(--color-text-primary)]">
-                    Enable synchronization
+                    {t("form.enable.label")}
                   </span>
                   <span className="mt-1 block text-xs text-[var(--color-text-muted)]">
-                    Backend controls the actual sync interval.
+                    {t("form.enable.description")}
                   </span>
                 </span>
                 <input
@@ -258,7 +265,7 @@ export function SyncSettingsPage({
                 />
               </label>
 
-              <FieldLabel label="Supabase URL">
+              <FieldLabel label={t("form.supabaseUrl.label")}>
                 <input
                   className="h-11 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
                   placeholder="https://project.supabase.co"
@@ -273,7 +280,7 @@ export function SyncSettingsPage({
               </FieldLabel>
 
               <FieldLabel
-                label="Interval seconds"
+                label={t("form.intervalSeconds.label")}
                 error={intervalValidation}
               >
                 <input
@@ -292,10 +299,10 @@ export function SyncSettingsPage({
                 />
               </FieldLabel>
 
-              <FieldLabel label="New service role key">
+              <FieldLabel label={t("form.serviceRoleKey.label")}>
                 <input
                   className="h-11 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
-                  placeholder="Leave blank to keep the existing key"
+                  placeholder={t("form.serviceRoleKey.placeholder")}
                   type="password"
                   value={formState.serviceRoleKey}
                   onChange={(event) =>
@@ -314,7 +321,7 @@ export function SyncSettingsPage({
               <ActionButton
                 busy={isTesting}
                 icon={<TestTube2 className="size-4" aria-hidden="true" />}
-                label="Test Connection"
+                label={t("actions.testConnection")}
                 type="button"
                 onClick={handleTestConnection}
               />
@@ -322,13 +329,13 @@ export function SyncSettingsPage({
                 busy={isSaving}
                 disabled={Boolean(intervalValidation)}
                 icon={<Save className="size-4" aria-hidden="true" />}
-                label="Save Settings"
+                label={t("actions.save")}
                 type="submit"
               />
               <ActionButton
                 busy={isRunning}
                 icon={<Play className="size-4" aria-hidden="true" />}
-                label="Run Sync"
+                label={t("actions.runSync")}
                 type="button"
                 onClick={handleRunSync}
               />
@@ -340,7 +347,7 @@ export function SyncSettingsPage({
               testResult={testResult}
               runResult={runResult}
             />
-            <StatusPanel status={status} />
+            <StatusPanel locale={i18n.resolvedLanguage} status={status} />
           </aside>
         </section>
       </div>
@@ -359,9 +366,12 @@ function createFormState(config: SyncConfigDto): SyncSettingsFormState {
 }
 
 /** Validates the synchronization interval input. */
-function validateIntervalSeconds(value: string): string | undefined {
+function validateIntervalSeconds(
+  value: string,
+  positiveIntegerMessage: string,
+): string | undefined {
   if (!/^\d+$/.test(value.trim())) {
-    return "Interval seconds must be 0 or a positive integer";
+    return positiveIntegerMessage;
   }
 
   return undefined;
@@ -378,13 +388,15 @@ function formatErrorMessage(error: unknown): string {
 
 /** Renders a compact status pill for synchronization enabled state. */
 function StatusPill({ enabled }: { enabled: boolean }) {
+  const { t } = useTranslation("settings");
+
   return (
     <div className="inline-flex h-10 items-center gap-2 rounded-full bg-[var(--color-surface)] px-4 text-sm font-semibold text-[var(--color-text-secondary)] shadow-[inset_0_0_0_1px_var(--color-border)]">
       <span
         className="size-2.5 rounded-full data-[enabled=true]:bg-[var(--color-accent)] data-[enabled=false]:bg-[var(--color-text-muted)]"
         data-enabled={enabled}
       />
-      {enabled ? "Sync enabled" : "Sync disabled"}
+      {enabled ? t("status.enabled") : t("status.disabled")}
     </div>
   );
 }
@@ -412,12 +424,14 @@ function FieldLabel({
 
 /** Renders whether the backend currently stores a service role key. */
 function SecretState({ configured }: { configured: boolean }) {
+  const { t } = useTranslation("settings");
+
   return (
     <div className="flex items-center gap-3 rounded-[12px] bg-[var(--color-surface-muted)] px-4 py-3 text-sm text-[var(--color-text-secondary)]">
       <KeyRound className="size-4 text-[var(--color-accent)]" aria-hidden="true" />
-      <span className="font-semibold">Service role key</span>
+      <span className="font-semibold">{t("secret.label")}</span>
       <span className="ml-auto text-[var(--color-text-muted)]">
-        {configured ? "Configured" : "Not configured"}
+        {configured ? t("secret.configured") : t("secret.notConfigured")}
       </span>
     </div>
   );
@@ -478,22 +492,27 @@ function ResultPanel({
   runResult?: SyncRunResultDto;
   testResult?: SyncConfigTestResultDto;
 }) {
+  const { t } = useTranslation("settings");
+
   return (
     <section className="rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--color-shadow-card)]">
-      <h2 className="mb-4 text-base font-bold text-[var(--color-text-primary)]">Results</h2>
+      <h2 className="mb-4 text-base font-bold text-[var(--color-text-primary)]">{t("results.title")}</h2>
       <div className="flex flex-col gap-3 text-sm text-[var(--color-text-secondary)]">
         <div className="rounded-[12px] bg-[var(--color-surface-muted)] px-4 py-3">
-          <div className="font-semibold">Test Connection</div>
+          <div className="font-semibold">{t("results.testConnection")}</div>
           <div className="mt-1 text-[var(--color-text-muted)]">
-            {testResult ? testResult.message : "No test run yet"}
+            {testResult ? testResult.message : t("results.noTestRun")}
           </div>
         </div>
         <div className="rounded-[12px] bg-[var(--color-surface-muted)] px-4 py-3">
-          <div className="font-semibold">Manual Sync</div>
+          <div className="font-semibold">{t("results.manualSync")}</div>
           <div className="mt-1 text-[var(--color-text-muted)]">
             {runResult
-              ? `Pushed ${runResult.pushed}, pulled ${runResult.pulled}`
-              : "No sync run yet"}
+              ? t("results.manualSyncSummary", {
+                  pulled: runResult.pulled,
+                  pushed: runResult.pushed,
+                })
+              : t("results.noSyncRun")}
           </div>
         </div>
       </div>
@@ -502,23 +521,32 @@ function ResultPanel({
 }
 
 /** Renders synchronization cursor status returned by the backend. */
-function StatusPanel({ status }: { status?: SyncStatusDto }) {
+function StatusPanel({
+  locale,
+  status,
+}: {
+  locale?: string;
+  status?: SyncStatusDto;
+}) {
+  const { t } = useTranslation("settings");
+
   return (
     <section className="rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--color-shadow-card)]">
       <div className="mb-4 flex items-center gap-2">
         <DatabaseZap className="size-4 text-[var(--color-accent)]" aria-hidden="true" />
-        <h2 className="text-base font-bold text-[var(--color-text-primary)]">Status</h2>
+        <h2 className="text-base font-bold text-[var(--color-text-primary)]">{t("status.title")}</h2>
       </div>
 
       {!status ? (
-        <p className="text-sm text-[var(--color-text-muted)]">Loading status</p>
+        <p className="text-sm text-[var(--color-text-muted)]">{t("status.loading")}</p>
       ) : status.states.length === 0 ? (
-        <p className="text-sm text-[var(--color-text-muted)]">No sync cursors yet</p>
+        <p className="text-sm text-[var(--color-text-muted)]">{t("status.noCursors")}</p>
       ) : (
         <div className="flex flex-col gap-3">
           {status.states.map((state) => (
             <SyncStateRow
               key={`${state.workspaceId}-${state.deviceId}-${state.scope}`}
+              locale={locale}
               state={state}
             />
           ))}
@@ -529,13 +557,21 @@ function StatusPanel({ status }: { status?: SyncStatusDto }) {
 }
 
 /** Renders one synchronization cursor row. */
-function SyncStateRow({ state }: { state: SyncStateDto }) {
+function SyncStateRow({
+  locale,
+  state,
+}: {
+  locale?: string;
+  state: SyncStateDto;
+}) {
+  const { t } = useTranslation("settings");
+
   return (
     <article className="rounded-[12px] bg-[var(--color-surface-muted)] px-4 py-3 text-sm">
       <div className="flex items-center justify-between gap-3">
         <span className="font-semibold text-[var(--color-text-primary)]">{state.scope}</span>
         <span className="text-xs text-[var(--color-text-muted)]">
-          {formatUnixTimestamp(state.lastChangeCreatedAt)}
+          {formatUnixTimestamp(state.lastChangeCreatedAt, locale, t("status.never"))}
         </span>
       </div>
       <div className="mt-2 truncate text-xs text-[var(--color-text-muted)]">
@@ -551,12 +587,16 @@ function SyncStateRow({ state }: { state: SyncStateDto }) {
 }
 
 /** Formats a Unix timestamp for compact settings page status text. */
-function formatUnixTimestamp(timestamp: number): string {
+function formatUnixTimestamp(
+  timestamp: number,
+  locale = "zh-CN",
+  neverLabel = "Never",
+): string {
   if (timestamp <= 0) {
-    return "Never";
+    return neverLabel;
   }
 
-  return new Intl.DateTimeFormat("zh-CN", {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
