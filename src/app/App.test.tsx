@@ -35,7 +35,7 @@ test("saves a reachable backend URL and renders the card note workspace", async 
   render(<App />);
 
   fireEvent.change(await screen.findByLabelText("Backend URL"), {
-    target: { value: "127.0.0.1:8000/api" },
+    target: { value: "127.0.0.1:8000" },
   });
   fireEvent.click(screen.getByRole("button", { name: /backend/i }));
 
@@ -45,7 +45,7 @@ test("saves a reachable backend URL and renders the card note workspace", async 
     expect.objectContaining({ method: "GET" }),
   );
   expect(window.localStorage.getItem(backendBaseUrlStorageKey)).toBe(
-    "http://127.0.0.1:8000/api",
+    "http://127.0.0.1:8000",
   );
 });
 
@@ -57,7 +57,7 @@ test("shows an error when the entered backend URL is unreachable", async () => {
   render(<App />);
 
   fireEvent.change(await screen.findByLabelText("Backend URL"), {
-    target: { value: "http://127.0.0.1:9000/api" },
+    target: { value: "http://127.0.0.1:9000" },
   });
   fireEvent.click(screen.getByRole("button", { name: /backend/i }));
 
@@ -71,7 +71,7 @@ test("returns to the backend URL gate when the saved URL is unreachable", async 
   vi.spyOn(console, "warn").mockImplementation(() => undefined);
   window.localStorage.setItem(
     backendBaseUrlStorageKey,
-    "http://127.0.0.1:9000/api",
+    "http://127.0.0.1:9000",
   );
   vi.spyOn(globalThis, "fetch").mockResolvedValue(
     new Response(null, { status: 503 }),
@@ -91,7 +91,7 @@ test("shows backend connection toast for five seconds", async () => {
   );
   window.localStorage.setItem(
     backendBaseUrlStorageKey,
-    "http://127.0.0.1:8000/api",
+    "http://127.0.0.1:8000",
   );
   render(<App />);
 

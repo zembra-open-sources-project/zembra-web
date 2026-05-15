@@ -118,7 +118,7 @@ export function BackendUrlGate({ children }: BackendUrlGateProps) {
               className="mt-2 h-11 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm outline-none transition focus:border-[var(--color-border-strong)]"
               name="backend-url"
               onChange={(event) => setBackendUrl(event.target.value)}
-              placeholder="http://127.0.0.1:8000/api"
+              placeholder="http://127.0.0.1:3000"
               value={backendUrl}
             />
           </label>

@@ -19,7 +19,7 @@ import {
 } from "./sync.client";
 
 const defaultApiBaseUrl =
-  import.meta.env.VITE_ZEMBRA_API_BASE_URL ?? "/api";
+  import.meta.env.VITE_ZEMBRA_API_BASE_URL ?? "http://127.0.0.1:3000";
 
 /** Resolves the API base URL from saved user config or Vite defaults. */
 const resolveDefaultApiBaseUrl: BackendBaseUrlResolver = () =>

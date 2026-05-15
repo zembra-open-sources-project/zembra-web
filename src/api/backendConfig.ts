@@ -31,14 +31,15 @@ export function resolveBackendBaseUrl(source: BackendBaseUrlSource): string {
   return typeof source === "function" ? source() : source;
 }
 
-/** Normalizes user-entered backend URLs before storage and fetch requests. */
+/** Normalizes user-entered backend service root URLs before storage and fetch requests. */
 export function normalizeBackendBaseUrl(value: string): string {
   const trimmed = value.trim();
   const withProtocol = /^[a-z][a-z\d+\-.]*:\/\//i.test(trimmed)
     ? trimmed
     : `http://${trimmed}`;
+  const url = new URL(withProtocol, window.location.origin);
 
-  return withProtocol.endsWith("/") ? withProtocol.slice(0, -1) : withProtocol;
+  return url.origin;
 }
 
 /** Checks whether the provided backend API base URL is reachable. */

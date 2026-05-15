@@ -18,19 +18,18 @@ afterEach(() => {
 
 describe("backend config", () => {
   test("normalizes backend URLs before storage", () => {
-    setConfiguredBackendBaseUrl("127.0.0.1:3000/api/");
+    setConfiguredBackendBaseUrl("127.0.0.1:3000");
 
     expect(window.localStorage.getItem(backendBaseUrlStorageKey)).toBe(
-      "http://127.0.0.1:3000/api",
+      "http://127.0.0.1:3000",
     );
-    expect(getConfiguredBackendBaseUrl()).toBe("http://127.0.0.1:3000/api");
+    expect(getConfiguredBackendBaseUrl()).toBe("http://127.0.0.1:3000");
   });
 
-  test("creates health URLs from API base URLs", () => {
-    expect(createBackendHealthUrl("http://127.0.0.1:3000/api")).toBe(
+  test("creates health URLs from backend service root URLs", () => {
+    expect(createBackendHealthUrl("http://127.0.0.1:3000")).toBe(
       "http://127.0.0.1:3000/health",
     );
-    expect(createBackendHealthUrl("/api")).toBe("http://localhost:3000/health");
   });
 
   test("checks documented backend health endpoint", async () => {
@@ -39,7 +38,7 @@ describe("backend config", () => {
       new Response(JSON.stringify({ status: "ok" }), { status: 200 }),
     ) as typeof fetch;
 
-    await expect(checkBackendReachability("127.0.0.1:3000/api")).resolves.toBe(
+    await expect(checkBackendReachability("127.0.0.1:3000")).resolves.toBe(
       true,
     );
 
@@ -50,7 +49,7 @@ describe("backend config", () => {
     expect(infoSpy).toHaveBeenCalledWith(
       "[zembra] Checking backend reachability",
       expect.objectContaining({
-        baseUrl: "http://127.0.0.1:3000/api",
+        baseUrl: "http://127.0.0.1:3000",
         healthUrl: "http://127.0.0.1:3000/health",
       }),
     );
@@ -63,7 +62,7 @@ describe("backend config", () => {
       throw error;
     }) as typeof fetch;
 
-    await expect(checkBackendReachability("http://server.test/api")).resolves.toBe(
+    await expect(checkBackendReachability("http://server.test")).resolves.toBe(
       false,
     );
 
@@ -78,9 +77,9 @@ describe("backend config", () => {
 });
 
 describe("normalizeBackendBaseUrl", () => {
-  test("adds http protocol and trims trailing slash", () => {
-    expect(normalizeBackendBaseUrl(" 127.0.0.1:3000/api/ ")).toBe(
-      "http://127.0.0.1:3000/api",
+  test("adds http protocol and returns the service root URL", () => {
+    expect(normalizeBackendBaseUrl(" 127.0.0.1:3000/ ")).toBe(
+      "http://127.0.0.1:3000",
     );
   });
 });

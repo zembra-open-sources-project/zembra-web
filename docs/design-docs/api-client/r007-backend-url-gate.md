@@ -28,6 +28,8 @@
 
 根据既有后端接入文档，健康检查 API 为 `GET /health`。用户输入的 URL 仍作为 API Base URL 保存，但可达性检查会回到同源服务根路径请求 `/health`，避免误把 API Base URL 本身当成健康检查端点。
 
+默认后端地址必须是 OpenAPI 已确认的服务根地址 `http://127.0.0.1:3000`，禁止使用未确认的路径前缀作为默认值或示例。
+
 ## 数据持久化
 
 后端 URL 保存到 `localStorage`，key 由 `backendConfig` 模块统一维护。测试环境仍保留 mock client 行为，避免单元测试依赖真实后端。
