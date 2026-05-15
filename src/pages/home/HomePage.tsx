@@ -10,6 +10,7 @@ import {
   Settings,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { ThemeToggle } from "../../app/ThemeToggle";
 import {
   FormEvent,
   MouseEvent,
@@ -149,25 +150,31 @@ export function HomePage() {
   }
 
   return (
-    <main className="h-screen overflow-hidden bg-[#0f1115] text-[#e8edf3]">
+    <main className="h-screen overflow-hidden bg-[var(--color-app-bg)] text-[var(--color-text-primary)]">
       <div className="mx-auto grid h-full w-full max-w-[1156px] grid-cols-1 gap-4 px-5 pt-6 lg:grid-cols-[300px_760px] lg:gap-16 lg:px-0 lg:pt-8">
         <aside className="flex min-h-0 min-w-0 flex-col lg:min-h-0">
           <div className="shrink-0">
             <div className="mb-7 flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-2 text-lg font-bold">
                 <span>Zembra</span>
-                <span className="rounded-[5px] border border-[#e8edf3]/70 px-1.5 py-0.5 text-[10px] leading-tight">
+                <span className="rounded-[5px] border border-[var(--color-text-primary)]/70 px-1.5 py-0.5 text-[10px] leading-tight">
                   LOCAL
                 </span>
               </div>
-              <Link
-                className="flex size-[34px] shrink-0 items-center justify-center rounded-[9px] text-[#94a0ae] hover:bg-[#242a33] hover:text-[#def4ff]"
-                title="Settings"
-                to="/settings/sync"
-                aria-label="Settings"
-              >
-                <Settings className="size-4 text-[#8fd3ff]" aria-hidden="true" />
-              </Link>
+              <div className="flex shrink-0 items-center gap-2">
+                <ThemeToggle />
+                <Link
+                  className="flex size-[34px] shrink-0 items-center justify-center rounded-[9px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
+                  title="Settings"
+                  to="/settings/sync"
+                  aria-label="Settings"
+                >
+                  <Settings
+                    className="size-4 text-[var(--color-accent)]"
+                    aria-hidden="true"
+                  />
+                </Link>
+              </div>
             </div>
 
             <div className="mb-5 hidden grid-cols-3 gap-4 lg:grid">
@@ -179,13 +186,13 @@ export function HomePage() {
             <div className="mb-3 hidden w-fit grid-cols-12 gap-[9px] lg:grid" aria-label="活跃热力图占位">
               {heatmapLevels.map((level, index) => (
                 <span
-                  className="size-[18px] rounded bg-[#343941] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] data-[level='1']:bg-[#3f4852] data-[level='2']:bg-[#4a6172] data-[level='3']:bg-[#5f90ac] data-[level='4']:bg-[#8fd3ff]"
+                  className="size-[18px] rounded bg-[var(--color-surface-muted)] shadow-[inset_0_0_0_1px_var(--color-border-subtle)] data-[level='1']:bg-[color-mix(in_srgb,var(--color-accent)_18%,var(--color-surface-muted))] data-[level='2']:bg-[color-mix(in_srgb,var(--color-accent)_34%,var(--color-surface-muted))] data-[level='3']:bg-[color-mix(in_srgb,var(--color-accent)_58%,var(--color-surface-muted))] data-[level='4']:bg-[var(--color-accent)]"
                   data-level={level}
                   key={`${level}-${index}`}
                 />
               ))}
             </div>
-            <div className="mb-7 hidden w-[244px] justify-between text-[13px] text-[#94a0ae] lg:flex">
+            <div className="mb-7 hidden w-[244px] justify-between text-[13px] text-[var(--color-text-muted)] lg:flex">
               <span>一月</span>
               <span>二月</span>
               <span>三月</span>
@@ -242,22 +249,22 @@ export function HomePage() {
 
         <section className="flex min-h-0 min-w-0 flex-col">
           <header className="mb-4 flex min-h-11 shrink-0 items-center justify-end lg:mb-5">
-            <label className="flex h-[42px] w-full items-center gap-2.5 rounded-full bg-[#1c2027] px-4 text-sm text-[#94a0ae] lg:max-w-80">
+            <label className="flex h-[42px] w-full items-center gap-2.5 rounded-full bg-[var(--color-surface)] px-4 text-sm text-[var(--color-text-muted)] shadow-[inset_0_0_0_1px_var(--color-border)] lg:max-w-80">
               <Search className="size-4" aria-hidden="true" />
               <input
-                className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#94a0ae]"
+                className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[var(--color-text-muted)]"
                 placeholder="搜索笔记、Field、Tag"
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
               />
-              <span className="text-[#9ea8b4]">⌘+K</span>
+              <span className="text-[var(--color-text-muted)]">⌘+K</span>
             </label>
           </header>
 
           <div className="min-h-0 flex-1 overflow-y-auto pb-44">
             <div className="flex flex-col gap-3.5">
             {visibleNotes.length === 0 ? (
-              <article className="rounded-[18px] border border-dashed border-[#2a313b] bg-[#1c2027]/60 px-5 py-8 text-[#94a0ae]">
+              <article className="rounded-[18px] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-raised)] px-5 py-8 text-[var(--color-text-muted)]">
                 暂无最近笔记
               </article>
             ) : null}
@@ -273,7 +280,7 @@ export function HomePage() {
         </section>
       </div>
 
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-10 h-[154px] bg-gradient-to-t from-[#0f1115] from-[24%] via-[#0f1115]/80 via-[62%] to-transparent" />
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-10 h-[154px] bg-[image:var(--color-composer-gradient)]" />
 
       <div className="fixed inset-x-0 bottom-6 z-20 px-5 lg:px-0">
         <form
@@ -281,9 +288,9 @@ export function HomePage() {
           onSubmit={handleSubmit}
         >
           <div className="min-w-0 lg:col-start-2">
-            <div className="overflow-hidden rounded-[18px] border border-[#8fd3ff]/45 bg-[#1c2027]/95 shadow-[0_18px_46px_rgba(0,0,0,0.44),0_0_0_1px_rgba(143,211,255,0.04)] backdrop-blur">
+            <div className="overflow-hidden rounded-[18px] border border-[var(--color-border-strong)] bg-[var(--color-surface-raised)] shadow-[var(--color-shadow-float)] backdrop-blur">
               <textarea
-                className="min-h-[54px] w-full resize-none bg-transparent px-[18px] pb-1.5 pt-4 text-base font-medium leading-6 text-[#e8edf3] outline-none placeholder:text-[#94a0ae]"
+                className="min-h-[54px] w-full resize-none bg-transparent px-[18px] pb-1.5 pt-4 text-base font-medium leading-6 text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
                 placeholder="现在的想法是..."
                 ref={textareaRef}
                 value={draft}
@@ -291,10 +298,10 @@ export function HomePage() {
               />
               <div className="flex items-end justify-between px-4 pb-3">
                 <div>
-                  <div className="flex items-center gap-4 text-[#a6afba]">
+                  <div className="flex items-center gap-4 text-[var(--color-text-secondary)]">
                     {composerTools.map((tool) => (
                       <button
-                        className="flex size-7 items-center justify-center rounded-md hover:bg-[#242a33] hover:text-[#e8edf3]"
+                        className="flex size-7 items-center justify-center rounded-md hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
                         key={tool.id}
                         type="button"
                         aria-label={tool.label}
@@ -305,14 +312,14 @@ export function HomePage() {
                       </button>
                     ))}
                   </div>
-                  <div className="mt-1.5 text-xs text-[#667180]">
+                  <div className="mt-1.5 text-xs text-[var(--color-text-muted)]">
                     将保存到 @
                     {fields.find((field) => field.id === selectedField)?.name ??
                       "inbox"}
                   </div>
                 </div>
                 <button
-                  className="flex h-[34px] w-12 items-center justify-center rounded-[10px] bg-[#8fd3ff] text-[#11212d] shadow-[0_8px_18px_rgba(143,211,255,0.16)] hover:bg-[#b8e4ff] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-[34px] w-12 items-center justify-center rounded-[10px] bg-[var(--color-accent)] text-[var(--color-accent-contrast)] shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_18%,transparent)] hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
                   type="submit"
                   aria-label="发送"
                   disabled={isSubmitting || draft.trim().length === 0}
@@ -326,7 +333,7 @@ export function HomePage() {
       </div>
 
       <button
-        className="fixed bottom-8 right-7 z-20 flex size-[46px] items-center justify-center rounded-full border border-white/[0.04] bg-[#1c2027] text-[#94a0ae] shadow-[0_14px_34px_rgba(0,0,0,0.36)]"
+        className="fixed bottom-8 right-7 z-20 flex size-[46px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] shadow-[var(--color-help-shadow)]"
         type="button"
         aria-label="帮助"
       >
@@ -368,25 +375,25 @@ function NoteCard({
   }, [measureOverflow]);
 
   return (
-    <article className="relative rounded-[18px] border border-white/[0.025] bg-[#1c2027] px-5 py-[18px] shadow-[0_10px_24px_rgba(0,0,0,0.36)]">
+    <article className="relative rounded-[18px] border border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-5 py-[18px] shadow-[var(--color-shadow-card)]">
       <MoreHorizontal
-        className="absolute right-[18px] top-[17px] size-5 text-[#94a0ae]"
+        className="absolute right-[18px] top-[17px] size-5 text-[var(--color-text-muted)]"
         aria-hidden="true"
       />
-      <div className="mb-3.5 text-[13px] text-[#94a0ae]">
+      <div className="mb-3.5 text-[13px] text-[var(--color-text-muted)]">
         {formatNoteTimestamp(note.updatedAt)}
         {fieldName ? (
-          <span className="ml-1 font-bold text-[#c7d0db]">@{fieldName}</span>
+          <span className="ml-1 font-bold text-[var(--color-text-secondary)]">@{fieldName}</span>
         ) : null}
       </div>
       <p
-        className="overflow-hidden whitespace-pre-wrap pr-7 text-base font-medium leading-7 text-[#e3e8ee]"
+        className="overflow-hidden whitespace-pre-wrap pr-7 text-base font-medium leading-7 text-[var(--color-text-primary)]"
         ref={contentRef}
         style={expanded ? undefined : { maxHeight: "5.25rem" }}
       >
         {note.tags.map((tag) => (
           <span
-            className="mr-1.5 inline-flex h-[25px] items-center rounded-[7px] bg-[#8fd3ff]/20 px-2 text-[13px] font-semibold text-[#8fd3ff]"
+            className="mr-1.5 inline-flex h-[25px] items-center rounded-[7px] bg-[var(--color-accent-soft)] px-2 text-[13px] font-semibold text-[var(--color-accent)]"
             key={tag}
           >
             #{tag}
@@ -396,7 +403,7 @@ function NoteCard({
       </p>
       {hasOverflow || expanded ? (
         <button
-          className="mt-3 text-sm font-semibold text-[#8fd3ff]"
+          className="mt-3 text-sm font-semibold text-[var(--color-accent)]"
           type="button"
           onClick={() => setExpanded((current) => !current)}
         >
@@ -411,10 +418,10 @@ function NoteCard({
 function StatBlock({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-[30px] font-bold leading-none text-[#cdd4dc]">
+      <div className="text-[30px] font-bold leading-none text-[var(--color-text-secondary)]">
         {value}
       </div>
-      <div className="mt-2 text-[13px] text-[#94a0ae]">{label}</div>
+      <div className="mt-2 text-[13px] text-[var(--color-text-muted)]">{label}</div>
     </div>
   );
 }
@@ -429,7 +436,7 @@ function SidebarSection({
 }) {
   return (
     <section className="mt-6">
-      <h2 className="mb-3 text-xs font-normal tracking-[0.02em] text-[#b89666]">
+      <h2 className="mb-3 text-xs font-normal tracking-[0.02em] text-[var(--color-warm)]">
         {title}
       </h2>
       <div className="flex flex-col gap-1">{children}</div>
@@ -455,17 +462,17 @@ function NavItem({
 }) {
   return (
     <button
-      className="grid min-h-9 grid-cols-[24px_1fr_auto] items-center gap-2.5 rounded-[9px] px-3 py-2 text-left text-[15px] text-[#c9d0d8] hover:bg-[#242a33] disabled:cursor-default disabled:opacity-45 disabled:hover:bg-transparent data-[active=true]:bg-[#8fd3ff]/15 data-[active=true]:text-[#def4ff] data-[active=true]:shadow-[inset_0_0_0_1px_rgba(143,211,255,0.12)]"
+      className="grid min-h-9 grid-cols-[24px_1fr_auto] items-center gap-2.5 rounded-[9px] px-3 py-2 text-left text-[15px] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted)] disabled:cursor-default disabled:opacity-45 disabled:hover:bg-transparent data-[active=true]:bg-[var(--color-accent-soft)] data-[active=true]:text-[var(--color-text-primary)] data-[active=true]:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
       data-active={active}
       disabled={disabled}
       type="button"
       onClick={onClick}
     >
-      <span className="text-center text-lg font-bold leading-none text-[#8fd3ff]">
+      <span className="text-center text-lg font-bold leading-none text-[var(--color-accent)]">
         {prefix}
       </span>
       <span className="min-w-0 truncate">{label}</span>
-      <span className="text-xs text-[#667180]">{count}</span>
+      <span className="text-xs text-[var(--color-text-muted)]">{count}</span>
     </button>
   );
 }

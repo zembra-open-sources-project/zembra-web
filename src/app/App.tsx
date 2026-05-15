@@ -9,6 +9,7 @@ import { HomePage } from "../pages/home/HomePage";
 import { SyncSettingsPage } from "../pages/settings/SyncSettingsPage";
 import { BackendConnectionToast } from "./BackendStatusToast";
 import { subscribeBackendConnectionFailed } from "./backendConnectionToast";
+import { ThemeProvider } from "./ThemeProvider";
 
 const rootRoute = createRootRoute();
 
@@ -64,9 +65,9 @@ export function App() {
   }, []);
 
   return (
-    <>
+    <ThemeProvider>
       <RouterProvider router={router} />
       {showsBackendConnectionToast ? <BackendConnectionToast /> : null}
-    </>
+    </ThemeProvider>
   );
 }

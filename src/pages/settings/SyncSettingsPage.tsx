@@ -12,6 +12,7 @@ import {
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import { syncClient as defaultSyncClient } from "../../api/client";
 import { ApiError } from "../../api/http";
+import { ThemeToggle } from "../../app/ThemeToggle";
 import type { SyncClient } from "../../api/sync.client";
 import type {
   SyncConfigDto,
@@ -185,27 +186,30 @@ export function SyncSettingsPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#0f1115] px-5 py-6 text-[#e8edf3] lg:px-0 lg:py-8">
+    <main className="min-h-screen bg-[var(--color-app-bg)] px-5 py-6 text-[var(--color-text-primary)] lg:px-0 lg:py-8">
       <div className="mx-auto flex w-full max-w-[980px] flex-col gap-6">
         <header className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <a
-              className="mb-5 inline-flex h-9 items-center gap-2 rounded-[9px] px-3 text-sm font-semibold text-[#94a0ae] hover:bg-[#242a33] hover:text-[#def4ff]"
+              className="mb-5 inline-flex h-9 items-center gap-2 rounded-[9px] px-3 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
               href="/"
             >
               <ArrowLeft className="size-4" aria-hidden="true" />
               Home
             </a>
-            <h1 className="text-3xl font-bold leading-tight text-[#f4f8fb]">
+            <h1 className="text-3xl font-bold leading-tight text-[var(--color-text-primary)]">
               Supabase Sync
             </h1>
-            <p className="mt-2 max-w-[620px] text-sm leading-6 text-[#94a0ae]">
+            <p className="mt-2 max-w-[620px] text-sm leading-6 text-[var(--color-text-muted)]">
               Configure backend-managed Supabase synchronization without exposing
               stored service role secrets.
             </p>
           </div>
 
-          <StatusPill enabled={status?.enabled ?? config?.enabled ?? false} />
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <StatusPill enabled={status?.enabled ?? config?.enabled ?? false} />
+          </div>
         </header>
 
         {errorMessage ? (
@@ -216,34 +220,34 @@ export function SyncSettingsPage({
 
         <section className="grid gap-4 lg:grid-cols-[1fr_320px]">
           <form
-            className="rounded-[18px] border border-white/[0.04] bg-[#1c2027] p-5 shadow-[0_16px_38px_rgba(0,0,0,0.34)]"
+            className="rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--color-shadow-card)]"
             onSubmit={handleSave}
           >
             <div className="mb-5 flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold text-[#f4f8fb]">Settings</h2>
-                <p className="mt-1 text-sm text-[#94a0ae]">
+                <h2 className="text-lg font-bold text-[var(--color-text-primary)]">Settings</h2>
+                <p className="mt-1 text-sm text-[var(--color-text-muted)]">
                   Values are saved by the backend sync service.
                 </p>
               </div>
               {isLoading ? (
-                <Loader2 className="size-5 animate-spin text-[#8fd3ff]" />
+                <Loader2 className="size-5 animate-spin text-[var(--color-accent)]" />
               ) : null}
             </div>
 
             <div className="flex flex-col gap-4">
-              <label className="flex items-center justify-between gap-4 rounded-[12px] bg-[#151922] px-4 py-3">
+              <label className="flex items-center justify-between gap-4 rounded-[12px] bg-[var(--color-surface-muted)] px-4 py-3">
                 <span>
-                  <span className="block text-sm font-semibold text-[#e8edf3]">
+                  <span className="block text-sm font-semibold text-[var(--color-text-primary)]">
                     Enable synchronization
                   </span>
-                  <span className="mt-1 block text-xs text-[#94a0ae]">
+                  <span className="mt-1 block text-xs text-[var(--color-text-muted)]">
                     Backend controls the actual sync interval.
                   </span>
                 </span>
                 <input
                   checked={formState.enabled}
-                  className="size-5 accent-[#8fd3ff]"
+                  className="size-5 accent-[var(--color-accent)]"
                   type="checkbox"
                   onChange={(event) =>
                     setFormState((current) => ({
@@ -256,7 +260,7 @@ export function SyncSettingsPage({
 
               <FieldLabel label="Supabase URL">
                 <input
-                  className="h-11 w-full rounded-[10px] border border-white/[0.06] bg-[#151922] px-3 text-sm text-[#f4f8fb] outline-none placeholder:text-[#667180] focus:border-[#8fd3ff]/70"
+                  className="h-11 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
                   placeholder="https://project.supabase.co"
                   value={formState.supabaseUrl}
                   onChange={(event) =>
@@ -273,7 +277,7 @@ export function SyncSettingsPage({
                 error={intervalValidation}
               >
                 <input
-                  className="h-11 w-full rounded-[10px] border border-white/[0.06] bg-[#151922] px-3 text-sm text-[#f4f8fb] outline-none placeholder:text-[#667180] focus:border-[#8fd3ff]/70"
+                  className="h-11 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
                   inputMode="numeric"
                   min="0"
                   placeholder="300"
@@ -290,7 +294,7 @@ export function SyncSettingsPage({
 
               <FieldLabel label="New service role key">
                 <input
-                  className="h-11 w-full rounded-[10px] border border-white/[0.06] bg-[#151922] px-3 text-sm text-[#f4f8fb] outline-none placeholder:text-[#667180] focus:border-[#8fd3ff]/70"
+                  className="h-11 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
                   placeholder="Leave blank to keep the existing key"
                   type="password"
                   value={formState.serviceRoleKey}
@@ -375,9 +379,9 @@ function formatErrorMessage(error: unknown): string {
 /** Renders a compact status pill for synchronization enabled state. */
 function StatusPill({ enabled }: { enabled: boolean }) {
   return (
-    <div className="inline-flex h-10 items-center gap-2 rounded-full bg-[#1c2027] px-4 text-sm font-semibold text-[#c9d0d8] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+    <div className="inline-flex h-10 items-center gap-2 rounded-full bg-[var(--color-surface)] px-4 text-sm font-semibold text-[var(--color-text-secondary)] shadow-[inset_0_0_0_1px_var(--color-border)]">
       <span
-        className="size-2.5 rounded-full data-[enabled=true]:bg-[#8fd3ff] data-[enabled=false]:bg-[#667180]"
+        className="size-2.5 rounded-full data-[enabled=true]:bg-[var(--color-accent)] data-[enabled=false]:bg-[var(--color-text-muted)]"
         data-enabled={enabled}
       />
       {enabled ? "Sync enabled" : "Sync disabled"}
@@ -397,11 +401,11 @@ function FieldLabel({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-semibold text-[#c9d0d8]">
+      <span className="mb-2 block text-sm font-semibold text-[var(--color-text-secondary)]">
         {label}
       </span>
       {children}
-      {error ? <span className="mt-2 block text-xs text-[#ff9f9f]">{error}</span> : null}
+      {error ? <span className="mt-2 block text-xs text-[var(--color-error)]">{error}</span> : null}
     </label>
   );
 }
@@ -409,10 +413,10 @@ function FieldLabel({
 /** Renders whether the backend currently stores a service role key. */
 function SecretState({ configured }: { configured: boolean }) {
   return (
-    <div className="flex items-center gap-3 rounded-[12px] bg-[#151922] px-4 py-3 text-sm text-[#c9d0d8]">
-      <KeyRound className="size-4 text-[#8fd3ff]" aria-hidden="true" />
+    <div className="flex items-center gap-3 rounded-[12px] bg-[var(--color-surface-muted)] px-4 py-3 text-sm text-[var(--color-text-secondary)]">
+      <KeyRound className="size-4 text-[var(--color-accent)]" aria-hidden="true" />
       <span className="font-semibold">Service role key</span>
-      <span className="ml-auto text-[#94a0ae]">
+      <span className="ml-auto text-[var(--color-text-muted)]">
         {configured ? "Configured" : "Not configured"}
       </span>
     </div>
@@ -437,7 +441,7 @@ function ActionButton({
 }) {
   return (
     <button
-      className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] bg-[#8fd3ff] px-4 text-sm font-bold text-[#11212d] hover:bg-[#b8e4ff] disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] bg-[var(--color-accent)] px-4 text-sm font-bold text-[var(--color-accent-contrast)] hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
       disabled={busy || disabled}
       type={type}
       onClick={onClick}
@@ -452,7 +456,7 @@ function ActionButton({
 function Alert({ message, tone }: { message: string; tone: "error" | "success" }) {
   return (
     <div
-      className="flex items-center gap-3 rounded-[12px] border px-4 py-3 text-sm data-[tone=error]:border-[#ff9f9f]/25 data-[tone=error]:bg-[#351f26] data-[tone=error]:text-[#ffd4d4] data-[tone=success]:border-[#8fd3ff]/25 data-[tone=success]:bg-[#132936] data-[tone=success]:text-[#dff5ff]"
+      className="flex items-center gap-3 rounded-[12px] border px-4 py-3 text-sm data-[tone=error]:border-[var(--color-error-border)] data-[tone=error]:bg-[var(--color-error-soft)] data-[tone=error]:text-[var(--color-error)] data-[tone=success]:border-[var(--color-success-border)] data-[tone=success]:bg-[var(--color-success-soft)] data-[tone=success]:text-[var(--color-accent)]"
       data-tone={tone}
       role="status"
     >
@@ -475,18 +479,18 @@ function ResultPanel({
   testResult?: SyncConfigTestResultDto;
 }) {
   return (
-    <section className="rounded-[18px] border border-white/[0.04] bg-[#1c2027] p-5 shadow-[0_16px_38px_rgba(0,0,0,0.28)]">
-      <h2 className="mb-4 text-base font-bold text-[#f4f8fb]">Results</h2>
-      <div className="flex flex-col gap-3 text-sm text-[#c9d0d8]">
-        <div className="rounded-[12px] bg-[#151922] px-4 py-3">
+    <section className="rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--color-shadow-card)]">
+      <h2 className="mb-4 text-base font-bold text-[var(--color-text-primary)]">Results</h2>
+      <div className="flex flex-col gap-3 text-sm text-[var(--color-text-secondary)]">
+        <div className="rounded-[12px] bg-[var(--color-surface-muted)] px-4 py-3">
           <div className="font-semibold">Test Connection</div>
-          <div className="mt-1 text-[#94a0ae]">
+          <div className="mt-1 text-[var(--color-text-muted)]">
             {testResult ? testResult.message : "No test run yet"}
           </div>
         </div>
-        <div className="rounded-[12px] bg-[#151922] px-4 py-3">
+        <div className="rounded-[12px] bg-[var(--color-surface-muted)] px-4 py-3">
           <div className="font-semibold">Manual Sync</div>
-          <div className="mt-1 text-[#94a0ae]">
+          <div className="mt-1 text-[var(--color-text-muted)]">
             {runResult
               ? `Pushed ${runResult.pushed}, pulled ${runResult.pulled}`
               : "No sync run yet"}
@@ -500,16 +504,16 @@ function ResultPanel({
 /** Renders synchronization cursor status returned by the backend. */
 function StatusPanel({ status }: { status?: SyncStatusDto }) {
   return (
-    <section className="rounded-[18px] border border-white/[0.04] bg-[#1c2027] p-5 shadow-[0_16px_38px_rgba(0,0,0,0.28)]">
+    <section className="rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--color-shadow-card)]">
       <div className="mb-4 flex items-center gap-2">
-        <DatabaseZap className="size-4 text-[#8fd3ff]" aria-hidden="true" />
-        <h2 className="text-base font-bold text-[#f4f8fb]">Status</h2>
+        <DatabaseZap className="size-4 text-[var(--color-accent)]" aria-hidden="true" />
+        <h2 className="text-base font-bold text-[var(--color-text-primary)]">Status</h2>
       </div>
 
       {!status ? (
-        <p className="text-sm text-[#94a0ae]">Loading status</p>
+        <p className="text-sm text-[var(--color-text-muted)]">Loading status</p>
       ) : status.states.length === 0 ? (
-        <p className="text-sm text-[#94a0ae]">No sync cursors yet</p>
+        <p className="text-sm text-[var(--color-text-muted)]">No sync cursors yet</p>
       ) : (
         <div className="flex flex-col gap-3">
           {status.states.map((state) => (
@@ -527,18 +531,18 @@ function StatusPanel({ status }: { status?: SyncStatusDto }) {
 /** Renders one synchronization cursor row. */
 function SyncStateRow({ state }: { state: SyncStateDto }) {
   return (
-    <article className="rounded-[12px] bg-[#151922] px-4 py-3 text-sm">
+    <article className="rounded-[12px] bg-[var(--color-surface-muted)] px-4 py-3 text-sm">
       <div className="flex items-center justify-between gap-3">
-        <span className="font-semibold text-[#e8edf3]">{state.scope}</span>
-        <span className="text-xs text-[#667180]">
+        <span className="font-semibold text-[var(--color-text-primary)]">{state.scope}</span>
+        <span className="text-xs text-[var(--color-text-muted)]">
           {formatUnixTimestamp(state.lastChangeCreatedAt)}
         </span>
       </div>
-      <div className="mt-2 truncate text-xs text-[#94a0ae]">
+      <div className="mt-2 truncate text-xs text-[var(--color-text-muted)]">
         {state.workspaceId} / {state.deviceId}
       </div>
       {state.lastErrorMessage ? (
-        <div className="mt-2 text-xs text-[#ffb3b3]">
+        <div className="mt-2 text-xs text-[var(--color-error)]">
           {state.lastErrorMessage}
         </div>
       ) : null}

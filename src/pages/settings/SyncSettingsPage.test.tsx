@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { ReactNode } from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import type { SyncClient } from "../../api/sync.client";
+import { ThemeProvider } from "../../app/ThemeProvider";
 import { SyncSettingsPage } from "./SyncSettingsPage";
 
 let client: SyncClient;
@@ -50,9 +52,14 @@ function createMockPageClient(): SyncClient {
   };
 }
 
+/** Renders the settings page with global providers used in production. */
+function renderSettingsPage(children: ReactNode) {
+  return render(<ThemeProvider>{children}</ThemeProvider>);
+}
+
 describe("SyncSettingsPage", () => {
   test("loads configuration, key state, and status", async () => {
-    render(<SyncSettingsPage client={client} />);
+    renderSettingsPage(<SyncSettingsPage client={client} />);
 
     expect(await screen.findByDisplayValue("https://project.supabase.co")).not.toBeNull();
     expect(screen.getByDisplayValue("120")).not.toBeNull();
@@ -61,7 +68,7 @@ describe("SyncSettingsPage", () => {
   });
 
   test("saves valid settings without sending a blank service role key", async () => {
-    render(<SyncSettingsPage client={client} />);
+    renderSettingsPage(<SyncSettingsPage client={client} />);
 
     const urlInput = await screen.findByDisplayValue("https://project.supabase.co");
     const keyInput = screen.getByPlaceholderText("Leave blank to keep the existing key");
@@ -84,7 +91,7 @@ describe("SyncSettingsPage", () => {
   });
 
   test("blocks save when interval seconds is not an integer", async () => {
-    render(<SyncSettingsPage client={client} />);
+    renderSettingsPage(<SyncSettingsPage client={client} />);
 
     const intervalInput = await screen.findByDisplayValue("120");
 
@@ -98,7 +105,7 @@ describe("SyncSettingsPage", () => {
   });
 
   test("tests candidate configuration without saving it", async () => {
-    render(<SyncSettingsPage client={client} />);
+    renderSettingsPage(<SyncSettingsPage client={client} />);
 
     await screen.findByDisplayValue("https://project.supabase.co");
 
@@ -115,7 +122,7 @@ describe("SyncSettingsPage", () => {
   });
 
   test("runs manual synchronization and refreshes status", async () => {
-    render(<SyncSettingsPage client={client} />);
+    renderSettingsPage(<SyncSettingsPage client={client} />);
 
     await screen.findByDisplayValue("https://project.supabase.co");
 
