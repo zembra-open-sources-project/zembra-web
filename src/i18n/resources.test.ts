@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 import { resources } from "./resources";
 
@@ -12,6 +14,23 @@ function flattenKeys(value: unknown, prefix = ""): string[] {
   );
 }
 
+/** Lists TypeScript source files under a directory, excluding tests. */
+function listSourceFiles(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+
+    if (entry.isDirectory()) {
+      return listSourceFiles(path);
+    }
+
+    return entry.isFile() &&
+      /\.(ts|tsx)$/.test(entry.name) &&
+      !entry.name.includes(".test.")
+      ? [path]
+      : [];
+  });
+}
+
 describe("i18n resources", () => {
   test("keeps locale namespaces aligned with en-US fallback resources", () => {
     const fallbackKeys = flattenKeys(resources["en-US"]).sort();
@@ -21,21 +40,13 @@ describe("i18n resources", () => {
   });
 
   test("keeps app and page components free of bare Chinese UI copy", () => {
-    const sourceFiles = {
-      ...import.meta.glob("../app/**/!(*.test).{ts,tsx}", {
-        eager: true,
-        import: "default",
-        query: "?raw",
-      }),
-      ...import.meta.glob("../pages/**/!(*.test).{ts,tsx}", {
-        eager: true,
-        import: "default",
-        query: "?raw",
-      }),
-    } as Record<string, string>;
-    const filesWithBareChinese = Object.entries(sourceFiles)
-      .filter(([, content]) => /[\u4e00-\u9fff]/.test(content))
-      .map(([file]) => file);
+    const sourceFiles = [
+      ...listSourceFiles(join(process.cwd(), "src/app")),
+      ...listSourceFiles(join(process.cwd(), "src/pages")),
+    ];
+    const filesWithBareChinese = sourceFiles.filter((file) =>
+      /[\u4e00-\u9fff]/.test(readFileSync(file, "utf8")),
+    );
 
     expect(filesWithBareChinese).toEqual([]);
   });
