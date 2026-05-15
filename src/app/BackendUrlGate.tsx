@@ -29,20 +29,28 @@ export function BackendUrlGate({ children }: BackendUrlGateProps) {
     const configuredUrl = getConfiguredBackendBaseUrl();
 
     if (!configuredUrl) {
+      console.info("[zembra] Backend URL is not configured; showing URL gate");
       setStatus("needs-url");
       return;
     }
 
+    console.info("[zembra] Validating saved backend URL before app startup", {
+      backendUrl: configuredUrl,
+    });
     const controller = new AbortController();
 
     void checkBackendReachability(configuredUrl, controller.signal).then((ok) => {
       if (!ok) {
+        console.warn("[zembra] Saved backend URL is unreachable; clearing config", {
+          backendUrl: configuredUrl,
+        });
         clearConfiguredBackendBaseUrl();
         setError(t("backend.login.savedUrlUnavailable"));
         setStatus("needs-url");
         return;
       }
 
+      console.info("[zembra] Saved backend URL is reachable; opening app");
       setStatus("ready");
     });
 
@@ -63,16 +71,25 @@ export function BackendUrlGate({ children }: BackendUrlGateProps) {
     setError(undefined);
 
     const normalizedUrl = normalizeBackendBaseUrl(candidateUrl);
+    console.info("[zembra] User submitted backend URL", {
+      backendUrl: normalizedUrl,
+    });
     const ok = await checkBackendReachability(normalizedUrl);
 
     setIsSubmitting(false);
 
     if (!ok) {
+      console.warn("[zembra] User submitted backend URL is unreachable", {
+        backendUrl: normalizedUrl,
+      });
       setError(t("backend.login.unreachable"));
       return;
     }
 
     setConfiguredBackendBaseUrl(normalizedUrl);
+    console.info("[zembra] Backend URL saved; opening app", {
+      backendUrl: normalizedUrl,
+    });
     setBackendUrl(normalizedUrl);
     setStatus("ready");
   }

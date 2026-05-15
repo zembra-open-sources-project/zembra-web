@@ -46,15 +46,46 @@ export async function checkBackendReachability(
   baseUrl: string,
   signal?: AbortSignal,
 ): Promise<boolean> {
+  const normalizedBaseUrl = normalizeBackendBaseUrl(baseUrl);
+  const healthUrl = createBackendHealthUrl(normalizedBaseUrl);
+
+  console.info("[zembra] Checking backend reachability", {
+    baseUrl: normalizedBaseUrl,
+    healthUrl,
+  });
+
   try {
-    const response = await fetch(normalizeBackendBaseUrl(baseUrl), {
+    const response = await fetch(healthUrl, {
       method: "GET",
       cache: "no-store",
       signal,
     });
+    const reachable = response.status < 500;
 
-    return response.status < 500;
-  } catch {
+    if (reachable) {
+      console.info("[zembra] Backend reachability check passed", {
+        healthUrl,
+        status: response.status,
+      });
+    } else {
+      console.warn("[zembra] Backend reachability check returned server error", {
+        healthUrl,
+        status: response.status,
+      });
+    }
+
+    return reachable;
+  } catch (error) {
+    if (isAbortError(error)) {
+      console.info("[zembra] Backend reachability check was aborted", {
+        healthUrl,
+      });
+    } else {
+      console.warn("[zembra] Backend reachability check failed", {
+        error,
+        healthUrl,
+      });
+    }
     return false;
   }
 }
@@ -62,4 +93,24 @@ export async function checkBackendReachability(
 /** Loads the configured backend URL or falls back to the Vite default. */
 export function getEffectiveBackendBaseUrl(defaultBaseUrl: string): string {
   return getConfiguredBackendBaseUrl() ?? defaultBaseUrl;
+}
+
+/** Creates the documented service health URL for a configured API base URL. */
+export function createBackendHealthUrl(baseUrl: string): string {
+  const trimmedBaseUrl = baseUrl.trim();
+  const url = new URL(
+    trimmedBaseUrl.startsWith("/")
+      ? trimmedBaseUrl
+      : normalizeBackendBaseUrl(trimmedBaseUrl),
+    window.location.origin,
+  );
+  url.pathname = "/health";
+  url.search = "";
+  url.hash = "";
+  return url.toString();
+}
+
+/** Checks whether an unknown thrown value represents fetch cancellation. */
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
 }

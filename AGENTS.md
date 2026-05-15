@@ -51,6 +51,11 @@
 - Supabase SDK 只能在认证、实时订阅或明确直连场景中局部使用，禁止 UI 组件直接依赖 Supabase 查询实现。
 - 涉及数据库、schema、同步或持久化的新依赖，必须先记录到需求澄清文档，再进入设计或实现。
 
+### 日志规范
+- 涉及前后端边界、外部服务调用、启动门禁、配置读取写入和错误兜底时，必须合理补充关键日志。
+- 日志至少覆盖开始、成功、失败和关键上下文，避免吞掉异常；前端使用 `console.info`、`console.warn` 或 `console.error`。
+- 日志禁止记录密钥、token、密码、service role key 等敏感信息。
+
 阅读规则
 - 开始任何任务时先读 AGENTS.md。
 - 涉及结构、分层、依赖、模块边界时读 ARCHITECTURE.md 和相关 design docs。

@@ -19,6 +19,7 @@ afterEach(() => {
 
 /** Verifies that the backend URL gate renders before the workspace. */
 test("renders the backend URL gate before the workspace", async () => {
+  vi.spyOn(console, "info").mockImplementation(() => undefined);
   render(<App />);
 
   expect(await screen.findByRole("button", { name: /backend/i })).not.toBeNull();
@@ -27,6 +28,7 @@ test("renders the backend URL gate before the workspace", async () => {
 
 /** Verifies that a reachable backend URL is saved before rendering notes. */
 test("saves a reachable backend URL and renders the card note workspace", async () => {
+  vi.spyOn(console, "info").mockImplementation(() => undefined);
   vi.spyOn(globalThis, "fetch").mockResolvedValue(
     new Response(null, { status: 204 }),
   );
@@ -38,6 +40,10 @@ test("saves a reachable backend URL and renders the card note workspace", async 
   fireEvent.click(screen.getByRole("button", { name: /backend/i }));
 
   expect(await screen.findByText("LOCAL")).not.toBeNull();
+  expect(globalThis.fetch).toHaveBeenCalledWith(
+    "http://127.0.0.1:8000/health",
+    expect.objectContaining({ method: "GET" }),
+  );
   expect(window.localStorage.getItem(backendBaseUrlStorageKey)).toBe(
     "http://127.0.0.1:8000/api",
   );
@@ -45,6 +51,8 @@ test("saves a reachable backend URL and renders the card note workspace", async 
 
 /** Verifies that unreachable user-entered URLs keep the gate visible. */
 test("shows an error when the entered backend URL is unreachable", async () => {
+  vi.spyOn(console, "info").mockImplementation(() => undefined);
+  vi.spyOn(console, "warn").mockImplementation(() => undefined);
   vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("failed"));
   render(<App />);
 
@@ -59,6 +67,8 @@ test("shows an error when the entered backend URL is unreachable", async () => {
 
 /** Verifies that a saved unreachable URL sends the user back to the gate. */
 test("returns to the backend URL gate when the saved URL is unreachable", async () => {
+  vi.spyOn(console, "info").mockImplementation(() => undefined);
+  vi.spyOn(console, "warn").mockImplementation(() => undefined);
   window.localStorage.setItem(
     backendBaseUrlStorageKey,
     "http://127.0.0.1:9000/api",
@@ -75,6 +85,7 @@ test("returns to the backend URL gate when the saved URL is unreachable", async 
 /** Verifies that backend connection failures surface as temporary toast UI. */
 test("shows backend connection toast for five seconds", async () => {
   vi.useFakeTimers();
+  vi.spyOn(console, "info").mockImplementation(() => undefined);
   vi.spyOn(globalThis, "fetch").mockResolvedValue(
     new Response(null, { status: 204 }),
   );
