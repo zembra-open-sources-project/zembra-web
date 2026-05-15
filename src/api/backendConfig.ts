@@ -28,7 +28,7 @@ export function clearConfiguredBackendBaseUrl(): void {
 
 /** Resolves a string or lazy base URL source into a concrete URL. */
 export function resolveBackendBaseUrl(source: BackendBaseUrlSource): string {
-  return typeof source === "function" ? source() : source;
+  return normalizeBackendBaseUrl(typeof source === "function" ? source() : source);
 }
 
 /** Normalizes user-entered backend service root URLs before storage and fetch requests. */
@@ -85,6 +85,8 @@ export async function checkBackendReachability(
       console.warn("[zembra] Backend reachability check failed", {
         error,
         healthUrl,
+        hint:
+          "If curl succeeds but the browser fails, verify backend CORS allows the WebUI origin.",
       });
     }
     return false;
@@ -93,7 +95,7 @@ export async function checkBackendReachability(
 
 /** Loads the configured backend URL or falls back to the Vite default. */
 export function getEffectiveBackendBaseUrl(defaultBaseUrl: string): string {
-  return getConfiguredBackendBaseUrl() ?? defaultBaseUrl;
+  return normalizeBackendBaseUrl(getConfiguredBackendBaseUrl() ?? defaultBaseUrl);
 }
 
 /** Creates the documented service health URL for a configured API base URL. */

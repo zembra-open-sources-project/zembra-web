@@ -32,7 +32,7 @@ describe("backend config", () => {
     );
   });
 
-  test("checks documented backend health endpoint", async () => {
+  test("checks documented backend health endpoint directly", async () => {
     const infoSpy = vi.spyOn(console, "info").mockImplementation(() => undefined);
     globalThis.fetch = vi.fn(async () =>
       new Response(JSON.stringify({ status: "ok" }), { status: 200 }),
@@ -70,6 +70,8 @@ describe("backend config", () => {
       "[zembra] Backend reachability check failed",
       expect.objectContaining({
         error,
+        hint:
+          "If curl succeeds but the browser fails, verify backend CORS allows the WebUI origin.",
         healthUrl: "http://server.test/health",
       }),
     );

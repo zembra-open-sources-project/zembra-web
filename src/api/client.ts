@@ -1,6 +1,5 @@
 import {
   getEffectiveBackendBaseUrl,
-  type BackendBaseUrlResolver,
 } from "./backendConfig";
 import {
   createMockNotesClient,
@@ -22,7 +21,7 @@ const defaultApiBaseUrl =
   import.meta.env.VITE_ZEMBRA_API_BASE_URL ?? "http://127.0.0.1:3000";
 
 /** Resolves the API base URL from saved user config or Vite defaults. */
-const resolveDefaultApiBaseUrl: BackendBaseUrlResolver = () =>
+const resolveDefaultApiBaseUrl = () =>
   getEffectiveBackendBaseUrl(defaultApiBaseUrl);
 
 /** Creates the default notes client configured for the current Vite environment. */

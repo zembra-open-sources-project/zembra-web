@@ -5,15 +5,6 @@ import { defineConfig } from "vitest/config";
 /** Creates the Vite configuration for the Zembra web UI. */
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  server: {
-    proxy: {
-      "/api": {
-        target: "http://127.0.0.1:3000",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
-      },
-    },
-  },
   test: {
     environment: "jsdom",
     globals: true,
