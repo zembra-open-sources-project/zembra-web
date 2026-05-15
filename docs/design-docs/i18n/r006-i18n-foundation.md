@@ -41,7 +41,7 @@
 | 类型层 | 在 `src/i18n/types.ts` 定义支持语言、语言展示名和默认语言 |
 | 偏好层 | 在 `src/i18n/locale.ts` 封装读取、规范化、持久化和 `document.documentElement.lang` 同步 |
 | React 接入 | 在应用根部完成初始化后使用 `useTranslation`，组件内通过 namespace 获取文案 |
-| UI 入口 | 新增 `LanguageToggle` 或 `LanguageMenu`，放在顶部工具区，与 `ThemeToggle` 并列 |
+| UI 入口 | 新增 `LanguageMenu`，放在设置页顶部工具区，与 `ThemeToggle` 并列 |
 
 ### 目录结构
 

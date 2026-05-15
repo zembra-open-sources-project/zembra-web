@@ -72,12 +72,12 @@
 
 **Files:** Modify `src/main.tsx`; Create `src/app/LanguageMenu.tsx`; Create/Modify related tests
 
-**Function:** 在应用根部启用 i18n，并提供用户可操作的语言切换入口。
+**Function:** 在应用根部启用 i18n，并在设置页提供用户可操作的语言切换入口。
 
 **Implementation Notes:**
 
 - 在全局 Provider 区域完成 i18n 初始化。
-- 新增语言菜单，放在顶部工具区，与主题切换并列。
+- 新增语言菜单，放在设置页顶部工具区，与主题切换并列。
 - 切换语言后调用 i18next changeLanguage，并持久化语言偏好。
 - 同步 `document.documentElement.lang`。
 
@@ -89,7 +89,7 @@
 
 **Verification Result:**
 
-- 已在入口初始化 i18n，并新增语言选择菜单。
+- 已在入口初始化 i18n，并在设置页新增语言选择菜单。
 - 切换语言会调用 `changeLanguage`、写入 `localStorage` 并同步 HTML `lang`。
 
 ### Task #4: 迁移首页文案与日期格式

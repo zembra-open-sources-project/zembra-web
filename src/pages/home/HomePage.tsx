@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { LanguageMenu } from "../../app/LanguageMenu";
 import { ThemeToggle } from "../../app/ThemeToggle";
 import {
   FormEvent,
@@ -165,7 +164,6 @@ export function HomePage() {
                 </span>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <LanguageMenu />
                 <ThemeToggle />
                 <Link
                   className="flex size-[34px] shrink-0 items-center justify-center rounded-[9px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
