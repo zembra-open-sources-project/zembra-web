@@ -6,6 +6,10 @@ export const common = {
       description:
         "Enter your Zembra backend address. The notes page opens after the connection check passes.",
       emptyUrl: "Enter a backend URL",
+      hostLabel: "IP / Host",
+      hostPlaceholder: "IP / Host: {{host}}",
+      portLabel: "Port",
+      portPlaceholder: "Port: {{port}}",
       savedUrlUnavailable:
         "The saved backend URL is not reachable. Enter it again.",
       submit: "Connect backend",

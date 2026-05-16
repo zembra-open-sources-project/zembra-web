@@ -7,6 +7,40 @@ export type BackendBaseUrlResolver = () => string;
 /** Defines an API base URL value or lazy resolver. */
 export type BackendBaseUrlSource = string | BackendBaseUrlResolver;
 
+/** Default backend service root confirmed by the backend OpenAPI docs. */
+export const defaultBackendBaseUrl =
+  import.meta.env.VITE_ZEMBRA_API_BASE_URL ?? "http://127.0.0.1:3000";
+
+/** Splits a backend service root URL into user-editable host and port fields. */
+export function parseBackendEndpoint(value: string): {
+  /** Hostname or IP address used by the backend service. */
+  host: string;
+  /** Optional TCP port used by the backend service. */
+  port: string;
+} {
+  const url = new URL(normalizeBackendBaseUrl(value));
+  return {
+    host: url.hostname,
+    port: url.port,
+  };
+}
+
+/** Creates a backend service root URL from host and port form values. */
+export function createBackendBaseUrl(host: string, port: string): string {
+  const trimmedHost = host.trim();
+  const trimmedPort = port.trim();
+  const hostWithProtocol = /^[a-z][a-z\d+\-.]*:\/\//i.test(trimmedHost)
+    ? trimmedHost
+    : `http://${trimmedHost}`;
+  const url = new URL(hostWithProtocol);
+
+  if (trimmedPort) {
+    url.port = trimmedPort;
+  }
+
+  return normalizeBackendBaseUrl(url.toString());
+}
+
 /** Reads the configured backend API base URL from browser storage. */
 export function getConfiguredBackendBaseUrl(): string | undefined {
   const value = window.localStorage.getItem(backendBaseUrlStorageKey)?.trim();

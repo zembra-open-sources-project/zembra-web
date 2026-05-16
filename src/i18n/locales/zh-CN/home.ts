@@ -5,7 +5,7 @@ export const home = {
   composer: {
     help: "帮助",
     placeholder: "现在的想法是...",
-    saveTo: "将保存到 @{{field}}",
+    saveTo: "Default field for note is @{{field}}",
     send: "发送",
     tools: {
       bold: "加粗",
@@ -23,7 +23,10 @@ export const home = {
     },
   },
   note: {
+    actions: "笔记操作",
     collapse: "收起",
+    delete: "删除",
+    deleting: "删除中",
     empty: "暂无最近笔记",
     expand: "展开",
   },

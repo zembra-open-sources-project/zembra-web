@@ -23,7 +23,32 @@ test("renders the backend URL gate before the workspace", async () => {
   render(<App />);
 
   expect(await screen.findByRole("button", { name: /backend/i })).not.toBeNull();
-  expect(screen.getByLabelText("Backend URL")).not.toBeNull();
+  const hostInput = screen.getByLabelText("IP / Host") as HTMLInputElement;
+  const portInput = screen.getByLabelText("Port") as HTMLInputElement;
+  expect(hostInput.value).toBe("");
+  expect(hostInput.placeholder).toBe("IP / Host: 127.0.0.1");
+  expect(portInput.value).toBe("");
+  expect(portInput.placeholder).toBe("Port: 3000");
+});
+
+/** Verifies that the default backend URL is used when the user leaves input empty. */
+test("uses the default backend URL when the input is empty", async () => {
+  vi.spyOn(console, "info").mockImplementation(() => undefined);
+  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    new Response(null, { status: 204 }),
+  );
+  render(<App />);
+
+  fireEvent.click(await screen.findByRole("button", { name: /backend/i }));
+
+  expect(await screen.findByText("LOCAL")).not.toBeNull();
+  expect(globalThis.fetch).toHaveBeenCalledWith(
+    "http://127.0.0.1:3000/health",
+    expect.objectContaining({ method: "GET" }),
+  );
+  expect(window.localStorage.getItem(backendBaseUrlStorageKey)).toBe(
+    "http://127.0.0.1:3000",
+  );
 });
 
 /** Verifies that a reachable backend URL is saved before rendering notes. */
@@ -34,9 +59,10 @@ test("saves a reachable backend URL and renders the card note workspace", async 
   );
   render(<App />);
 
-  fireEvent.change(await screen.findByLabelText("Backend URL"), {
-    target: { value: "127.0.0.1:8000" },
+  fireEvent.change(await screen.findByLabelText("IP / Host"), {
+    target: { value: "127.0.0.1" },
   });
+  fireEvent.change(screen.getByLabelText("Port"), { target: { value: "8000" } });
   fireEvent.click(screen.getByRole("button", { name: /backend/i }));
 
   expect(await screen.findByText("LOCAL")).not.toBeNull();
@@ -56,7 +82,7 @@ test("shows an error when the entered backend URL is unreachable", async () => {
   vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("failed"));
   render(<App />);
 
-  fireEvent.change(await screen.findByLabelText("Backend URL"), {
+  fireEvent.change(await screen.findByLabelText("IP / Host"), {
     target: { value: "http://127.0.0.1:9000" },
   });
   fireEvent.click(screen.getByRole("button", { name: /backend/i }));

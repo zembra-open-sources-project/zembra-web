@@ -185,4 +185,17 @@ describe("mapNoteResponseToDto", () => {
       tags: ["tag"],
     });
   });
+
+  test("deletes notes with the OpenAPI delete endpoint", async () => {
+    const fetchMock = vi.fn(async () => new Response(null, { status: 204 }));
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+
+    await expect(client.deleteNote("abc123")).resolves.toBeUndefined();
+    expect(fetchMock).toHaveBeenCalledWith(
+      new URL("http://server.test/notes/abc123"),
+      expect.objectContaining({ method: "DELETE" }),
+    );
+  });
 });

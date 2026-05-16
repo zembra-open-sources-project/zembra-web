@@ -3,8 +3,10 @@ import {
   backendBaseUrlStorageKey,
   checkBackendReachability,
   createBackendHealthUrl,
+  createBackendBaseUrl,
   getConfiguredBackendBaseUrl,
   normalizeBackendBaseUrl,
+  parseBackendEndpoint,
   setConfiguredBackendBaseUrl,
 } from "./backendConfig";
 
@@ -17,6 +19,20 @@ afterEach(() => {
 });
 
 describe("backend config", () => {
+  test("parses backend service roots into host and port fields", () => {
+    expect(parseBackendEndpoint("http://127.0.0.1:3000")).toEqual({
+      host: "127.0.0.1",
+      port: "3000",
+    });
+  });
+
+  test("creates backend service roots from host and port fields", () => {
+    expect(createBackendBaseUrl("127.0.0.1", "3000")).toBe(
+      "http://127.0.0.1:3000",
+    );
+    expect(createBackendBaseUrl("localhost", "")).toBe("http://localhost");
+  });
+
   test("normalizes backend URLs before storage", () => {
     setConfiguredBackendBaseUrl("127.0.0.1:3000");
 

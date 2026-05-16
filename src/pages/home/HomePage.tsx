@@ -67,6 +67,7 @@ export function HomePage() {
     loadFields,
     loadRecentNotes,
     loadTags,
+    deleteNote,
   } = useNotesStore();
 
   const composerTools = useMemo(
@@ -164,6 +165,17 @@ export function HomePage() {
                 </span>
               </div>
               <div className="flex shrink-0 items-center gap-2">
+                <button
+                  className="flex size-[34px] shrink-0 items-center justify-center rounded-[9px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
+                  type="button"
+                  aria-label={t("composer.help")}
+                  title={t("composer.help")}
+                >
+                  <CircleHelp
+                    className="size-4 text-[var(--color-accent)]"
+                    aria-hidden="true"
+                  />
+                </button>
                 <ThemeToggle />
                 <Link
                   className="flex size-[34px] shrink-0 items-center justify-center rounded-[9px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
@@ -272,6 +284,7 @@ export function HomePage() {
             ) : null}
             {visibleNotes.map((note) => (
               <NoteCard
+                onDelete={deleteNote}
                 fieldName={note.fieldId ? fieldNameById.get(note.fieldId) : undefined}
                 key={note.id}
                 locale={i18n.resolvedLanguage}
@@ -319,7 +332,7 @@ export function HomePage() {
                     {t("composer.saveTo", {
                       field:
                         fields.find((field) => field.id === selectedField)?.name ??
-                        "inbox",
+                        "Inbox",
                     })}
                   </div>
                 </div>
@@ -337,13 +350,6 @@ export function HomePage() {
         </form>
       </div>
 
-      <button
-        className="fixed bottom-8 right-7 z-20 flex size-[46px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] shadow-[var(--color-help-shadow)]"
-        type="button"
-        aria-label={t("composer.help")}
-      >
-        <CircleHelp className="size-5" aria-hidden="true" />
-      </button>
     </main>
   );
 }
@@ -353,14 +359,18 @@ function NoteCard({
   fieldName,
   locale,
   note,
+  onDelete,
 }: {
   fieldName?: string;
   locale?: string;
   note: NoteDto;
+  onDelete: (noteId: string) => Promise<void>;
 }) {
   const { t } = useTranslation("home");
   const [expanded, setExpanded] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
+  const [isActionsOpen, setIsActionsOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const contentRef = useRef<HTMLParagraphElement>(null);
   const measureOverflow = useCallback(() => {
     const element = contentRef.current;
@@ -382,12 +392,42 @@ function NoteCard({
     return () => window.removeEventListener("resize", measureOverflow);
   }, [measureOverflow]);
 
+  /** Deletes this note through the notes client and closes the action menu. */
+  async function handleDeleteClick() {
+    setIsDeleting(true);
+    try {
+      await onDelete(note.id);
+      setIsActionsOpen(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <article className="relative rounded-[18px] border border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-5 py-[18px] shadow-[var(--color-shadow-card)]">
-      <MoreHorizontal
-        className="absolute right-[18px] top-[17px] size-5 text-[var(--color-text-muted)]"
-        aria-hidden="true"
-      />
+      <div className="absolute right-[12px] top-[11px]">
+        <button
+          aria-expanded={isActionsOpen}
+          aria-label={t("note.actions")}
+          className="flex size-9 items-center justify-center rounded-[9px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
+          onClick={() => setIsActionsOpen((current) => !current)}
+          type="button"
+        >
+          <MoreHorizontal className="size-5" aria-hidden="true" />
+        </button>
+        {isActionsOpen ? (
+          <div className="absolute right-0 top-10 z-30 min-w-28 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--color-shadow-float)]">
+            <button
+              className="block w-full px-3 py-2 text-left text-sm text-[var(--color-error)] hover:bg-[var(--color-error-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={isDeleting}
+              onClick={handleDeleteClick}
+              type="button"
+            >
+              {isDeleting ? t("note.deleting") : t("note.delete")}
+            </button>
+          </div>
+        ) : null}
+      </div>
       <div className="mb-3.5 text-[13px] text-[var(--color-text-muted)]">
         {formatNoteTimestamp(note.updatedAt, locale)}
         {fieldName ? (
@@ -395,7 +435,7 @@ function NoteCard({
         ) : null}
       </div>
       <p
-        className="overflow-hidden whitespace-pre-wrap pr-7 text-base font-medium leading-7 text-[var(--color-text-primary)]"
+        className="overflow-hidden whitespace-pre-wrap pr-7 text-base leading-7 text-[var(--color-text-primary)]"
         ref={contentRef}
         style={expanded ? undefined : { maxHeight: "5.25rem" }}
       >

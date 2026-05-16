@@ -1,4 +1,5 @@
 import {
+  defaultBackendBaseUrl,
   getEffectiveBackendBaseUrl,
 } from "./backendConfig";
 import {
@@ -17,12 +18,9 @@ import {
   type SyncClient,
 } from "./sync.client";
 
-const defaultApiBaseUrl =
-  import.meta.env.VITE_ZEMBRA_API_BASE_URL ?? "http://127.0.0.1:3000";
-
 /** Resolves the API base URL from saved user config or Vite defaults. */
 const resolveDefaultApiBaseUrl = () =>
-  getEffectiveBackendBaseUrl(defaultApiBaseUrl);
+  getEffectiveBackendBaseUrl(defaultBackendBaseUrl);
 
 /** Creates the default notes client configured for the current Vite environment. */
 export function createDefaultNotesClient(): NotesClient {

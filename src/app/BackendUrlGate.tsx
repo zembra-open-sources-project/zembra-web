@@ -3,8 +3,10 @@ import { useTranslation } from "react-i18next";
 import {
   checkBackendReachability,
   clearConfiguredBackendBaseUrl,
+  createBackendBaseUrl,
+  defaultBackendBaseUrl,
   getConfiguredBackendBaseUrl,
-  normalizeBackendBaseUrl,
+  parseBackendEndpoint,
   setConfiguredBackendBaseUrl,
 } from "../api/backendConfig";
 
@@ -14,14 +16,20 @@ interface BackendUrlGateProps {
 }
 
 type GateStatus = "checking" | "ready" | "needs-url";
+const defaultBackendEndpoint = parseBackendEndpoint(defaultBackendBaseUrl);
 
 /** Gates the app behind a reachable backend API base URL. */
 export function BackendUrlGate({ children }: BackendUrlGateProps) {
   const { t } = useTranslation("common");
   const [status, setStatus] = useState<GateStatus>("checking");
-  const [backendUrl, setBackendUrl] = useState(
-    () => getConfiguredBackendBaseUrl() ?? "",
-  );
+  const [backendHost, setBackendHost] = useState(() => {
+    const configuredUrl = getConfiguredBackendBaseUrl();
+    return configuredUrl ? parseBackendEndpoint(configuredUrl).host : "";
+  });
+  const [backendPort, setBackendPort] = useState(() => {
+    const configuredUrl = getConfiguredBackendBaseUrl();
+    return configuredUrl ? parseBackendEndpoint(configuredUrl).port : "";
+  });
   const [error, setError] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -60,17 +68,13 @@ export function BackendUrlGate({ children }: BackendUrlGateProps) {
   /** Validates and stores the backend URL entered by the user. */
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const candidateUrl = backendUrl.trim();
-
-    if (!candidateUrl) {
-      setError(t("backend.login.emptyUrl"));
-      return;
-    }
+    const candidateHost = backendHost.trim() || defaultBackendEndpoint.host;
+    const candidatePort = backendPort.trim() || defaultBackendEndpoint.port;
 
     setIsSubmitting(true);
     setError(undefined);
 
-    const normalizedUrl = normalizeBackendBaseUrl(candidateUrl);
+    const normalizedUrl = createBackendBaseUrl(candidateHost, candidatePort);
     console.info("[zembra] User submitted backend URL", {
       backendUrl: normalizedUrl,
     });
@@ -90,7 +94,9 @@ export function BackendUrlGate({ children }: BackendUrlGateProps) {
     console.info("[zembra] Backend URL saved; opening app", {
       backendUrl: normalizedUrl,
     });
-    setBackendUrl(normalizedUrl);
+    const endpoint = parseBackendEndpoint(normalizedUrl);
+    setBackendHost(endpoint.host);
+    setBackendPort(endpoint.port);
     setStatus("ready");
   }
 
@@ -103,25 +109,41 @@ export function BackendUrlGate({ children }: BackendUrlGateProps) {
       <section className="w-full max-w-[420px]">
         <div className="mb-8">
           <div className="mb-3 text-2xl font-bold">Zembra</div>
-          <h1 className="text-[22px] font-semibold leading-tight">
-            {t("backend.login.title")}
-          </h1>
           <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
             {t("backend.login.description")}
           </p>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <label className="block text-sm font-medium">
-            <span>{t("backend.login.urlLabel")}</span>
-            <input
-              className="mt-2 h-11 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm outline-none transition focus:border-[var(--color-border-strong)]"
-              name="backend-url"
-              onChange={(event) => setBackendUrl(event.target.value)}
-              placeholder="http://127.0.0.1:3000"
-              value={backendUrl}
-            />
-          </label>
+          <div className="grid grid-cols-[1fr_116px] gap-3">
+            <label className="block text-sm font-medium">
+              <span className="sr-only">{t("backend.login.hostLabel")}</span>
+              <input
+                aria-label={t("backend.login.hostLabel")}
+                className="h-11 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] transition focus:border-[var(--color-border-strong)]"
+                name="backend-host"
+                onChange={(event) => setBackendHost(event.target.value)}
+                placeholder={t("backend.login.hostPlaceholder", {
+                  host: defaultBackendEndpoint.host,
+                })}
+                value={backendHost}
+              />
+            </label>
+            <label className="block text-sm font-medium">
+              <span className="sr-only">{t("backend.login.portLabel")}</span>
+              <input
+                aria-label={t("backend.login.portLabel")}
+                className="h-11 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] transition focus:border-[var(--color-border-strong)]"
+                inputMode="numeric"
+                name="backend-port"
+                onChange={(event) => setBackendPort(event.target.value)}
+                placeholder={t("backend.login.portPlaceholder", {
+                  port: defaultBackendEndpoint.port,
+                })}
+                value={backendPort}
+              />
+            </label>
+          </div>
 
           {error ? (
             <p

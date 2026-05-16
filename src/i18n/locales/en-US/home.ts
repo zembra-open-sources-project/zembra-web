@@ -5,7 +5,7 @@ export const home = {
   composer: {
     help: "Help",
     placeholder: "What are you thinking now?",
-    saveTo: "Will save to @{{field}}",
+    saveTo: "Default field for note is @{{field}}",
     send: "Send",
     tools: {
       bold: "Bold",
@@ -23,7 +23,10 @@ export const home = {
     },
   },
   note: {
+    actions: "Note actions",
     collapse: "Collapse",
+    delete: "Delete",
+    deleting: "Deleting",
     empty: "No recent notes yet",
     expand: "Expand",
   },

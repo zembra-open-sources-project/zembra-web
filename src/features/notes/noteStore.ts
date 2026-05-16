@@ -30,6 +30,8 @@ interface NotesState {
   loadRecentNotes: () => Promise<void>;
   /** Creates a note and places it at the top of the recent feed. */
   createNote: (input: CreateNoteInput) => Promise<void>;
+  /** Deletes a note and removes it from the recent feed. */
+  deleteNote: (noteRef: string) => Promise<void>;
   /** Loads fields from the active taxonomy client. */
   loadFields: () => Promise<void>;
   /** Loads tags from the active taxonomy client. */
@@ -65,6 +67,12 @@ export const useNotesStore = create<NotesState>((set, get) => ({
       taxonomyClient.listTags(),
     ]);
     set({ fields, tags });
+  },
+  deleteNote: async (noteRef) => {
+    await notesClient.deleteNote(noteRef);
+    set((state) => ({
+      notes: state.notes.filter((note) => note.id !== noteRef),
+    }));
   },
   loadFields: async () => {
     const existingFields = get().fields;
