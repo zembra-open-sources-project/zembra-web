@@ -35,3 +35,4 @@
 - 2026-05-20：完成 Tauri v2 工程接入，新增 macOS app 配置、Rust shell、capability、占位图标和 npm scripts；运行 `cargo check` 通过。
 - 2026-05-20：运行 `npm test` 通过，结果为 11 个测试文件、49 个测试用例全部通过；运行 `npm run build` 通过。
 - 2026-05-20：运行 Tauri app bundle 构建通过，产物为 `src-tauri/target/release/bundle/macos/Zembra.app`；核对 `Info.plist`，`CFBundleIdentifier` 为 `com.antarxly.zembra`，应用名称为 `Zembra`。
+- 2026-05-20：补充 `npm run package:macos` 打包脚本和 `docs/references/tauri-macos-packaging.md` 本机打包教程，覆盖测试、Web 构建、Tauri app bundle 和产物元数据核对。
