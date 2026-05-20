@@ -1,0 +1,14 @@
+[package]
+name = "zembra"
+version = "0.1.0"
+description = "Zembra desktop app"
+authors = ["Antarx"]
+edition = "2021"
+rust-version = "1.77.2"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+
