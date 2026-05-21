@@ -10,3 +10,4 @@
 - R007 `775c508` 根据 `docs/exec-plans/active/api-client/r007-backend-url-gate.md` 完成后端 URL 门禁、直连健康检查、关键日志、IP/Host 与 Port 默认输入、首页文案和按钮位置调整，并基于 OpenAPI 确认的删除接口补齐笔记删除功能。
 - R009 `a347f5e` 根据 `docs/exec-plans/active/home-ui/r009-edit-note.md` 完成首页 note card 原地编辑能力，复用 composer 输入 UI，提交时按正文重新解析 `#tag` 与第一个 `@field`，多个 field 通过 warning bubble 提示，并保持单 note 草稿锁定。
 - R010 `9b0947b` 根据 `docs/exec-plans/active/home-ui/r010-daily-note-heatmap.md` 完成首页最近 30 天笔记热力图改造，接入后端每日统计接口，以每列 5 天的日历网格展示热力等级，并根据侧栏空间优化列宽、段落间距和日期格高度。
+- R011 `3b8fdba` 完成首页视觉可读性修复，收紧顶部、侧栏、卡片列表和 note card 内部间距，将 composer 底部渐变限制在右侧内容列，并在展示态移除已渲染 tag 对应的正文标记，保留编辑态原始内容不变；同时补充前端测试禁止绑定静态视觉实现细节的规范。
