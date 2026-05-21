@@ -377,7 +377,7 @@ function DailyNotesHeatmap({
         </span>
         <span className="shrink-0">{t("heatmap.days", { count: days.length })}</span>
       </div>
-      <div className="grid grid-cols-10 gap-[7px]">
+      <div className="grid grid-flow-col grid-rows-5 justify-start gap-[7px]">
         {days.map((day) => {
           const level = getHeatmapLevel(day.count, maxCount);
           const label = t("heatmap.dayLabel", {

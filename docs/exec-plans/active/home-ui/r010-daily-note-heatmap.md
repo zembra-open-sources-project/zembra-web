@@ -78,3 +78,4 @@
 - 2026-05-21：已通过 `http://127.0.0.1:3000/api-docs/openapi.json` 确认 `GET /notes/stats/daily-counts`，并直接请求接口确认返回 2026-04-22 到 2026-05-21 的 30 天每日笔记数。
 - 2026-05-21：已完成 API Client、mock client、notes store、首页 `DailyNotesHeatmap`、三语言 i18n 文案和首页测试改造。热力图使用接口返回的 30 天数据，按最大 count 映射 0-4 级热力颜色，新建和编辑 note 成功后刷新统计。
 - 2026-05-21：已运行 `npm run test -- src/api/notes.client.test.ts`、`npm run test -- src/pages/home/HomePage.test.tsx`、`npm run test` 和 `npm run build`，全部通过。用户已肉眼验证热力图可用。
+- 2026-05-21：根据用户反馈调整热力图布局为每列 5 天，30 天数据按列填充为 6 列；该调整只改变网格排列，不改变接口、热力等级和刷新逻辑。

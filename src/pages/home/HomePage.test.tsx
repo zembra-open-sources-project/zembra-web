@@ -31,6 +31,11 @@ test("renders daily note count heatmap from store data", async () => {
   ).not.toBeNull();
   expect(await screen.findByText("最近活跃")).not.toBeNull();
   expect(await screen.findByText("30 天")).not.toBeNull();
+  expect(
+    screen
+      .getByRole("region", { name: "最近30天笔记热力图" })
+      .querySelector(".grid-rows-5"),
+  ).not.toBeNull();
   expect((await screen.findAllByLabelText(/3 条笔记/)).length).toBeGreaterThan(0);
 });
 
