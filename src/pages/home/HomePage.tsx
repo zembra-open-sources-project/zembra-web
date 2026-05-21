@@ -297,7 +297,7 @@ export function HomePage() {
           <div className="min-h-0 flex-1 overflow-y-auto pb-44">
             <div className="flex flex-col gap-3.5">
             {visibleNotes.length === 0 ? (
-              <article className="rounded-[18px] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-raised)] px-5 py-8 text-[var(--color-text-muted)]">
+              <article className="rounded-[18px] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-8 text-[var(--color-text-muted)]">
                 {t("note.empty")}
               </article>
             ) : null}
@@ -436,7 +436,7 @@ function NoteCard({
 
   return (
     <article
-      className="relative rounded-[18px] border border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-5 py-[18px] shadow-[var(--color-shadow-card)]"
+      className="relative rounded-[18px] border border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-5 py-[18px]"
       onDoubleClick={handleDoubleClick}
     >
       {!isEditing ? (
