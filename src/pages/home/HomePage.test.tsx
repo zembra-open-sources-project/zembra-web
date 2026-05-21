@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { createRootRoute, createRoute, createRouter, RouterProvider } from "@tanstack/react-router";
 import { afterEach, beforeEach, expect, test } from "vitest";
 import { i18next } from "../../i18n";
@@ -100,6 +100,62 @@ test("renders tag chips without repeating inline tag markers", async () => {
   expect(within(noteCard as HTMLElement).getByText("#zembra")).not.toBeNull();
   expect(within(noteCard as HTMLElement).queryByText(/^#zembra 界面/)).toBeNull();
 });
+
+/** Verifies field navigation counts use actual note membership. */
+test("renders actual note counts for all and field navigation", async () => {
+  renderHomePage();
+
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
+
+  act(() => {
+    useNotesStore.setState({
+      fields: [
+        { id: "inbox-field", name: "inbox", createdAt: 1_779_382_320 },
+        { id: "project-field", name: "project", createdAt: 1_779_382_320 },
+        { id: "empty-field", name: "empty", createdAt: 1_779_382_320 },
+      ],
+      notes: [
+        {
+          id: "note-1",
+          content: "inbox note",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          fieldId: "inbox-field",
+          tags: [],
+        },
+        {
+          id: "note-2",
+          content: "project note",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          fieldId: "project-field",
+          tags: [],
+        },
+        {
+          id: "note-3",
+          content: "unfiled note",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: [],
+        },
+      ],
+    });
+  });
+
+  expect(await sidebarNavCount("全部")).toBe("3");
+  expect(await sidebarNavCount("inbox")).toBe("1");
+  expect(await sidebarNavCount("project")).toBe("1");
+  expect(await sidebarNavCount("empty")).toBe("0");
+});
+
+/** Finds the count text rendered inside a sidebar navigation row. */
+async function sidebarNavCount(label: string): Promise<string> {
+  const rowLabel = await screen.findByText(label);
+  const row = rowLabel.closest("button");
+  expect(row).not.toBeNull();
+
+  return row?.querySelector("span:last-child")?.textContent ?? "";
+}
 
 /** Renders HomePage with the providers required by its header controls. */
 function renderHomePage() {
