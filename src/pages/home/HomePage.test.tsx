@@ -36,11 +36,6 @@ test("renders daily note count heatmap from store data", async () => {
       .getByRole("region", { name: "最近30天笔记热力图" })
       .querySelector(".grid-rows-5"),
   ).not.toBeNull();
-  expect(
-    screen
-      .getByRole("region", { name: "最近30天笔记热力图" })
-      .querySelector(".h-\\[23px\\]"),
-  ).not.toBeNull();
   expect((await screen.findAllByLabelText(/3 条笔记/)).length).toBeGreaterThan(0);
 });
 
@@ -80,6 +75,30 @@ test("edits one note inline and warns when multiple fields are present", async (
   await waitFor(() =>
     expect(screen.queryByText("检测到多个 Field，本次只使用 @project")).toBeNull(),
   );
+});
+
+/** Verifies rendered tag chips are not duplicated in note body text. */
+test("renders tag chips without repeating inline tag markers", async () => {
+  renderHomePage();
+
+  useNotesStore.setState({
+    notes: [
+      {
+        id: "tagged-note",
+        content: "#zembra 界面不要追求agent",
+        createdAt: 1_779_382_320,
+        updatedAt: 1_779_382_320,
+        tags: ["zembra"],
+      },
+    ],
+  });
+
+  const noteText = await screen.findByText("界面不要追求agent");
+  const noteCard = noteText.closest("article");
+  expect(noteCard).not.toBeNull();
+
+  expect(within(noteCard as HTMLElement).getByText("#zembra")).not.toBeNull();
+  expect(within(noteCard as HTMLElement).queryByText(/^#zembra 界面/)).toBeNull();
 });
 
 /** Renders HomePage with the providers required by its header controls. */

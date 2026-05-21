@@ -171,10 +171,10 @@ export function HomePage() {
 
   return (
     <main className="h-screen overflow-hidden bg-[var(--color-app-bg)] text-[var(--color-text-primary)]">
-      <div className="mx-auto grid h-full w-full max-w-[1156px] grid-cols-1 gap-4 px-5 pt-6 lg:grid-cols-[300px_760px] lg:gap-16 lg:px-0 lg:pt-8">
+      <div className="mx-auto grid h-full w-full max-w-[1156px] grid-cols-1 gap-4 px-5 pt-1 lg:grid-cols-[300px_760px] lg:gap-16 lg:px-0">
         <aside className="flex min-h-0 min-w-0 flex-col lg:min-h-0">
           <div className="shrink-0">
-            <div className="mb-7 flex items-center justify-between gap-3">
+            <div className="mb-3 flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-2 text-lg font-bold">
                 <span>Zembra</span>
                 <span className="rounded-[5px] border border-[var(--color-text-primary)]/70 px-1.5 py-0.5 text-[10px] leading-tight">
@@ -266,7 +266,7 @@ export function HomePage() {
         </aside>
 
         <section className="flex min-h-0 min-w-0 flex-col">
-          <header className="mb-4 flex min-h-11 shrink-0 items-center justify-end lg:mb-5">
+          <header className="mb-4 flex min-h-11 shrink-0 items-center justify-end lg:mb-3">
             <label className="flex h-[42px] w-full items-center gap-2.5 rounded-full bg-[var(--color-surface)] px-4 text-sm text-[var(--color-text-muted)] shadow-[inset_0_0_0_1px_var(--color-border)] lg:max-w-80">
               <Search className="size-4" aria-hidden="true" />
               <input
@@ -280,7 +280,7 @@ export function HomePage() {
           </header>
 
           <div className="min-h-0 flex-1 overflow-y-auto pb-44">
-            <div className="flex flex-col gap-3.5">
+            <div className="flex flex-col gap-2">
             {visibleNotes.length === 0 ? (
               <article className="rounded-[18px] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-8 text-[var(--color-text-muted)]">
                 {t("note.empty")}
@@ -310,7 +310,11 @@ export function HomePage() {
         </section>
       </div>
 
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-10 h-[154px] bg-[image:var(--color-composer-gradient)]" />
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-10 px-5 lg:px-0">
+        <div className="mx-auto grid h-[154px] w-full max-w-[1156px] grid-cols-1 lg:grid-cols-[300px_760px] lg:gap-16">
+          <div className="min-w-0 bg-[image:var(--color-composer-gradient)] lg:col-start-2" />
+        </div>
+      </div>
 
       <div className="fixed inset-x-0 bottom-6 z-20 px-5 lg:px-0">
         <form
@@ -443,6 +447,10 @@ function NoteCard({
   const [hasOverflow, setHasOverflow] = useState(false);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const displayContent = useMemo(
+    () => stripRenderedTagMarkers(note.content, note.tags),
+    [note.content, note.tags],
+  );
   const contentRef = useRef<HTMLParagraphElement>(null);
   const measureOverflow = useCallback(() => {
     const element = contentRef.current;
@@ -456,7 +464,7 @@ function NoteCard({
 
   useLayoutEffect(() => {
     measureOverflow();
-  }, [measureOverflow, note.content, note.tags, fieldName]);
+  }, [displayContent, fieldName, measureOverflow, note.tags]);
 
   useEffect(() => {
     window.addEventListener("resize", measureOverflow);
@@ -484,7 +492,7 @@ function NoteCard({
 
   return (
     <article
-      className="relative rounded-[18px] border border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-5 py-[18px]"
+      className="relative rounded-[18px] border border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-4 py-3"
       onDoubleClick={handleDoubleClick}
     >
       {!isEditing ? (
@@ -552,7 +560,7 @@ function NoteCard({
             #{tag}
           </span>
         ))}
-        {note.content}
+        {displayContent}
       </p>
       {hasOverflow || expanded ? (
         <button
@@ -797,6 +805,25 @@ function parseTagNames(content: string): string[] {
     content.matchAll(/(?:^|\s)#([^\s#@]+)/g),
     (match) => match[1],
   );
+}
+
+/** Removes tag markers that are already rendered as note chips. */
+function stripRenderedTagMarkers(content: string, tags: string[]): string {
+  if (tags.length === 0) {
+    return content;
+  }
+
+  const tagSet = new Set(tags);
+
+  return content
+    .replace(/(^|\s)#([^\s#@]+)/g, (match, leading: string, tag: string) => {
+      if (!tagSet.has(tag)) {
+        return match;
+      }
+
+      return leading;
+    })
+    .trimStart();
 }
 
 /** Extracts inline field names from note content in document order. */
