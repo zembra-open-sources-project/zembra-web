@@ -114,6 +114,20 @@ export interface ListNotesResponse {
   notes: NoteRecord[];
 }
 
+/** Represents one server-local daily note count bucket. */
+export interface DailyNoteCount {
+  /** Calendar date in YYYY-MM-DD format. */
+  date: string;
+  /** Number of visible notes created on this date. */
+  count: number;
+}
+
+/** Represents the backend daily note count response wrapper. */
+export interface DailyNoteCountsResponse {
+  /** Daily note counts ordered by date ascending. */
+  days: DailyNoteCount[];
+}
+
 /** Represents a backend tag database record. */
 export interface TagRecord {
   /** Stable tag identifier. */

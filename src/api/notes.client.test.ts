@@ -61,6 +61,28 @@ describe("createNotesHttpClient", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  test("lists daily note counts with the stats endpoint", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe("http://server.test/notes/stats/daily-counts");
+      expect(init?.method).toBe("GET");
+
+      return jsonResponse({
+        days: [
+          { date: "2026-05-20", count: 2 },
+          { date: "2026-05-21", count: 0 },
+        ],
+      });
+    });
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+
+    await expect(client.listDailyNoteCounts()).resolves.toEqual([
+      { date: "2026-05-20", count: 2 },
+      { date: "2026-05-21", count: 0 },
+    ]);
+  });
+
   test("lists notes using backend records and note tag endpoints", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);

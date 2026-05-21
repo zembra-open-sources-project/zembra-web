@@ -1,6 +1,7 @@
 import {
   AtSign,
   Bold,
+  CalendarDays,
   CircleHelp,
   Hash,
   List,
@@ -24,7 +25,7 @@ import {
   useState,
 } from "react";
 import { useNotesStore } from "../../features/notes/noteStore";
-import type { NoteDto } from "../../api/types";
+import type { DailyNoteCount, NoteDto } from "../../api/types";
 
 interface ComposerTool {
   /** Stable tool identifier. */
@@ -41,12 +42,6 @@ interface ComposerTool {
   cursorOffset?: number;
 }
 
-const heatmapLevels = [
-  0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 0, 3, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 4, 0,
-  1, 0, 0, 3, 0, 0, 2, 0, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 3, 0, 2, 0, 0,
-  0, 0, 1, 0, 0, 0, 2, 0, 1, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 0, 1, 0, 3, 0,
-];
-
 /** Renders the redesigned Zembra note workspace shell. */
 export function HomePage() {
   const { i18n, t } = useTranslation("home");
@@ -57,6 +52,7 @@ export function HomePage() {
   const [isUpdating, setIsUpdating] = useState(false);
   const {
     notes,
+    dailyNoteCounts,
     fields,
     tags,
     keyword,
@@ -66,6 +62,7 @@ export function HomePage() {
     setSelectedTag,
     setSelectedField,
     createNote,
+    loadDailyNoteCounts,
     loadFields,
     loadRecentNotes,
     loadTags,
@@ -97,10 +94,11 @@ export function HomePage() {
       : undefined;
 
   useEffect(() => {
+    void loadDailyNoteCounts();
     void loadFields();
     void loadTags();
     void loadRecentNotes();
-  }, [loadFields, loadRecentNotes, loadTags]);
+  }, [loadDailyNoteCounts, loadFields, loadRecentNotes, loadTags]);
 
   /** Persists the current composer draft as a new note. */
   async function handleCreateSubmit() {
@@ -216,20 +214,7 @@ export function HomePage() {
               <StatBlock label={t("stats.fields")} value={String(fields.length)} />
             </div>
 
-            <div className="mb-3 hidden w-fit grid-cols-12 gap-[9px] lg:grid" aria-label={t("heatmap.ariaLabel")}>
-              {heatmapLevels.map((level, index) => (
-                <span
-                  className="size-[18px] rounded bg-[var(--color-surface-muted)] shadow-[inset_0_0_0_1px_var(--color-border-subtle)] data-[level='1']:bg-[color-mix(in_srgb,var(--color-accent)_18%,var(--color-surface-muted))] data-[level='2']:bg-[color-mix(in_srgb,var(--color-accent)_34%,var(--color-surface-muted))] data-[level='3']:bg-[color-mix(in_srgb,var(--color-accent)_58%,var(--color-surface-muted))] data-[level='4']:bg-[var(--color-accent)]"
-                  data-level={level}
-                  key={`${level}-${index}`}
-                />
-              ))}
-            </div>
-            <div className="mb-7 hidden w-[244px] justify-between text-[13px] text-[var(--color-text-muted)] lg:flex">
-              <span>{t("heatmap.months.january")}</span>
-              <span>{t("heatmap.months.february")}</span>
-              <span>{t("heatmap.months.march")}</span>
-            </div>
+            <DailyNotesHeatmap days={dailyNoteCounts} locale={i18n.resolvedLanguage} />
           </div>
 
           <div className="hidden min-h-0 flex-1 overflow-y-auto pb-44 pr-1 lg:block">
@@ -355,6 +340,69 @@ export function HomePage() {
       </div>
 
     </main>
+  );
+}
+
+/** Renders the recent daily note count calendar heatmap in the sidebar. */
+function DailyNotesHeatmap({
+  days,
+  locale = "zh-CN",
+}: {
+  days: DailyNoteCount[];
+  locale?: string;
+}) {
+  const { t } = useTranslation("home");
+  const maxCount = Math.max(0, ...days.map((day) => day.count));
+
+  if (days.length === 0) {
+    return (
+      <section
+        aria-label={t("heatmap.ariaLabel")}
+        className="mb-7 hidden w-[300px] rounded-[12px] border border-dashed border-[var(--color-border)] px-3 py-3 text-sm text-[var(--color-text-muted)] lg:block"
+      >
+        {t("heatmap.empty")}
+      </section>
+    );
+  }
+
+  return (
+    <section
+      aria-label={t("heatmap.ariaLabel")}
+      className="mb-7 hidden w-[300px] lg:block"
+    >
+      <div className="mb-2 flex items-center justify-between gap-3 text-[13px] text-[var(--color-text-muted)]">
+        <span className="inline-flex min-w-0 items-center gap-1.5">
+          <CalendarDays className="size-3.5 shrink-0 text-[var(--color-accent)]" aria-hidden="true" />
+          <span className="truncate">{t("heatmap.title")}</span>
+        </span>
+        <span className="shrink-0">{t("heatmap.days", { count: days.length })}</span>
+      </div>
+      <div className="grid grid-cols-10 gap-[7px]">
+        {days.map((day) => {
+          const level = getHeatmapLevel(day.count, maxCount);
+          const label = t("heatmap.dayLabel", {
+            count: day.count,
+            date: formatHeatmapDate(day.date, locale),
+          });
+
+          return (
+            <span
+              aria-label={label}
+              className="flex size-[23px] items-center justify-center rounded-[6px] bg-[var(--color-surface-muted)] text-[10px] font-semibold leading-none text-[var(--color-text-muted)] shadow-[inset_0_0_0_1px_var(--color-border-subtle)] data-[level='1']:bg-[color-mix(in_srgb,var(--color-accent)_18%,var(--color-surface-muted))] data-[level='2']:bg-[color-mix(in_srgb,var(--color-accent)_34%,var(--color-surface-muted))] data-[level='3']:bg-[color-mix(in_srgb,var(--color-accent)_58%,var(--color-surface-muted))] data-[level='4']:bg-[var(--color-accent)] data-[level='4']:text-[var(--color-accent-contrast)]"
+              data-level={level}
+              key={day.date}
+              title={label}
+            >
+              {Number(day.date.slice(-2))}
+            </span>
+          );
+        })}
+      </div>
+      <div className="mt-2 flex justify-between text-[12px] text-[var(--color-text-muted)]">
+        <span>{formatHeatmapDate(days[0]?.date, locale)}</span>
+        <span>{formatHeatmapDate(days.at(-1)?.date, locale)}</span>
+      </div>
+    </section>
   );
 }
 
@@ -773,6 +821,27 @@ function formatNoteTimestamp(timestamp: number, locale = "zh-CN"): string {
   return `${value("year")}-${value("month")}-${value("day")} ${value(
     "hour",
   )}:${value("minute")}`;
+}
+
+/** Maps a daily note count to a visual heatmap intensity level. */
+function getHeatmapLevel(count: number, maxCount: number): number {
+  if (count <= 0 || maxCount <= 0) {
+    return 0;
+  }
+
+  return Math.min(4, Math.max(1, Math.ceil((count / maxCount) * 4)));
+}
+
+/** Formats a YYYY-MM-DD heatmap date for compact sidebar labels. */
+function formatHeatmapDate(dateKey: string | undefined, locale = "zh-CN"): string {
+  if (!dateKey) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
+    month: "short",
+  }).format(new Date(`${dateKey}T00:00:00`));
 }
 
 /** Creates toolbar definitions for the composer insertion buttons. */

@@ -13,12 +13,25 @@ beforeEach(async () => {
 afterEach(() => {
   useNotesStore.setState({
     fields: [],
+    dailyNoteCounts: [],
     keyword: "",
     notes: [],
     selectedField: undefined,
     selectedTag: undefined,
     tags: [],
   });
+});
+
+/** Verifies that the sidebar activity heatmap renders daily note counts. */
+test("renders daily note count heatmap from store data", async () => {
+  renderHomePage();
+
+  expect(
+    await screen.findByRole("region", { name: "最近30天笔记热力图" }),
+  ).not.toBeNull();
+  expect(await screen.findByText("最近活跃")).not.toBeNull();
+  expect(await screen.findByText("30 天")).not.toBeNull();
+  expect((await screen.findAllByLabelText(/3 条笔记/)).length).toBeGreaterThan(0);
 });
 
 /** Verifies that inline note editing parses the first field and locks other cards. */

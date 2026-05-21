@@ -15,12 +15,11 @@ export const home = {
     },
   },
   heatmap: {
-    ariaLabel: "活跃热力图占位",
-    months: {
-      february: "二月",
-      january: "一月",
-      march: "三月",
-    },
+    ariaLabel: "最近30天笔记热力图",
+    dayLabel: "{{date}}：{{count}} 条笔记",
+    days: "{{count}} 天",
+    empty: "暂无热力统计",
+    title: "最近活跃",
   },
   note: {
     actions: "笔记操作",

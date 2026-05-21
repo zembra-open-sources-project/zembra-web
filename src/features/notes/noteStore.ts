@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { notesClient, taxonomyClient } from "../../api/client";
 import type {
   CreateNoteInput,
+  DailyNoteCount,
   FieldDto,
   NoteDto,
   TagDto,
@@ -15,6 +16,8 @@ interface NotesState {
   fields: FieldDto[];
   /** Tags available for note organization. */
   tags: TagDto[];
+  /** Daily note counts used by the home activity heatmap. */
+  dailyNoteCounts: DailyNoteCount[];
   /** Search keyword entered by the user. */
   keyword: string;
   /** Tag selected by the user. */
@@ -29,6 +32,8 @@ interface NotesState {
   setSelectedField: (field?: string) => void;
   /** Loads recent notes from the home feed endpoint. */
   loadRecentNotes: () => Promise<void>;
+  /** Loads visible note counts for the past 30 days. */
+  loadDailyNoteCounts: () => Promise<void>;
   /** Creates a note and places it at the top of the recent feed. */
   createNote: (input: CreateNoteInput) => Promise<void>;
   /** Updates a note and moves it to the top of the recent feed. */
@@ -46,6 +51,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   notes: [],
   fields: [],
   tags: [],
+  dailyNoteCounts: [],
   keyword: "",
   selectedTag: undefined,
   selectedField: undefined,
@@ -56,6 +62,10 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     const notes = await notesClient.listRecentNotes({ limit: 50 });
     set({ notes });
   },
+  loadDailyNoteCounts: async () => {
+    const dailyNoteCounts = await notesClient.listDailyNoteCounts();
+    set({ dailyNoteCounts });
+  },
   createNote: async (input) => {
     const note = await notesClient.createNote(input);
     set((state) => ({
@@ -65,11 +75,12 @@ export const useNotesStore = create<NotesState>((set, get) => ({
       ),
     }));
 
-    const [fields, tags] = await Promise.all([
+    const [fields, tags, dailyNoteCounts] = await Promise.all([
       taxonomyClient.listFields(),
       taxonomyClient.listTags(),
+      notesClient.listDailyNoteCounts(),
     ]);
-    set({ fields, tags });
+    set({ dailyNoteCounts, fields, tags });
   },
   updateNote: async (noteRef, input) => {
     const note = await notesClient.updateNote(noteRef, input);
@@ -80,11 +91,12 @@ export const useNotesStore = create<NotesState>((set, get) => ({
       ),
     }));
 
-    const [fields, tags] = await Promise.all([
+    const [fields, tags, dailyNoteCounts] = await Promise.all([
       taxonomyClient.listFields(),
       taxonomyClient.listTags(),
+      notesClient.listDailyNoteCounts(),
     ]);
-    set({ fields, tags });
+    set({ dailyNoteCounts, fields, tags });
   },
   deleteNote: async (noteRef) => {
     await notesClient.deleteNote(noteRef);

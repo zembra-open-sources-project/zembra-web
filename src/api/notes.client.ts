@@ -5,6 +5,8 @@ import {
 import { requestJson } from "./http";
 import type {
   CreateNoteInput,
+  DailyNoteCount,
+  DailyNoteCountsResponse,
   ListNoteTagsResponse,
   ListNotesResponse,
   NoteDto,
@@ -19,6 +21,8 @@ import type {
 export interface NotesClient {
   /** Lists recent notes ordered by update time for the home feed. */
   listRecentNotes(query?: RecentNotesQuery): Promise<NoteDto[]>;
+  /** Lists visible note counts for the past 30 server-local calendar days. */
+  listDailyNoteCounts(): Promise<DailyNoteCount[]>;
   /** Lists notes using the provided query filters. */
   listNotes(query: NotesQuery): Promise<NoteDto[]>;
   /** Reads a single note by full ID or unique prefix. */
@@ -64,6 +68,15 @@ export function createNotesHttpClient(
       );
 
       return notes;
+    },
+    async listDailyNoteCounts() {
+      const resolvedBaseUrl = resolveBackendBaseUrl(baseUrl);
+      const response = await requestJson<DailyNoteCountsResponse>(
+        resolvedBaseUrl,
+        "/notes/stats/daily-counts",
+      );
+
+      return response.days;
     },
     async listNotes(query) {
       const resolvedBaseUrl = resolveBackendBaseUrl(baseUrl);
@@ -164,6 +177,9 @@ export function createMockNotesClient(): NotesClient {
     async listRecentNotes(query = {}) {
       return filterNotes(notes.slice(0, query.limit ?? 50), {});
     },
+    async listDailyNoteCounts() {
+      return createMockDailyNoteCounts(now);
+    },
     async listNotes(query) {
       return notes.filter((note) => {
         const keywordMatched =
@@ -214,6 +230,22 @@ export function createMockNotesClient(): NotesClient {
       }
     },
   };
+}
+
+/** Creates deterministic mock daily counts for test and local mock mode. */
+function createMockDailyNoteCounts(now: number): DailyNoteCount[] {
+  const today = new Date(now * 1000);
+
+  return Array.from({ length: 30 }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (29 - index));
+    const dateKey = date.toISOString().slice(0, 10);
+
+    return {
+      count: index % 9 === 0 ? 3 : index % 5 === 0 ? 1 : 0,
+      date: dateKey,
+    };
+  });
 }
 
 /** Maps a backend note response wrapper to the frontend note DTO. */

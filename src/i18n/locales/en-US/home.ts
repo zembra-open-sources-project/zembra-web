@@ -15,12 +15,11 @@ export const home = {
     },
   },
   heatmap: {
-    ariaLabel: "Activity heatmap placeholder",
-    months: {
-      february: "Feb",
-      january: "Jan",
-      march: "Mar",
-    },
+    ariaLabel: "Last 30 days note heatmap",
+    dayLabel: "{{date}}: {{count}} notes",
+    days: "{{count}} days",
+    empty: "No activity stats yet",
+    title: "Recent activity",
   },
   note: {
     actions: "Note actions",
