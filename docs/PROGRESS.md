@@ -8,3 +8,4 @@
 - R004 `9d1ca13` 根据 `preview.html` 完成首页深色工作台改版，接入 `/fields?all=true`、`/tags?all=true` 与 `POST /notes/recent` 展示真实数据，打通 composer 创建笔记，优化独立滚动、窄屏布局、展开逻辑、工具按钮、占位提示和 field 元信息展示。
 - R005 `0229173a` 根据 `docs/exec-plans/active/home-ui/r005-light-theme-mode.md` 完成 Web UI 浅色默认主题，新增 light/dark token、主题 Provider、纯图标切换按钮和本地记忆，覆盖首页、同步设置页与 backend Toast，并通过测试、构建和浏览器验证。
 - R007 `775c508` 根据 `docs/exec-plans/active/api-client/r007-backend-url-gate.md` 完成后端 URL 门禁、直连健康检查、关键日志、IP/Host 与 Port 默认输入、首页文案和按钮位置调整，并基于 OpenAPI 确认的删除接口补齐笔记删除功能。
+- R009 `a347f5e` 根据 `docs/exec-plans/active/home-ui/r009-edit-note.md` 完成首页 note card 原地编辑能力，复用 composer 输入 UI，提交时按正文重新解析 `#tag` 与第一个 `@field`，多个 field 通过 warning bubble 提示，并保持单 note 草稿锁定。
