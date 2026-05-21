@@ -119,6 +119,8 @@ export function createNotesHttpClient(
           body: {
             content: input.content,
             device_id: input.deviceId,
+            field: input.field,
+            tags: input.tags,
           },
         },
       );
@@ -200,6 +202,7 @@ export function createMockNotesClient(): NotesClient {
       }
 
       note.content = input.content;
+      note.tags = input.tags ?? note.tags;
       note.updatedAt = Math.floor(Date.now() / 1000);
       return note;
     },

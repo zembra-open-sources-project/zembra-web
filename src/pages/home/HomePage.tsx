@@ -13,7 +13,7 @@ import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ThemeToggle } from "../../app/ThemeToggle";
 import {
-  FormEvent,
+  KeyboardEvent,
   MouseEvent,
   ReactNode,
   useCallback,
@@ -52,7 +52,9 @@ export function HomePage() {
   const { i18n, t } = useTranslation("home");
   const [draft, setDraft] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [editingNoteId, setEditingNoteId] = useState<string>();
+  const [editDraft, setEditDraft] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
   const {
     notes,
     fields,
@@ -68,6 +70,7 @@ export function HomePage() {
     loadRecentNotes,
     loadTags,
     deleteNote,
+    updateNote,
   } = useNotesStore();
 
   const composerTools = useMemo(
@@ -87,6 +90,11 @@ export function HomePage() {
     [keyword, notes, selectedField, selectedTag],
   );
   const tagUsage = useMemo(() => countTags(notes), [notes]);
+  const editFieldNames = useMemo(() => parseFieldNames(editDraft), [editDraft]);
+  const editWarning =
+    editFieldNames.length > 1
+      ? t("note.edit.warningMultipleFields", { field: editFieldNames[0] })
+      : undefined;
 
   useEffect(() => {
     void loadFields();
@@ -95,8 +103,7 @@ export function HomePage() {
   }, [loadFields, loadRecentNotes, loadTags]);
 
   /** Persists the current composer draft as a new note. */
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleCreateSubmit() {
     const content = draft.trim();
 
     if (!content) {
@@ -121,35 +128,47 @@ export function HomePage() {
     }
   }
 
-  /** Inserts a composer tool snippet at the current textarea selection. */
-  function handleToolClick(
-    event: MouseEvent<HTMLButtonElement>,
-    tool: ComposerTool,
-  ) {
-    event.preventDefault();
-    insertTextAtSelection(tool);
+  /** Starts editing a note when no other card owns a draft. */
+  function handleEditStart(note: NoteDto) {
+    if (editingNoteId && editingNoteId !== note.id) {
+      return;
+    }
+
+    setEditingNoteId(note.id);
+    setEditDraft(note.content);
   }
 
-  /** Inserts text into the composer while preserving a useful cursor position. */
-  function insertTextAtSelection(tool: ComposerTool) {
-    const textarea = textareaRef.current;
-    const start = textarea?.selectionStart ?? draft.length;
-    const end = textarea?.selectionEnd ?? draft.length;
-    const selection = draft.slice(start, end);
-    const nextDraft = `${draft.slice(0, start)}${tool.before}${selection}${
-      tool.after ?? ""
-    }${draft.slice(end)}`;
-    const cursorPosition =
-      start +
-      (selection
-        ? tool.before.length + selection.length + (tool.after?.length ?? 0)
-        : tool.cursorOffset ?? tool.before.length);
+  /** Cancels the current note edit draft. */
+  function handleEditCancel() {
+    setEditingNoteId(undefined);
+    setEditDraft("");
+  }
 
-    setDraft(nextDraft);
-    window.requestAnimationFrame(() => {
-      textarea?.focus();
-      textarea?.setSelectionRange(cursorPosition, cursorPosition);
-    });
+  /** Persists the current edit draft and exits edit mode on success. */
+  async function handleEditSubmit() {
+    if (!editingNoteId) {
+      return;
+    }
+
+    const content = editDraft.trim();
+
+    if (!content) {
+      return;
+    }
+
+    const fieldNames = parseFieldNames(content);
+
+    setIsUpdating(true);
+    try {
+      await updateNote(editingNoteId, {
+        content,
+        field: fieldNames[0] ?? null,
+        tags: parseTagNames(content),
+      });
+      handleEditCancel();
+    } finally {
+      setIsUpdating(false);
+    }
   }
 
   return (
@@ -284,11 +303,21 @@ export function HomePage() {
             ) : null}
             {visibleNotes.map((note) => (
               <NoteCard
+                canStartEditing={!editingNoteId || editingNoteId === note.id}
+                editDraft={editingNoteId === note.id ? editDraft : undefined}
+                editWarning={editingNoteId === note.id ? editWarning : undefined}
                 onDelete={deleteNote}
+                onEditCancel={handleEditCancel}
+                onEditDraftChange={setEditDraft}
+                onEditStart={handleEditStart}
+                onEditSubmit={handleEditSubmit}
                 fieldName={note.fieldId ? fieldNameById.get(note.fieldId) : undefined}
+                isEditing={editingNoteId === note.id}
+                isUpdating={isUpdating}
                 key={note.id}
                 locale={i18n.resolvedLanguage}
                 note={note}
+                tools={composerTools}
               />
             ))}
             </div>
@@ -301,51 +330,26 @@ export function HomePage() {
       <div className="fixed inset-x-0 bottom-6 z-20 px-5 lg:px-0">
         <form
           className="mx-auto grid w-full max-w-[1156px] grid-cols-1 lg:grid-cols-[300px_760px] lg:gap-16"
-          onSubmit={handleSubmit}
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleCreateSubmit();
+          }}
         >
           <div className="min-w-0 lg:col-start-2">
-            <div className="overflow-hidden rounded-[18px] border border-[var(--color-border-strong)] bg-[var(--color-surface-raised)] shadow-[var(--color-shadow-float)] backdrop-blur">
-              <textarea
-                className="min-h-[54px] w-full resize-none bg-transparent px-[18px] pb-1.5 pt-4 text-base font-medium leading-6 text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
-                placeholder={t("composer.placeholder")}
-                ref={textareaRef}
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-              />
-              <div className="flex items-end justify-between px-4 pb-3">
-                <div>
-                  <div className="flex items-center gap-4 text-[var(--color-text-secondary)]">
-                    {composerTools.map((tool) => (
-                      <button
-                        className="flex size-7 items-center justify-center rounded-md hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
-                        key={tool.id}
-                        type="button"
-                        aria-label={tool.label}
-                        title={tool.label}
-                        onClick={(event) => handleToolClick(event, tool)}
-                      >
-                        {tool.icon}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="mt-1.5 text-xs text-[var(--color-text-muted)]">
-                    {t("composer.saveTo", {
-                      field:
-                        fields.find((field) => field.id === selectedField)?.name ??
-                        "Inbox",
-                    })}
-                  </div>
-                </div>
-                <button
-                  className="flex h-[34px] w-12 items-center justify-center rounded-[10px] bg-[var(--color-accent)] text-[var(--color-accent-contrast)] shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_18%,transparent)] hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
-                  type="submit"
-                  aria-label={t("composer.send")}
-                  disabled={isSubmitting || draft.trim().length === 0}
-                >
-                  <SendHorizontal className="size-5" aria-hidden="true" />
-                </button>
-              </div>
-            </div>
+            <NoteEditor
+              draft={draft}
+              isSubmitting={isSubmitting}
+              meta={t("composer.saveTo", {
+                field:
+                  fields.find((field) => field.id === selectedField)?.name ??
+                  "Inbox",
+              })}
+              placeholder={t("composer.placeholder")}
+              submitLabel={t("composer.send")}
+              tools={composerTools}
+              variant="floating"
+              onDraftChange={setDraft}
+            />
           </div>
         </form>
       </div>
@@ -356,15 +360,35 @@ export function HomePage() {
 
 /** Renders one recent note in the home feed. */
 function NoteCard({
+  canStartEditing,
+  editDraft,
+  editWarning,
   fieldName,
+  isEditing,
+  isUpdating,
   locale,
   note,
   onDelete,
+  onEditCancel,
+  onEditDraftChange,
+  onEditStart,
+  onEditSubmit,
+  tools,
 }: {
+  canStartEditing: boolean;
+  editDraft?: string;
+  editWarning?: string;
   fieldName?: string;
+  isEditing: boolean;
+  isUpdating: boolean;
   locale?: string;
   note: NoteDto;
   onDelete: (noteId: string) => Promise<void>;
+  onEditCancel: () => void;
+  onEditDraftChange: (draft: string) => void;
+  onEditStart: (note: NoteDto) => void;
+  onEditSubmit: () => Promise<void>;
+  tools: ComposerTool[];
 }) {
   const { t } = useTranslation("home");
   const [expanded, setExpanded] = useState(false);
@@ -403,8 +427,19 @@ function NoteCard({
     }
   }
 
+  /** Enters edit mode when this card is allowed to own the draft. */
+  function handleDoubleClick() {
+    if (!isEditing && canStartEditing) {
+      onEditStart(note);
+    }
+  }
+
   return (
-    <article className="relative rounded-[18px] border border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-5 py-[18px] shadow-[var(--color-shadow-card)]">
+    <article
+      className="relative rounded-[18px] border border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-5 py-[18px] shadow-[var(--color-shadow-card)]"
+      onDoubleClick={handleDoubleClick}
+    >
+      {!isEditing ? (
       <div className="absolute right-[12px] top-[11px]">
         <button
           aria-expanded={isActionsOpen}
@@ -428,12 +463,34 @@ function NoteCard({
           </div>
         ) : null}
       </div>
+      ) : null}
       <div className="mb-3.5 text-[13px] text-[var(--color-text-muted)]">
         {formatNoteTimestamp(note.updatedAt, locale)}
         {fieldName ? (
           <span className="ml-1 font-bold text-[var(--color-text-secondary)]">@{fieldName}</span>
         ) : null}
       </div>
+      {isEditing ? (
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            void onEditSubmit();
+          }}
+        >
+          <NoteEditor
+            draft={editDraft ?? ""}
+            isSubmitting={isUpdating}
+            placeholder={t("composer.placeholder")}
+            submitLabel={isUpdating ? t("note.edit.saving") : t("composer.send")}
+            tools={tools}
+            variant="embedded"
+            warning={editWarning}
+            onCancel={onEditCancel}
+            onDraftChange={onEditDraftChange}
+          />
+        </form>
+      ) : (
+      <>
       <p
         className="overflow-hidden whitespace-pre-wrap pr-7 text-base leading-7 text-[var(--color-text-primary)]"
         ref={contentRef}
@@ -458,7 +515,138 @@ function NoteCard({
           {expanded ? t("note.collapse") : t("note.expand")}
         </button>
       ) : null}
+      </>
+      )}
     </article>
+  );
+}
+
+/** Renders a reusable note text editor shared by creation and card editing. */
+function NoteEditor({
+  draft,
+  isSubmitting,
+  meta,
+  onCancel,
+  onDraftChange,
+  placeholder,
+  submitLabel,
+  tools,
+  variant,
+  warning,
+}: {
+  draft: string;
+  isSubmitting: boolean;
+  meta?: string;
+  onCancel?: () => void;
+  onDraftChange: (draft: string) => void;
+  placeholder: string;
+  submitLabel: string;
+  tools: ComposerTool[];
+  variant: "floating" | "embedded";
+  warning?: string;
+}) {
+  const { t } = useTranslation("home");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  /** Handles keyboard shortcuts scoped to this editor. */
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Escape" && onCancel) {
+      event.preventDefault();
+      onCancel();
+    }
+  }
+
+  /** Inserts a toolbar snippet into this editor's draft. */
+  function handleToolClick(
+    event: MouseEvent<HTMLButtonElement>,
+    tool: ComposerTool,
+  ) {
+    event.preventDefault();
+    const textarea = textareaRef.current;
+    const start = textarea?.selectionStart ?? draft.length;
+    const end = textarea?.selectionEnd ?? draft.length;
+    const selection = draft.slice(start, end);
+    const nextDraft = `${draft.slice(0, start)}${tool.before}${selection}${
+      tool.after ?? ""
+    }${draft.slice(end)}`;
+    const cursorPosition =
+      start +
+      (selection
+        ? tool.before.length + selection.length + (tool.after?.length ?? 0)
+        : tool.cursorOffset ?? tool.before.length);
+
+    onDraftChange(nextDraft);
+    window.requestAnimationFrame(() => {
+      textarea?.focus();
+      textarea?.setSelectionRange(cursorPosition, cursorPosition);
+    });
+  }
+
+  return (
+    <div
+      className={[
+        "overflow-hidden rounded-[18px] border border-[var(--color-border-strong)] bg-[var(--color-surface-raised)]",
+        variant === "floating"
+          ? "shadow-[var(--color-shadow-float)] backdrop-blur"
+          : "shadow-[inset_0_0_0_1px_var(--color-border-subtle)]",
+      ].join(" ")}
+    >
+      <textarea
+        className="min-h-[54px] w-full resize-none bg-transparent px-[18px] pb-1.5 pt-4 text-base font-medium leading-6 text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
+        placeholder={placeholder}
+        ref={textareaRef}
+        value={draft}
+        onChange={(event) => onDraftChange(event.target.value)}
+        onKeyDown={handleKeyDown}
+      />
+      {warning ? (
+        <div className="mx-4 mb-2 rounded-[9px] border border-[var(--color-warning-border)] bg-[var(--color-warning-soft)] px-3 py-2 text-sm text-[var(--color-warning)]">
+          {warning}
+        </div>
+      ) : null}
+      <div className="flex items-end justify-between gap-3 px-4 pb-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-4 text-[var(--color-text-secondary)]">
+            {tools.map((tool) => (
+              <button
+                className="flex size-7 items-center justify-center rounded-md hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
+                key={tool.id}
+                type="button"
+                aria-label={tool.label}
+                title={tool.label}
+                onClick={(event) => handleToolClick(event, tool)}
+              >
+                {tool.icon}
+              </button>
+            ))}
+          </div>
+          {meta ? (
+            <div className="mt-1.5 truncate text-xs text-[var(--color-text-muted)]">
+              {meta}
+            </div>
+          ) : null}
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          {onCancel ? (
+            <button
+              className="h-[34px] rounded-[10px] px-3 text-sm font-semibold text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
+              type="button"
+              onClick={onCancel}
+            >
+              {t("note.edit.cancel")}
+            </button>
+          ) : null}
+          <button
+            className="flex h-[34px] min-w-12 items-center justify-center rounded-[10px] bg-[var(--color-accent)] px-3 text-[var(--color-accent-contrast)] shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_18%,transparent)] hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+            type="submit"
+            aria-label={submitLabel}
+            disabled={isSubmitting || draft.trim().length === 0}
+          >
+            <SendHorizontal className="size-5" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -557,6 +745,14 @@ function countTags(notes: NoteDto[]): Map<string, number> {
 function parseTagNames(content: string): string[] {
   return Array.from(
     content.matchAll(/(?:^|\s)#([^\s#@]+)/g),
+    (match) => match[1],
+  );
+}
+
+/** Extracts inline field names from note content in document order. */
+function parseFieldNames(content: string): string[] {
+  return Array.from(
+    content.matchAll(/(?:^|\s)@([^\s#@]+)/g),
     (match) => match[1],
   );
 }

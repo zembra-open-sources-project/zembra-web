@@ -21,6 +21,9 @@
   --color-error: #b42318;
   --color-error-soft: #fff1f0;
   --color-error-border: rgba(180, 35, 24, 0.24);
+  --color-warning: #92400e;
+  --color-warning-soft: #fff7ed;
+  --color-warning-border: rgba(146, 64, 14, 0.24);
   --color-success-soft: #ecfeff;
   --color-success-border: rgba(14, 116, 144, 0.24);
   --color-help-shadow: 0 14px 34px rgba(15, 23, 42, 0.14);
@@ -62,6 +65,9 @@ html[data-theme="dark"] {
   --color-error: #ffb3b3;
   --color-error-soft: #351f26;
   --color-error-border: rgba(255, 159, 159, 0.25);
+  --color-warning: #f6c783;
+  --color-warning-soft: #332819;
+  --color-warning-border: rgba(246, 199, 131, 0.24);
   --color-success-soft: #132936;
   --color-success-border: rgba(143, 211, 255, 0.25);
   --color-help-shadow: 0 14px 34px rgba(0, 0, 0, 0.36);

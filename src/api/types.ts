@@ -50,6 +50,10 @@ export interface CreateNoteInput {
 export interface UpdateNoteInput {
   /** New main note body. */
   content: string;
+  /** Optional replacement tag names parsed from the note body. */
+  tags?: string[];
+  /** Optional field name update; null moves the note to inbox. */
+  field?: string | null;
   /** Optional device identifier used for revision tracking. */
   deviceId?: string;
 }

@@ -27,6 +27,11 @@ export const home = {
     collapse: "收起",
     delete: "刪除",
     deleting: "刪除中",
+    edit: {
+      cancel: "取消",
+      saving: "儲存中",
+      warningMultipleFields: "偵測到多個 Field，本次只使用 @{{field}}",
+    },
     empty: "暫無最近筆記",
     expand: "展開",
   },

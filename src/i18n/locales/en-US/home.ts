@@ -27,6 +27,11 @@ export const home = {
     collapse: "Collapse",
     delete: "Delete",
     deleting: "Deleting",
+    edit: {
+      cancel: "Cancel",
+      saving: "Saving",
+      warningMultipleFields: "Multiple fields detected. Only @{{field}} will be used.",
+    },
     empty: "No recent notes yet",
     expand: "Expand",
   },

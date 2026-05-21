@@ -5,6 +5,7 @@ import type {
   FieldDto,
   NoteDto,
   TagDto,
+  UpdateNoteInput,
 } from "../../api/types";
 
 interface NotesState {
@@ -30,6 +31,8 @@ interface NotesState {
   loadRecentNotes: () => Promise<void>;
   /** Creates a note and places it at the top of the recent feed. */
   createNote: (input: CreateNoteInput) => Promise<void>;
+  /** Updates a note and moves it to the top of the recent feed. */
+  updateNote: (noteRef: string, input: UpdateNoteInput) => Promise<void>;
   /** Deletes a note and removes it from the recent feed. */
   deleteNote: (noteRef: string) => Promise<void>;
   /** Loads fields from the active taxonomy client. */
@@ -55,6 +58,21 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   },
   createNote: async (input) => {
     const note = await notesClient.createNote(input);
+    set((state) => ({
+      notes: [note, ...state.notes.filter((item) => item.id !== note.id)].slice(
+        0,
+        50,
+      ),
+    }));
+
+    const [fields, tags] = await Promise.all([
+      taxonomyClient.listFields(),
+      taxonomyClient.listTags(),
+    ]);
+    set({ fields, tags });
+  },
+  updateNote: async (noteRef, input) => {
+    const note = await notesClient.updateNote(noteRef, input);
     set((state) => ({
       notes: [note, ...state.notes.filter((item) => item.id !== note.id)].slice(
         0,

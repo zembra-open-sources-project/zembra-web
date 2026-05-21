@@ -160,6 +160,58 @@ describe("createNotesHttpClient", () => {
       code: "validation_error",
     } satisfies Partial<ApiError>);
   });
+
+  test("updates notes with replacement field and tags", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+
+      if (url.endsWith("/notes/abc123")) {
+        expect(init?.method).toBe("PATCH");
+        expect(JSON.parse(String(init?.body))).toEqual({
+          content: "edited note",
+          device_id: "device-1",
+          field: "project",
+          tags: ["api", "edit"],
+        });
+
+        return jsonResponse({
+          id: "abc123",
+          content: "edited note",
+          role: "Human",
+          field_id: "field-project",
+          created_at: 1,
+          updated_at: 3,
+        });
+      }
+
+      return jsonResponse({
+        tags: [
+          { id: "tag-1", name: "api", created_at: 1 },
+          { id: "tag-2", name: "edit", created_at: 2 },
+        ],
+      });
+    });
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+
+    await expect(
+      client.updateNote("abc123", {
+        content: "edited note",
+        deviceId: "device-1",
+        field: "project",
+        tags: ["api", "edit"],
+      }),
+    ).resolves.toEqual({
+      id: "abc123",
+      content: "edited note",
+      fieldId: "field-project",
+      createdAt: 1,
+      updatedAt: 3,
+      tags: ["api", "edit"],
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe("mapNoteResponseToDto", () => {
