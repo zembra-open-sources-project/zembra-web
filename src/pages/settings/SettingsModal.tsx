@@ -23,12 +23,12 @@ export function SettingsModal({ client, onClose }: SettingsModalProps) {
         onClick={onClose}
       />
       <div
-        className="relative max-h-full w-full max-w-[640px] overflow-y-auto rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-[var(--color-text-primary)] shadow-[var(--color-shadow-card)] sm:p-6"
+        className="relative max-h-full w-full max-w-[480px] overflow-y-auto rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-[var(--color-text-primary)] shadow-[var(--color-shadow-card)] sm:p-5"
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-modal-title"
       >
-        <header className="relative mb-6 flex min-h-9 items-center justify-center">
+        <header className="relative mb-4 flex min-h-8 items-center justify-center">
           <h1
             className="text-xl font-bold text-[var(--color-text-primary)]"
             id="settings-modal-title"

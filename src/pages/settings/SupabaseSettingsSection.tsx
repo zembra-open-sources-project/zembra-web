@@ -11,6 +11,8 @@ import { syncClient as defaultSyncClient } from "../../api/client";
 import { ApiError } from "../../api/http";
 import type { SyncClient } from "../../api/sync.client";
 import type { SyncConfigDto, SyncConfigTestResultDto } from "../../api/types";
+import { CompactFieldRow } from "./CompactFieldRow";
+import { CompactSettingsCard } from "./CompactSettingsCard";
 
 interface SupabaseSettingsSectionProps {
   /** Optional client override used by tests and isolated previews. */
@@ -211,73 +213,82 @@ export function SupabaseSettingsSection({
       ) : null}
 
       <form className="mt-3 min-w-0" onSubmit={handleSave}>
-        <div className="overflow-hidden rounded-[16px] bg-[var(--color-surface-muted)] shadow-[inset_0_0_0_1px_var(--color-border)]">
-          <FieldLabel label={t("supabase.url")}>
-            <input
-              className="h-9 w-full rounded-[6px] bg-transparent px-2 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:bg-[var(--color-surface)] focus:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
-              placeholder="https://project.supabase.co"
-              value={formState.supabaseUrl}
-              onChange={(event) =>
-                setFormState((current) => ({
-                  ...current,
-                  supabaseUrl: event.target.value,
-                }))
-              }
-            />
-          </FieldLabel>
-
-          <FieldLabel label={t("supabase.secretKey")}>
-            <input
-              className="h-9 w-full rounded-[6px] bg-transparent px-2 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:bg-[var(--color-surface)] focus:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
-              placeholder={t("supabase.secretPlaceholder")}
-              type="password"
-              value={formState.secretKey}
-              onChange={(event) =>
-                setFormState((current) => ({
-                  ...current,
-                  secretKey: event.target.value,
-                }))
-              }
-            />
-          </FieldLabel>
-
-          <FieldLabel
-            error={intervalValidation}
-            label={t("supabase.intervalSeconds")}
-          >
-            <input
-              className="h-9 w-full rounded-[6px] bg-transparent px-2 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:bg-[var(--color-surface)] focus:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
-              inputMode="numeric"
-              min="0"
-              placeholder="300"
-              type="number"
-              value={formState.intervalSeconds}
-              onChange={(event) =>
-                setFormState((current) => ({
-                  ...current,
-                  intervalSeconds: event.target.value,
-                }))
-              }
-            />
-          </FieldLabel>
-
-          <SettingRow label={t("supabase.enableSync")}>
-            <label className="relative inline-flex h-7 w-12 shrink-0 items-center justify-self-end">
+        {/* Two semantic compact cards per r016 design.
+            4px gap between cards is achieved via space-y-1 on the wrapper. */}
+        <div className="space-y-1">
+          <CompactSettingsCard title="连接信息">
+            <CompactFieldRow label={t("supabase.url")}>
               <input
-                checked={syncEnabled}
-                className="peer sr-only"
-                disabled={isLoading || isTogglingEnabled}
-                role="switch"
-                type="checkbox"
-                aria-label={t("supabase.enableSync")}
+                className="h-9 w-full rounded-[6px] bg-transparent px-2 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:bg-[var(--color-surface)] focus:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
+                placeholder="https://project.supabase.co"
+                value={formState.supabaseUrl}
                 onChange={(event) =>
-                  void handleSyncEnabledChange(event.target.checked)
+                  setFormState((current) => ({
+                    ...current,
+                    supabaseUrl: event.target.value,
+                  }))
                 }
               />
-              <span className="absolute inset-0 rounded-full bg-[var(--color-border)] transition peer-checked:bg-[var(--color-accent)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent)]" />
-              <span className="absolute left-1 size-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
-            </label>
-          </SettingRow>
+            </CompactFieldRow>
+
+            <CompactFieldRow
+              helpText={t("supabase.secretPlaceholder")}
+              label={t("supabase.secretKey")}
+            >
+              <input
+                className="h-9 w-full rounded-[6px] bg-transparent px-2 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:bg-[var(--color-surface)] focus:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
+                placeholder={t("supabase.secretPlaceholder")}
+                type="password"
+                value={formState.secretKey}
+                onChange={(event) =>
+                  setFormState((current) => ({
+                    ...current,
+                    secretKey: event.target.value,
+                  }))
+                }
+              />
+            </CompactFieldRow>
+          </CompactSettingsCard>
+
+          <CompactSettingsCard title="同步设置">
+            <CompactFieldRow
+              error={intervalValidation}
+              label={t("supabase.intervalSeconds")}
+            >
+              <input
+                className="h-9 w-full rounded-[6px] bg-transparent px-2 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:bg-[var(--color-surface)] focus:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
+                inputMode="numeric"
+                min="0"
+                placeholder="300"
+                type="number"
+                value={formState.intervalSeconds}
+                onChange={(event) =>
+                  setFormState((current) => ({
+                    ...current,
+                    intervalSeconds: event.target.value,
+                  }))
+                }
+              />
+            </CompactFieldRow>
+
+            <CompactFieldRow label={t("supabase.enableSync")}>
+              <label className="relative inline-flex h-7 w-12 shrink-0 items-center justify-self-end">
+                <input
+                  checked={syncEnabled}
+                  className="peer sr-only"
+                  disabled={isLoading || isTogglingEnabled}
+                  role="switch"
+                  type="checkbox"
+                  aria-label={t("supabase.enableSync")}
+                  onChange={(event) =>
+                    void handleSyncEnabledChange(event.target.checked)
+                  }
+                />
+                <span className="absolute inset-0 rounded-full bg-[var(--color-border)] transition peer-checked:bg-[var(--color-accent)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent)]" />
+                <span className="absolute left-1 size-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
+              </label>
+            </CompactFieldRow>
+          </CompactSettingsCard>
         </div>
 
         {testResult ? (
