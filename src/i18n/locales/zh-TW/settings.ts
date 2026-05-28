@@ -1,9 +1,9 @@
 export const settings = {
   actions: {
-    runSync: "執行同步",
+    runSync: "同步",
     saveAndEnable: "儲存並啟用同步",
-    save: "儲存設定",
-    testConnection: "測試連線",
+    save: "儲存",
+    testConnection: "測試",
   },
   description: "設定由後端管理的 Supabase 同步，避免暴露已儲存的 service role 密鑰。",
   form: {

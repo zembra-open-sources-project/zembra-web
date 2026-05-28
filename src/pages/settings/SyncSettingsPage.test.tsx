@@ -80,7 +80,7 @@ describe("SyncSettingsPage", () => {
       target: { value: "https://next.supabase.co" },
     });
     fireEvent.change(keyInput, { target: { value: "   " } });
-    fireEvent.click(screen.getByRole("button", { name: "Save Settings" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => {
       expect(client.updateConfig).toHaveBeenCalledWith({
@@ -111,7 +111,7 @@ describe("SyncSettingsPage", () => {
     renderSettingsPage(<SyncSettingsPage client={client} />);
 
     await screen.findByDisplayValue("https://project.supabase.co");
-    fireEvent.click(screen.getByRole("button", { name: "Save Settings" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => {
       expect(client.updateConfig).toHaveBeenCalledWith({
@@ -129,7 +129,7 @@ describe("SyncSettingsPage", () => {
     const intervalInput = await screen.findByDisplayValue("120");
 
     fireEvent.change(intervalInput, { target: { value: "1.5" } });
-    fireEvent.click(screen.getByRole("button", { name: "Save Settings" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
     expect(
       screen.getByText("Interval seconds must be 0 or a positive integer"),
@@ -142,7 +142,7 @@ describe("SyncSettingsPage", () => {
 
     await screen.findByDisplayValue("https://project.supabase.co");
 
-    fireEvent.click(screen.getByRole("button", { name: "Test Connection" }));
+    fireEvent.click(screen.getByRole("button", { name: "Test" }));
 
     await waitFor(() => {
       expect(client.testConfig).toHaveBeenCalledWith({
@@ -159,7 +159,7 @@ describe("SyncSettingsPage", () => {
 
     await screen.findByDisplayValue("https://project.supabase.co");
 
-    fireEvent.click(screen.getByRole("button", { name: "Run Sync" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sync" }));
 
     expect(await screen.findByText("Pushed 2, pulled 3")).not.toBeNull();
     expect(client.runSync).toHaveBeenCalled();

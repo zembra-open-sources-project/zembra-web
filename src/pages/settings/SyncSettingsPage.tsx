@@ -332,7 +332,7 @@ export function SyncSettingsPage({
               <SecretState configured={config?.serviceRoleKeyConfigured ?? false} />
             </div>
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-nowrap items-center gap-3 overflow-x-auto">
               <ActionButton
                 busy={isTesting}
                 icon={<TestTube2 className="size-4" aria-hidden="true" />}
@@ -477,7 +477,7 @@ function ActionButton({
 }) {
   return (
     <button
-      className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] bg-[var(--color-accent)] px-4 text-sm font-bold text-[var(--color-accent-contrast)] hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[10px] bg-[var(--color-accent)] px-4 py-2 text-sm font-bold text-[var(--color-accent-contrast)] hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
       disabled={busy || disabled}
       type={type}
       onClick={onClick}

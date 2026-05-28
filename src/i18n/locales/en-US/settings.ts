@@ -1,9 +1,9 @@
 export const settings = {
   actions: {
-    runSync: "Run Sync",
+    runSync: "Sync",
     saveAndEnable: "Save & Enable Sync",
-    save: "Save Settings",
-    testConnection: "Test Connection",
+    save: "Save",
+    testConnection: "Test",
   },
   description:
     "Configure backend-managed Supabase synchronization without exposing stored service role secrets.",
