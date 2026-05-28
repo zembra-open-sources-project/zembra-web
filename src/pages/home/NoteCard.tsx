@@ -231,9 +231,20 @@ function NoteLinkPreview({
   const [isLoading, setIsLoading] = useState(false);
   const [preview, setPreview] = useState<NoteDto>();
   const [hasError, setHasError] = useState(false);
+  const [previewPosition, setPreviewPosition] = useState({ left: 0, top: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   /** Loads preview content when the user inspects this note reference. */
   async function handlePreviewOpen() {
+    const rect = buttonRef.current?.getBoundingClientRect();
+
+    if (rect) {
+      setPreviewPosition({
+        left: Math.min(rect.left, window.innerWidth - 304),
+        top: rect.bottom + 6,
+      });
+    }
+
     setIsOpen(true);
 
     if (preview || isLoading) {
@@ -268,12 +279,19 @@ function NoteLinkPreview({
         onFocus={() => void handlePreviewOpen()}
         onMouseEnter={() => void handlePreviewOpen()}
         onMouseLeave={handlePreviewClose}
+        ref={buttonRef}
         type="button"
       >
         {formatShortNoteRef(noteRef)}
       </button>
       {isOpen ? (
-        <span className="absolute left-0 top-7 z-40 block w-72 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-3 py-2 text-left text-sm leading-6 text-[var(--color-text-primary)] shadow-[var(--color-shadow-float)]">
+        <span
+          className="fixed z-40 block w-72 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-3 py-2 text-left text-sm leading-6 text-[var(--color-text-primary)] shadow-[var(--color-shadow-float)]"
+          style={{
+            left: `${Math.max(8, previewPosition.left)}px`,
+            top: `${previewPosition.top}px`,
+          }}
+        >
           {isLoading
             ? t("note.linkPreview.loading")
             : hasError
