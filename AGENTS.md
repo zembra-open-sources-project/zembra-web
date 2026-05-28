@@ -120,3 +120,7 @@
 - 除非用户提示，否则禁止使用 git commit --amend。
 - git 操作必须串行执行，避免并发 git add、commit、merge、rebase、checkout、switch。
 - 执行 git checkout、git switch 或任何会改变当前分支的操作前，必须先运行 git worktree list，并确认当前 worktree 归属和目标分支占用情况。
+
+## 相关资源
+
+- Backend URL 默认为 `https://localhost:3000`
