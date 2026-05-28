@@ -3,6 +3,9 @@ export const settings = {
     save: "儲存",
     test: "測試",
   },
+  categories: {
+    sync: "同步",
+  },
   close: "關閉",
   form: {
     settings: {

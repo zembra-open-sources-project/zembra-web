@@ -3,6 +3,9 @@ export const settings = {
     save: "Save",
     test: "Test",
   },
+  categories: {
+    sync: "Sync",
+  },
   close: "Close",
   form: {
     settings: {

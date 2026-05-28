@@ -11,8 +11,6 @@ import { syncClient as defaultSyncClient } from "../../api/client";
 import { ApiError } from "../../api/http";
 import type { SyncClient } from "../../api/sync.client";
 import type { SyncConfigDto, SyncConfigTestResultDto } from "../../api/types";
-import { CompactFieldRow } from "./CompactFieldRow";
-import { CompactSettingsCard } from "./CompactSettingsCard";
 
 interface SupabaseSettingsSectionProps {
   /** Optional client override used by tests and isolated previews. */
@@ -189,18 +187,21 @@ export function SupabaseSettingsSection({
 
   return (
     <section aria-labelledby="supabase-settings-title" className="min-w-0">
-      <div className="mb-3 flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 py-5">
         <div className="min-w-0">
           <h2
-            className="text-sm font-semibold text-[var(--color-text-muted)]"
+            className="text-base font-semibold text-[var(--color-text-primary)]"
             id="supabase-settings-title"
           >
             {t("supabase.title")}
           </h2>
+          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+            {t("supabase.description")}
+          </p>
         </div>
         {isLoading ? (
           <Loader2
-            className="mt-1 size-5 shrink-0 animate-spin text-[var(--color-accent)]"
+            className="size-5 shrink-0 animate-spin text-[var(--color-accent)]"
             aria-hidden="true"
           />
         ) : null}
@@ -212,83 +213,77 @@ export function SupabaseSettingsSection({
         <Alert tone="success" message={successMessage} />
       ) : null}
 
-      <form className="mt-3 min-w-0" onSubmit={handleSave}>
-        {/* Two semantic compact cards per r016 design.
-            4px gap between cards is achieved via space-y-1 on the wrapper. */}
-        <div className="space-y-1">
-          <CompactSettingsCard title="连接信息">
-            <CompactFieldRow label={t("supabase.url")}>
+      <form className="min-w-0" onSubmit={handleSave}>
+        <div className="border-t border-[var(--color-border-subtle)]">
+          <SettingsFieldRow label={t("supabase.url")}>
+            <input
+              className="h-10 w-full max-w-[340px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
+              placeholder="https://project.supabase.co"
+              value={formState.supabaseUrl}
+              onChange={(event) =>
+                setFormState((current) => ({
+                  ...current,
+                  supabaseUrl: event.target.value,
+                }))
+              }
+            />
+          </SettingsFieldRow>
+
+          <SettingsFieldRow
+            helpText={t("supabase.secretPlaceholder")}
+            label={t("supabase.secretKey")}
+          >
+            <input
+              className="h-10 w-full max-w-[340px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
+              placeholder={t("supabase.secretPlaceholder")}
+              type="password"
+              value={formState.secretKey}
+              onChange={(event) =>
+                setFormState((current) => ({
+                  ...current,
+                  secretKey: event.target.value,
+                }))
+              }
+            />
+          </SettingsFieldRow>
+
+          <SettingsFieldRow
+            error={intervalValidation}
+            label={t("supabase.intervalSeconds")}
+          >
+            <input
+              className="h-10 w-full max-w-[180px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
+              inputMode="numeric"
+              min="0"
+              placeholder="300"
+              type="number"
+              value={formState.intervalSeconds}
+              onChange={(event) =>
+                setFormState((current) => ({
+                  ...current,
+                  intervalSeconds: event.target.value,
+                }))
+              }
+            />
+          </SettingsFieldRow>
+
+          <SettingsFieldRow label={t("supabase.enableSync")}>
+            <label className="relative inline-flex h-7 w-12 shrink-0 items-center justify-self-end">
               <input
-                className="h-9 w-full rounded-[6px] bg-transparent px-2 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:bg-[var(--color-surface)] focus:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
-                placeholder="https://project.supabase.co"
-                value={formState.supabaseUrl}
+                checked={syncEnabled}
+                className="peer sr-only"
+                disabled={isLoading || isTogglingEnabled}
+                role="switch"
+                type="checkbox"
+                aria-label={t("supabase.enableSync")}
                 onChange={(event) =>
-                  setFormState((current) => ({
-                    ...current,
-                    supabaseUrl: event.target.value,
-                  }))
+                  void handleSyncEnabledChange(event.target.checked)
                 }
               />
-            </CompactFieldRow>
-
-            <CompactFieldRow
-              helpText={t("supabase.secretPlaceholder")}
-              label={t("supabase.secretKey")}
-            >
-              <input
-                className="h-9 w-full rounded-[6px] bg-transparent px-2 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:bg-[var(--color-surface)] focus:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
-                placeholder={t("supabase.secretPlaceholder")}
-                type="password"
-                value={formState.secretKey}
-                onChange={(event) =>
-                  setFormState((current) => ({
-                    ...current,
-                    secretKey: event.target.value,
-                  }))
-                }
-              />
-            </CompactFieldRow>
-          </CompactSettingsCard>
-
-          <CompactSettingsCard title="同步设置">
-            <CompactFieldRow
-              error={intervalValidation}
-              label={t("supabase.intervalSeconds")}
-            >
-              <input
-                className="h-9 w-full rounded-[6px] bg-transparent px-2 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:bg-[var(--color-surface)] focus:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
-                inputMode="numeric"
-                min="0"
-                placeholder="300"
-                type="number"
-                value={formState.intervalSeconds}
-                onChange={(event) =>
-                  setFormState((current) => ({
-                    ...current,
-                    intervalSeconds: event.target.value,
-                  }))
-                }
-              />
-            </CompactFieldRow>
-
-            <CompactFieldRow label={t("supabase.enableSync")}>
-              <label className="relative inline-flex h-7 w-12 shrink-0 items-center justify-self-end">
-                <input
-                  checked={syncEnabled}
-                  className="peer sr-only"
-                  disabled={isLoading || isTogglingEnabled}
-                  role="switch"
-                  type="checkbox"
-                  aria-label={t("supabase.enableSync")}
-                  onChange={(event) =>
-                    void handleSyncEnabledChange(event.target.checked)
-                  }
-                />
-                <span className="absolute inset-0 rounded-full bg-[var(--color-border)] transition peer-checked:bg-[var(--color-accent)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent)]" />
-                <span className="absolute left-1 size-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
-              </label>
-            </CompactFieldRow>
-          </CompactSettingsCard>
+              <span className="absolute inset-0 rounded-full bg-[var(--color-border)] transition peer-checked:bg-[var(--color-accent)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent)]" />
+              <span className="absolute left-1 size-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
+            </label>
+          </SettingsFieldRow>
         </div>
 
         {testResult ? (
@@ -297,7 +292,7 @@ export function SupabaseSettingsSection({
           </p>
         ) : null}
 
-        <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
+        <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
           <ActionButton
             busy={isTesting}
             icon={<TestTube2 className="size-4" aria-hidden="true" />}
@@ -348,46 +343,37 @@ function formatErrorMessage(error: unknown): string {
   return "Request failed";
 }
 
-/** Renders a form field label with optional validation feedback. */
-function FieldLabel({
+/** Renders one flat settings row with the real control aligned on the right. */
+function SettingsFieldRow({
   children,
   error,
+  helpText,
   label,
 }: {
   children: ReactNode;
   error?: string;
+  helpText?: string;
   label: string;
 }) {
   return (
-    <label className="grid min-w-0 grid-cols-[150px_minmax(0,1fr)] items-center gap-4 border-b border-[var(--color-border-subtle)] px-4 py-3 last:border-b-0">
-      <span className="min-w-0 text-sm font-semibold text-[var(--color-text-primary)]">
-        {label}
-      </span>
-      <span className="min-w-0">{children}</span>
+    <label className="grid min-w-0 grid-cols-1 gap-3 border-b border-[var(--color-border-subtle)] py-4 sm:grid-cols-[minmax(160px,220px)_minmax(0,1fr)] sm:items-center">
+      <div className="min-w-0">
+        <div className="text-sm font-medium text-[var(--color-text-primary)]">
+          {label}
+        </div>
+        {helpText ? (
+          <div className="mt-1 text-xs text-[var(--color-text-muted)]">
+            {helpText}
+          </div>
+        ) : null}
+      </div>
+      <div className="flex min-w-0 justify-start sm:justify-end">{children}</div>
       {error ? (
-        <span className="col-start-2 block text-right text-xs text-[var(--color-error)]">
+        <div className="text-xs text-[var(--color-error)] sm:col-start-2 sm:text-right">
           {error}
-        </span>
+        </div>
       ) : null}
     </label>
-  );
-}
-
-/** Renders one compact settings row with label and control on the same line. */
-function SettingRow({
-  children,
-  label,
-}: {
-  children: ReactNode;
-  label: string;
-}) {
-  return (
-    <div className="grid min-w-0 grid-cols-[150px_minmax(0,1fr)] items-center gap-4 border-b border-[var(--color-border-subtle)] px-4 py-3 last:border-b-0">
-      <div className="min-w-0 text-sm font-semibold text-[var(--color-text-primary)]">
-        {label}
-      </div>
-      <div className="flex min-w-0 justify-end">{children}</div>
-    </div>
   );
 }
 

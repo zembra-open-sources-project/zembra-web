@@ -53,7 +53,8 @@ function renderSettingsModal(onClose = vi.fn()) {
 test("renders Settings dialog with Supabase section", async () => {
   renderSettingsModal();
 
-  expect(screen.getByRole("dialog", { name: "Settings" })).not.toBeNull();
+  expect(screen.getByRole("dialog", { name: "Sync" })).not.toBeNull();
+  expect(screen.getByRole("button", { name: "Sync" })).not.toBeNull();
   expect(await screen.findByText("Supabase")).not.toBeNull();
   expect(screen.getByRole("switch", { name: "Enable sync" })).not.toBeNull();
 });
@@ -61,8 +62,7 @@ test("renders Settings dialog with Supabase section", async () => {
 test("closes Settings dialog from close button and backdrop", () => {
   const onClose = renderSettingsModal();
 
-  fireEvent.click(screen.getAllByRole("button", { name: "Close" })[1]);
   fireEvent.click(screen.getAllByRole("button", { name: "Close" })[0]);
 
-  expect(onClose).toHaveBeenCalledTimes(2);
+  expect(onClose).toHaveBeenCalledTimes(1);
 });
