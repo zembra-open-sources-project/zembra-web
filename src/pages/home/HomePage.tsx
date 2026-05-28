@@ -7,7 +7,6 @@ import {
   Loader2,
   RefreshCw,
   Search,
-  Settings,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ThemeToggle } from "../../app/ThemeToggle";
@@ -17,7 +16,7 @@ import { ApiError } from "../../api/http";
 import type { SyncClient } from "../../api/sync.client";
 import { useNotesStore } from "../../features/notes/noteStore";
 import type { NoteDto } from "../../api/types";
-import { SettingsModal } from "../settings/SettingsModal";
+import { SettingsModule } from "../settings/SettingsModule";
 import { NoteCard } from "./NoteCard";
 import { NoteEditor } from "./NoteEditor";
 import {
@@ -49,7 +48,6 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
   const [editingNoteId, setEditingNoteId] = useState<string>();
   const [editDraft, setEditDraft] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncFeedback, setSyncFeedback] = useState<string | undefined>();
   const [syncError, setSyncError] = useState<string | undefined>();
@@ -259,18 +257,7 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
                   )}
                 </button>
                 <ThemeToggle />
-                <button
-                  className="flex size-[34px] shrink-0 items-center justify-center rounded-[9px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
-                  title={t("form.settings.title", { ns: "settings" })}
-                  type="button"
-                  aria-label={t("form.settings.title", { ns: "settings" })}
-                  onClick={() => setIsSettingsOpen(true)}
-                >
-                  <Settings
-                    className="size-4 text-[var(--color-accent)]"
-                    aria-hidden="true"
-                  />
-                </button>
+                <SettingsModule client={syncClient} />
               </div>
             </div>
 
@@ -420,12 +407,6 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
           </div>
         </form>
       </div>
-      {isSettingsOpen ? (
-        <SettingsModal
-          client={syncClient}
-          onClose={() => setIsSettingsOpen(false)}
-        />
-      ) : null}
     </main>
   );
 }
