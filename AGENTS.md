@@ -40,7 +40,6 @@
 
 ### 共享数据库契约
 - 本项目群的数据表契约来自 `vendor/zembra-schema` submodule，远程仓库为 `https://github.com/gawainx/zembra-schema.git`。
-- 当前固定版本为 `v0.1.0`，submodule commit 为 `a557f37c2827eb5cd8cd2ca4dd639a082764a763`。
 - 数据表说明、SQLite DDL、JSON Schema 和 migration 以 `vendor/zembra-schema` 为准，本仓库禁止复制维护数据表设计正文。
 - 前端代码只能通过 API Client 或 Repository 层消费业务数据，禁止让 UI 组件直接依赖 SQLite 表结构或未来 Supabase 的具体查询实现。
 - 涉及 schema 升级时，必须先确认兼容性；如果存在破坏性变化，需要同步更新前端数据访问逻辑和迁移策略说明。
