@@ -15,6 +15,10 @@ export interface SettingsCategory {
   id: SettingsCategoryId;
   /** Translation key for the visible category label. */
   labelKey: string;
+  /** Translation key for the content title shown in the settings header. */
+  titleKey: string;
+  /** Optional translation key for the settings header description. */
+  descriptionKey?: string;
   /** Icon shown in the settings category navigation item. */
   icon: ComponentType<SVGProps<SVGSVGElement>>;
   /** Renders the real settings content for this category. */
@@ -25,8 +29,10 @@ export interface SettingsCategory {
 export const settingsCategories: SettingsCategory[] = [
   {
     icon: RefreshCw,
+    descriptionKey: "supabase.description",
     id: "sync",
     labelKey: "categories.sync",
+    titleKey: "supabase.title",
     renderContent: ({ client }) => <SupabaseSettingsSection client={client} />,
   },
 ];

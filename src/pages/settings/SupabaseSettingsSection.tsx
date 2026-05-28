@@ -33,7 +33,9 @@ const initialFormState: SupabaseSettingsFormState = {
 };
 
 const settingsLineInputClassName =
-  "h-10 w-full max-w-[320px] border-0 border-b border-[var(--color-border)] bg-transparent px-0 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]";
+  "h-10 w-full max-w-[320px] border-0 border-b border-[var(--color-border)] bg-transparent px-0 text-left text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]";
+const settingsNumberInputClassName =
+  "h-10 w-[60px] border-0 border-b border-[var(--color-border)] bg-transparent px-0 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]";
 
 /** Renders the Supabase synchronization section inside the Settings modal. */
 export function SupabaseSettingsSection({
@@ -189,19 +191,8 @@ export function SupabaseSettingsSection({
   }
 
   return (
-    <section aria-labelledby="supabase-settings-title" className="min-w-0">
-      <div className="flex items-center justify-between gap-4 py-5">
-        <div className="min-w-0">
-          <h2
-            className="text-base font-semibold text-[var(--color-text-primary)]"
-            id="supabase-settings-title"
-          >
-            {t("supabase.title")}
-          </h2>
-          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-            {t("supabase.description")}
-          </p>
-        </div>
+    <section aria-label={t("supabase.title")} className="min-w-0">
+      <div className="flex justify-end py-3">
         {isLoading ? (
           <Loader2
             className="size-5 shrink-0 animate-spin text-[var(--color-accent)]"
@@ -232,10 +223,7 @@ export function SupabaseSettingsSection({
             />
           </SettingsFieldRow>
 
-          <SettingsFieldRow
-            helpText={t("supabase.secretPlaceholder")}
-            label={t("supabase.secretKey")}
-          >
+          <SettingsFieldRow label={t("supabase.secretKey")}>
             <input
               className={settingsLineInputClassName}
               placeholder={t("supabase.secretPlaceholder")}
@@ -255,7 +243,7 @@ export function SupabaseSettingsSection({
             label={t("supabase.intervalSeconds")}
           >
             <input
-              className={`${settingsLineInputClassName} sm:max-w-[160px]`}
+              className={settingsNumberInputClassName}
               inputMode="numeric"
               min="0"
               placeholder="300"
@@ -359,7 +347,7 @@ function SettingsFieldRow({
   label: string;
 }) {
   return (
-    <label className="grid min-w-0 grid-cols-1 gap-3 border-b border-[var(--color-border-subtle)] py-4 sm:grid-cols-[minmax(160px,220px)_minmax(0,1fr)] sm:items-center">
+    <label className="grid min-w-0 grid-cols-1 gap-3 border-b border-[var(--color-border-subtle)] py-0.5 sm:grid-cols-[minmax(140px,180px)_minmax(0,1fr)] sm:items-center">
       <div className="min-w-0">
         <div className="text-sm font-medium text-[var(--color-text-primary)]">
           {label}

@@ -322,12 +322,12 @@ test("opens and closes Settings modal from the home toolbar", async () => {
 
   fireEvent.click(await screen.findByRole("button", { name: "设置" }));
 
-  expect(await screen.findByRole("dialog", { name: "同步" })).not.toBeNull();
+  expect(await screen.findByRole("dialog", { name: "Supabase" })).not.toBeNull();
 
   fireEvent.click(screen.getAllByRole("button", { name: "关闭" })[0]);
 
   await waitFor(() =>
-    expect(screen.queryByRole("dialog", { name: "同步" })).toBeNull(),
+    expect(screen.queryByRole("dialog", { name: "Supabase" })).toBeNull(),
   );
 });
 

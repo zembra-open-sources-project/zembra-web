@@ -28,6 +28,10 @@ export function SettingsModal({ client, onClose }: SettingsModalProps) {
   }
 
   const activeCategoryLabel = t(activeCategory.labelKey);
+  const activeCategoryTitle = t(activeCategory.titleKey);
+  const activeCategoryDescription = activeCategory.descriptionKey
+    ? t(activeCategory.descriptionKey)
+    : undefined;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-3 py-4 sm:px-6 sm:py-8">
@@ -38,12 +42,12 @@ export function SettingsModal({ client, onClose }: SettingsModalProps) {
         onClick={onClose}
       />
       <div
-        className="relative grid max-h-full w-full max-w-[880px] grid-cols-1 overflow-hidden rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-[var(--color-shadow-float)] md:grid-cols-[232px_minmax(0,1fr)]"
+        className="relative grid max-h-full w-full max-w-[700px] grid-cols-1 overflow-hidden rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-[var(--color-shadow-float)] md:h-[450px] md:grid-cols-[200px_minmax(0,1fr)]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-modal-title"
       >
-        <aside className="flex min-w-0 flex-col px-3 pb-3 pt-3 md:min-h-[560px] md:px-4 md:pb-5 md:pt-5">
+        <aside className="flex min-w-0 flex-col px-3 pb-3 pt-3 md:min-h-[450px] md:px-4 md:pb-5 md:pt-5">
           <div className="flex min-h-11 items-center">
             <button
               className="flex size-10 shrink-0 items-center justify-center rounded-[10px] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]"
@@ -82,13 +86,18 @@ export function SettingsModal({ client, onClose }: SettingsModalProps) {
           </nav>
         </aside>
 
-        <main className="min-h-0 min-w-0 overflow-y-auto px-5 pb-6 pt-4 sm:px-8 md:px-9 md:pb-8 md:pt-8">
+        <main className="min-h-0 min-w-0 overflow-y-auto px-5 pb-6 pt-4 sm:px-8 md:px-8 md:pb-6 md:pt-8">
           <h1
             className="text-2xl font-semibold text-[var(--color-text-primary)]"
             id="settings-modal-title"
           >
-            {activeCategoryLabel}
+            {activeCategoryTitle}
           </h1>
+          {activeCategoryDescription ? (
+            <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+              {activeCategoryDescription}
+            </p>
+          ) : null}
           <div className="mt-7 border-t border-[var(--color-border)] pt-0">
             {activeCategory.renderContent({ client })}
           </div>

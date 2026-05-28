@@ -18,7 +18,7 @@ export const settings = {
     intervalSeconds: "同步間隔秒數",
     intervalSecondsError: "同步間隔必須為 0 或正整數",
     secretKey: "Secret key",
-    secretPlaceholder: "留空則保留現有 secret",
+    secretPlaceholder: "留空保留",
     title: "Supabase",
     url: "Supabase URL",
   },

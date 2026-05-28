@@ -53,7 +53,7 @@ function renderSettingsModal(onClose = vi.fn()) {
 test("renders Settings dialog with Supabase section", async () => {
   renderSettingsModal();
 
-  expect(screen.getByRole("dialog", { name: "Sync" })).not.toBeNull();
+  expect(screen.getByRole("dialog", { name: "Supabase" })).not.toBeNull();
   expect(screen.getByRole("button", { name: "Sync" })).not.toBeNull();
   expect(await screen.findByText("Supabase")).not.toBeNull();
   expect(screen.getByRole("switch", { name: "Enable sync" })).not.toBeNull();

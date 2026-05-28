@@ -105,7 +105,7 @@ describe("SupabaseSettingsSection", () => {
     renderSupabaseSection();
 
     const urlInput = await screen.findByDisplayValue("https://project.supabase.co");
-    const keyInput = screen.getByPlaceholderText("Leave blank to keep existing secret");
+    const keyInput = screen.getByPlaceholderText("Keep existing");
 
     fireEvent.change(urlInput, {
       target: { value: "https://next.supabase.co" },
