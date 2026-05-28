@@ -493,30 +493,40 @@ function ResultPanel({
   testResult?: SyncConfigTestResultDto;
 }) {
   const { t } = useTranslation("settings");
+  const manualSyncLabel = runResult
+    ? t("results.manualSyncSummary", {
+        pulled: runResult.pulled,
+        pushed: runResult.pushed,
+      })
+    : t("results.noSyncRun");
 
   return (
     <section className="rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--color-shadow-card)]">
-      <h2 className="mb-4 text-base font-bold text-[var(--color-text-primary)]">{t("results.title")}</h2>
-      <div className="flex flex-col gap-3 text-sm text-[var(--color-text-secondary)]">
-        <div className="rounded-[12px] bg-[var(--color-surface-muted)] px-4 py-3">
-          <div className="font-semibold">{t("results.testConnection")}</div>
-          <div className="mt-1 text-[var(--color-text-muted)]">
-            {testResult ? testResult.message : t("results.noTestRun")}
-          </div>
-        </div>
-        <div className="rounded-[12px] bg-[var(--color-surface-muted)] px-4 py-3">
-          <div className="font-semibold">{t("results.manualSync")}</div>
-          <div className="mt-1 text-[var(--color-text-muted)]">
-            {runResult
-              ? t("results.manualSyncSummary", {
-                  pulled: runResult.pulled,
-                  pushed: runResult.pushed,
-                })
-              : t("results.noSyncRun")}
-          </div>
-        </div>
+      <div className="mb-3 flex items-center gap-2">
+        <TestTube2 className="size-4 text-[var(--color-accent)]" aria-hidden="true" />
+        <h2 className="text-base font-bold text-[var(--color-text-primary)]">{t("results.title")}</h2>
+      </div>
+      <div className="divide-y divide-[var(--color-border-subtle)] text-sm">
+        <StatusLine
+          label={t("results.testConnection")}
+          value={testResult ? testResult.message : t("results.noTestRun")}
+        />
+        <StatusLine
+          label={t("results.manualSync")}
+          value={manualSyncLabel}
+        />
       </div>
     </section>
+  );
+}
+
+/** Renders one lightweight status row inside a settings status card. */
+function StatusLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-3 first:pt-0 last:pb-0">
+      <span className="font-semibold text-[var(--color-text-secondary)]">{label}</span>
+      <span className="min-w-0 text-right text-[var(--color-text-muted)]">{value}</span>
+    </div>
   );
 }
 
