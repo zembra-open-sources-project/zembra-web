@@ -28,7 +28,7 @@ export function SettingsModal({ client, onClose }: SettingsModalProps) {
         aria-modal="true"
         aria-labelledby="settings-modal-title"
       >
-        <header className="mb-5 flex items-center justify-between gap-4">
+        <header className="relative mb-6 flex min-h-9 items-center justify-center">
           <h1
             className="text-xl font-bold text-[var(--color-text-primary)]"
             id="settings-modal-title"
@@ -36,7 +36,7 @@ export function SettingsModal({ client, onClose }: SettingsModalProps) {
             {t("title")}
           </h1>
           <button
-            className="flex size-9 shrink-0 items-center justify-center rounded-[9px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
+            className="absolute right-0 top-0 flex size-9 shrink-0 items-center justify-center rounded-[9px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
             type="button"
             aria-label={t("close")}
             onClick={onClose}

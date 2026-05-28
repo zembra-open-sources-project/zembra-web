@@ -187,17 +187,14 @@ export function SupabaseSettingsSection({
 
   return (
     <section aria-labelledby="supabase-settings-title" className="min-w-0">
-      <div className="mb-4 flex items-start justify-between gap-4">
+      <div className="mb-3 flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h2
-            className="text-base font-bold text-[var(--color-text-primary)]"
+            className="text-sm font-semibold text-[var(--color-text-muted)]"
             id="supabase-settings-title"
           >
             {t("supabase.title")}
           </h2>
-          <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">
-            {t("supabase.description")}
-          </p>
         </div>
         {isLoading ? (
           <Loader2
@@ -213,81 +210,83 @@ export function SupabaseSettingsSection({
         <Alert tone="success" message={successMessage} />
       ) : null}
 
-      <form className="mt-4 flex min-w-0 flex-col gap-3" onSubmit={handleSave}>
-        <FieldLabel label={t("supabase.url")}>
-          <input
-            className="h-11 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
-            placeholder="https://project.supabase.co"
-            value={formState.supabaseUrl}
-            onChange={(event) =>
-              setFormState((current) => ({
-                ...current,
-                supabaseUrl: event.target.value,
-              }))
-            }
-          />
-        </FieldLabel>
-
-        <FieldLabel label={t("supabase.secretKey")}>
-          <input
-            className="h-11 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
-            placeholder={t("supabase.secretPlaceholder")}
-            type="password"
-            value={formState.secretKey}
-            onChange={(event) =>
-              setFormState((current) => ({
-                ...current,
-                secretKey: event.target.value,
-              }))
-            }
-          />
-        </FieldLabel>
-
-        <FieldLabel
-          error={intervalValidation}
-          label={t("supabase.intervalSeconds")}
-        >
-          <input
-            className="h-11 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
-            inputMode="numeric"
-            min="0"
-            placeholder="300"
-            type="number"
-            value={formState.intervalSeconds}
-            onChange={(event) =>
-              setFormState((current) => ({
-                ...current,
-                intervalSeconds: event.target.value,
-              }))
-            }
-          />
-        </FieldLabel>
-
-        <SettingRow label={t("supabase.enableSync")}>
-          <label className="relative inline-flex h-7 w-12 shrink-0 items-center justify-self-end">
+      <form className="mt-3 min-w-0" onSubmit={handleSave}>
+        <div className="overflow-hidden rounded-[16px] bg-[var(--color-surface-muted)] shadow-[inset_0_0_0_1px_var(--color-border)]">
+          <FieldLabel label={t("supabase.url")}>
             <input
-              checked={syncEnabled}
-              className="peer sr-only"
-              disabled={isLoading || isTogglingEnabled}
-              role="switch"
-              type="checkbox"
-              aria-label={t("supabase.enableSync")}
+              className="h-9 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
+              placeholder="https://project.supabase.co"
+              value={formState.supabaseUrl}
               onChange={(event) =>
-                void handleSyncEnabledChange(event.target.checked)
+                setFormState((current) => ({
+                  ...current,
+                  supabaseUrl: event.target.value,
+                }))
               }
             />
-            <span className="absolute inset-0 rounded-full bg-[var(--color-border)] transition peer-checked:bg-[var(--color-accent)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent)]" />
-            <span className="absolute left-1 size-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
-          </label>
-        </SettingRow>
+          </FieldLabel>
+
+          <FieldLabel label={t("supabase.secretKey")}>
+            <input
+              className="h-9 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
+              placeholder={t("supabase.secretPlaceholder")}
+              type="password"
+              value={formState.secretKey}
+              onChange={(event) =>
+                setFormState((current) => ({
+                  ...current,
+                  secretKey: event.target.value,
+                }))
+              }
+            />
+          </FieldLabel>
+
+          <FieldLabel
+            error={intervalValidation}
+            label={t("supabase.intervalSeconds")}
+          >
+            <input
+              className="h-9 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
+              inputMode="numeric"
+              min="0"
+              placeholder="300"
+              type="number"
+              value={formState.intervalSeconds}
+              onChange={(event) =>
+                setFormState((current) => ({
+                  ...current,
+                  intervalSeconds: event.target.value,
+                }))
+              }
+            />
+          </FieldLabel>
+
+          <SettingRow label={t("supabase.enableSync")}>
+            <label className="relative inline-flex h-7 w-12 shrink-0 items-center justify-self-end">
+              <input
+                checked={syncEnabled}
+                className="peer sr-only"
+                disabled={isLoading || isTogglingEnabled}
+                role="switch"
+                type="checkbox"
+                aria-label={t("supabase.enableSync")}
+                onChange={(event) =>
+                  void handleSyncEnabledChange(event.target.checked)
+                }
+              />
+              <span className="absolute inset-0 rounded-full bg-[var(--color-border)] transition peer-checked:bg-[var(--color-accent)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent)]" />
+              <span className="absolute left-1 size-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
+            </label>
+          </SettingRow>
+        </div>
 
         {testResult ? (
-          <p className="text-sm text-[var(--color-text-secondary)]" role="status">
+          <p className="mt-3 text-sm text-[var(--color-text-secondary)]" role="status">
             {testResult.message}
           </p>
         ) : null}
 
-        <div className="flex flex-wrap items-center justify-end gap-3 pt-1">
+        <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
           <ActionButton
             busy={isTesting}
             icon={<TestTube2 className="size-4" aria-hidden="true" />}
@@ -349,13 +348,13 @@ function FieldLabel({
   label: string;
 }) {
   return (
-    <label className="grid min-w-0 grid-cols-[150px_minmax(0,1fr)] items-center gap-4 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3">
-      <span className="min-w-0 text-sm font-semibold text-[var(--color-text-secondary)]">
+    <label className="grid min-w-0 grid-cols-[150px_minmax(0,1fr)] items-center gap-4 border-b border-[var(--color-border-subtle)] px-4 py-3 last:border-b-0">
+      <span className="min-w-0 text-sm font-semibold text-[var(--color-text-primary)]">
         {label}
       </span>
       <span className="min-w-0">{children}</span>
       {error ? (
-        <span className="col-start-2 block text-xs text-[var(--color-error)]">
+        <span className="col-start-2 block text-right text-xs text-[var(--color-error)]">
           {error}
         </span>
       ) : null}
@@ -372,11 +371,11 @@ function SettingRow({
   label: string;
 }) {
   return (
-    <div className="grid min-w-0 grid-cols-[150px_minmax(0,1fr)] items-center gap-4 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3">
-      <div className="min-w-0 text-sm font-semibold text-[var(--color-text-secondary)]">
+    <div className="grid min-w-0 grid-cols-[150px_minmax(0,1fr)] items-center gap-4 border-b border-[var(--color-border-subtle)] px-4 py-3 last:border-b-0">
+      <div className="min-w-0 text-sm font-semibold text-[var(--color-text-primary)]">
         {label}
       </div>
-      <div className="min-w-0">{children}</div>
+      <div className="flex min-w-0 justify-end">{children}</div>
     </div>
   );
 }
@@ -399,7 +398,7 @@ function ActionButton({
 }) {
   return (
     <button
-      className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[10px] bg-[var(--color-accent)] px-4 py-2 text-sm font-bold text-[var(--color-accent-contrast)] hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex min-h-9 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[9px] px-3 py-2 text-sm font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-muted)] disabled:cursor-not-allowed disabled:opacity-50"
       disabled={busy || disabled}
       type={type}
       onClick={onClick}
