@@ -24,6 +24,8 @@ export const home = {
   note: {
     actions: "笔记操作",
     collapse: "收起",
+    copyLink: "拷贝链接",
+    copyLinkCopied: "已拷贝",
     delete: "删除",
     deleting: "删除中",
     edit: {
@@ -33,6 +35,11 @@ export const home = {
     },
     empty: "暂无最近笔记",
     expand: "展开",
+    linkPreview: {
+      label: "引用笔记 {{id}}",
+      loading: "加载中",
+      unavailable: "无法加载引用内容",
+    },
   },
   search: {
     placeholder: "搜索笔记、Field、Tag",

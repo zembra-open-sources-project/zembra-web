@@ -24,6 +24,8 @@ export const home = {
   note: {
     actions: "Note actions",
     collapse: "Collapse",
+    copyLink: "Copy link",
+    copyLinkCopied: "Copied",
     delete: "Delete",
     deleting: "Deleting",
     edit: {
@@ -33,6 +35,11 @@ export const home = {
     },
     empty: "No recent notes yet",
     expand: "Expand",
+    linkPreview: {
+      label: "Linked note {{id}}",
+      loading: "Loading",
+      unavailable: "Preview unavailable",
+    },
   },
   search: {
     placeholder: "Search notes, Fields, Tags",

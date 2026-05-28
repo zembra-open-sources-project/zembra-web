@@ -24,6 +24,8 @@ export const home = {
   note: {
     actions: "筆記操作",
     collapse: "收起",
+    copyLink: "拷貝連結",
+    copyLinkCopied: "已拷貝",
     delete: "刪除",
     deleting: "刪除中",
     edit: {
@@ -33,6 +35,11 @@ export const home = {
     },
     empty: "暫無最近筆記",
     expand: "展開",
+    linkPreview: {
+      label: "引用筆記 {{id}}",
+      loading: "載入中",
+      unavailable: "無法載入引用內容",
+    },
   },
   search: {
     placeholder: "搜尋筆記、Field、Tag",

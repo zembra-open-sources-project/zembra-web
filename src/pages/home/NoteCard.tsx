@@ -11,7 +11,12 @@ import { useTranslation } from "react-i18next";
 import type { NoteDto } from "../../api/types";
 import { NoteEditor } from "./NoteEditor";
 import type { ComposerTool } from "./homeTypes";
-import { formatNoteTimestamp, stripRenderedTagMarkers } from "./homeUtils";
+import {
+  formatNoteTimestamp,
+  formatShortNoteRef,
+  parseRenderableNoteContent,
+  stripRenderedTagMarkers,
+} from "./homeUtils";
 
 /** Renders one recent note in the home feed. */
 export function NoteCard({
@@ -51,10 +56,15 @@ export function NoteCard({
   const [expanded, setExpanded] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
+  const [hasCopiedLink, setHasCopiedLink] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const displayContent = useMemo(
     () => stripRenderedTagMarkers(note.content, note.tags),
     [note.content, note.tags],
+  );
+  const contentSegments = useMemo(
+    () => parseRenderableNoteContent(displayContent),
+    [displayContent],
   );
   const contentRef = useRef<HTMLParagraphElement>(null);
   const measureOverflow = useCallback(() => {
@@ -85,6 +95,17 @@ export function NoteCard({
       setIsActionsOpen(false);
     } finally {
       setIsDeleting(false);
+    }
+  }
+
+  /** Copies the full note identifier for use inside note links. */
+  async function handleCopyLinkClick() {
+    try {
+      await navigator.clipboard.writeText(note.id);
+      setHasCopiedLink(true);
+      setIsActionsOpen(false);
+    } catch (error) {
+      console.error("Failed to copy note link", error);
     }
   }
 
@@ -120,6 +141,13 @@ export function NoteCard({
             </button>
             {isActionsOpen ? (
               <div className="absolute right-0 top-9 z-30 min-w-28 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--color-shadow-float)]">
+                <button
+                  className="block w-full px-3 py-2 text-left text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]"
+                  onClick={handleCopyLinkClick}
+                  type="button"
+                >
+                  {hasCopiedLink ? t("note.copyLinkCopied") : t("note.copyLink")}
+                </button>
                 <button
                   className="block w-full px-3 py-2 text-left text-sm text-[var(--color-error)] hover:bg-[var(--color-error-soft)] disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={isDeleting}
@@ -167,7 +195,17 @@ export function NoteCard({
                 #{tag}
               </span>
             ))}
-            {displayContent}
+            {contentSegments.map((segment, index) =>
+              segment.type === "text" ? (
+                <span key={`${segment.type}-${index}`}>{segment.text}</span>
+              ) : (
+                <NoteLinkPreview
+                  key={`${segment.targetNoteRef}-${index}`}
+                  noteRef={segment.targetNoteRef}
+                  onLoadNotePreview={onLoadNotePreview}
+                />
+              ),
+            )}
           </p>
           {hasOverflow || expanded ? (
             <button
@@ -181,5 +219,72 @@ export function NoteCard({
         </>
       )}
     </article>
+  );
+}
+
+/** Renders one compact note reference with hover preview content. */
+function NoteLinkPreview({
+  noteRef,
+  onLoadNotePreview,
+}: {
+  noteRef: string;
+  onLoadNotePreview: (noteRef: string) => Promise<NoteDto>;
+}) {
+  const { t } = useTranslation("home");
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [preview, setPreview] = useState<NoteDto>();
+  const [hasError, setHasError] = useState(false);
+
+  /** Loads preview content when the user inspects this note reference. */
+  async function handlePreviewOpen() {
+    setIsOpen(true);
+
+    if (preview || isLoading) {
+      return;
+    }
+
+    setIsLoading(true);
+    setHasError(false);
+    try {
+      setPreview(await onLoadNotePreview(noteRef));
+    } catch (error) {
+      console.error("Failed to load note link preview", error);
+      setHasError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  /** Hides the hover preview without clearing cached content. */
+  function handlePreviewClose() {
+    setIsOpen(false);
+  }
+
+  return (
+    <span className="relative inline-flex">
+      <button
+        aria-label={t("note.linkPreview.label", {
+          id: formatShortNoteRef(noteRef),
+        })}
+        className="mx-0.5 inline-flex h-[24px] items-center rounded-[7px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-1.5 text-[13px] font-semibold text-[var(--color-accent)] hover:border-[var(--color-accent)]"
+        onBlur={handlePreviewClose}
+        onFocus={() => void handlePreviewOpen()}
+        onMouseEnter={() => void handlePreviewOpen()}
+        onMouseLeave={handlePreviewClose}
+        type="button"
+      >
+        {formatShortNoteRef(noteRef)}
+      </button>
+      {isOpen ? (
+        <span className="absolute left-0 top-7 z-40 block w-72 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-3 py-2 text-left text-sm leading-6 text-[var(--color-text-primary)] shadow-[var(--color-shadow-float)]">
+          {isLoading
+            ? t("note.linkPreview.loading")
+            : hasError
+              ? t("note.linkPreview.unavailable")
+              : preview?.content ?? t("note.linkPreview.unavailable")}
+        </span>
+      ) : null}
+    </span>
   );
 }

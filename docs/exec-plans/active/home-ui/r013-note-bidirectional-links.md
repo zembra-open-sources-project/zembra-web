@@ -63,7 +63,7 @@
 
 ### 任务 #5: 增加 note card 拷贝链接动作
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/NoteCard.tsx`, Modify `src/i18n/locales/zh-CN/home.ts`, Modify `src/i18n/locales/zh-TW/home.ts`, Modify `src/i18n/locales/en-US/home.ts`
 
@@ -75,7 +75,7 @@
 
 ### 任务 #6: 渲染短 uuid 与 hover 预览
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/NoteCard.tsx`, Modify `src/pages/home/HomePage.tsx`, Modify `src/i18n/locales/zh-CN/home.ts`, Modify `src/i18n/locales/zh-TW/home.ts`, Modify `src/i18n/locales/en-US/home.ts`
 
@@ -116,3 +116,4 @@
 - 2026-05-28：已完成需求澄清、设计文档和执行计划。确认前端解析 `[[完整uuid]]` 后提交后端 `links`，展示态显示 6 位短 uuid，hover 预览先查当前 feed、未命中再读取后端。
 - 2026-05-28：已完成 Stage #1，扩展 note links API 类型和 HTTP client，新增 `parseNoteLinks`、`formatShortNoteRef`、`parseRenderableNoteContent`，并通过 `npm run test -- src/api/notes.client.test.ts` 与 `npm run test -- src/pages/home/homeUtils.test.ts`。
 - 2026-05-28：已完成 Stage #2，新增 note preview 缓存读取 action，并在新建、编辑提交中随正文解析并发送 `links`；`npm run test -- src/pages/home/HomePage.test.tsx` 通过。
+- 2026-05-28：已完成 Stage #3，note card 三点菜单新增“拷贝链接”，展示态将 `[[完整uuid]]` 渲染为 6 位短 uuid，并支持 hover/focus 加载引用内容预览；`npm run test -- src/pages/home/HomePage.test.tsx` 通过。
