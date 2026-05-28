@@ -1,15 +1,12 @@
 export const settings = {
   actions: {
     runSync: "執行同步",
+    saveAndEnable: "儲存並啟用同步",
     save: "儲存設定",
     testConnection: "測試連線",
   },
   description: "設定由後端管理的 Supabase 同步，避免暴露已儲存的 service role 密鑰。",
   form: {
-    enable: {
-      description: "實際同步間隔由後端控制。",
-      label: "啟用同步",
-    },
     intervalSeconds: {
       errorPositiveInteger: "同步間隔必須為 0 或正整數",
       label: "同步間隔秒數",

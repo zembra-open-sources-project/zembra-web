@@ -93,6 +93,36 @@ describe("SyncSettingsPage", () => {
     expect(await screen.findByText("Settings saved")).not.toBeNull();
   });
 
+  test("keeps synchronization disabled when saving disabled settings", async () => {
+    client = {
+      ...createMockPageClient(),
+      getConfig: vi.fn(async () => ({
+        enabled: false,
+        intervalSeconds: 120,
+        supabaseUrl: "https://project.supabase.co",
+        serviceRoleKeyConfigured: true,
+      })),
+      getStatus: vi.fn(async () => ({
+        enabled: false,
+        states: [],
+      })),
+    };
+
+    renderSettingsPage(<SyncSettingsPage client={client} />);
+
+    await screen.findByDisplayValue("https://project.supabase.co");
+    fireEvent.click(screen.getByRole("button", { name: "Save Settings" }));
+
+    await waitFor(() => {
+      expect(client.updateConfig).toHaveBeenCalledWith({
+        enabled: false,
+        intervalSeconds: 120,
+        supabaseUrl: "https://project.supabase.co",
+        serviceRoleKey: "",
+      });
+    });
+  });
+
   test("blocks save when interval seconds is not an integer", async () => {
     renderSettingsPage(<SyncSettingsPage client={client} />);
 
@@ -136,7 +166,7 @@ describe("SyncSettingsPage", () => {
     expect(client.getStatus).toHaveBeenCalledTimes(2);
   });
 
-  test("persists synchronization enablement when the checkbox changes", async () => {
+  test("enables synchronization with the save and enable action", async () => {
     client = {
       ...createMockPageClient(),
       getConfig: vi.fn(async () => ({
@@ -154,7 +184,7 @@ describe("SyncSettingsPage", () => {
     renderSettingsPage(<SyncSettingsPage client={client} />);
 
     await screen.findByDisplayValue("https://project.supabase.co");
-    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("button", { name: "Save & Enable Sync" }));
 
     await waitFor(() => {
       expect(client.updateConfig).toHaveBeenCalledWith({

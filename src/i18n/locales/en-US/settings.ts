@@ -1,16 +1,13 @@
 export const settings = {
   actions: {
     runSync: "Run Sync",
+    saveAndEnable: "Save & Enable Sync",
     save: "Save Settings",
     testConnection: "Test Connection",
   },
   description:
     "Configure backend-managed Supabase synchronization without exposing stored service role secrets.",
   form: {
-    enable: {
-      description: "Backend controls the actual sync interval.",
-      label: "Enable synchronization",
-    },
     intervalSeconds: {
       errorPositiveInteger: "Interval seconds must be 0 or a positive integer",
       label: "Interval seconds",

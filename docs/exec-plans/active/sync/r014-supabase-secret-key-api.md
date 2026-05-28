@@ -25,3 +25,23 @@
 
 - `npm run test -- src/api/sync.client.test.ts`
 - `npm run build`
+
+## Stage 2：同步启用交互修正
+
+### Task 2.1：使用 Save & Enable Sync 表达启用动作
+
+状态：Finished
+
+功能：移除顶部 enable checkbox，把启用同步作为明确提交动作，避免用户在填写 URL 前触发后端校验。
+
+实现要点：
+
+- 保留 `Save Settings` 用于保存 disabled 配置。
+- 新增 `Save & Enable Sync` 动作，提交时强制 `enabled=true`。
+- 顶部状态继续只展示后端已保存状态。
+- `Run Sync` 仍只允许在后端已启用后执行。
+
+预期测试：
+
+- `npm run test -- src/pages/settings/SyncSettingsPage.test.tsx`
+- `npm run build`

@@ -30,8 +30,6 @@ interface SyncSettingsPageProps {
 }
 
 interface SyncSettingsFormState {
-  /** Whether background synchronization should be enabled. */
-  enabled: boolean;
   /** Supabase project URL draft. */
   supabaseUrl: string;
   /** Synchronization interval draft in seconds. */
@@ -41,7 +39,6 @@ interface SyncSettingsFormState {
 }
 
 const initialFormState: SyncSettingsFormState = {
-  enabled: false,
   supabaseUrl: "",
   intervalSeconds: "0",
   serviceRoleKey: "",
@@ -58,7 +55,7 @@ export function SyncSettingsPage({
     useState<SyncSettingsFormState>(initialFormState);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [isTogglingEnabled, setIsTogglingEnabled] = useState(false);
+  const [isEnabling, setIsEnabling] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -130,7 +127,7 @@ export function SyncSettingsPage({
 
     try {
       const nextConfig = await client.updateConfig({
-        enabled: formState.enabled,
+        enabled: persistedSyncEnabled,
         intervalSeconds: Number(formState.intervalSeconds),
         supabaseUrl: formState.supabaseUrl.trim(),
         serviceRoleKey: formState.serviceRoleKey,
@@ -148,27 +145,23 @@ export function SyncSettingsPage({
     }
   }
 
-  /** Immediately persists synchronization enablement changes. */
-  async function handleEnabledChange(enabled: boolean) {
+  /** Persists the current form values and enables synchronization. */
+  async function handleSaveAndEnable() {
     if (intervalValidation) {
       setErrorMessage(intervalValidation);
       return;
     }
 
-    const previousFormState = formState;
-    const nextFormState = { ...formState, enabled };
-
-    setFormState(nextFormState);
-    setIsTogglingEnabled(true);
+    setIsEnabling(true);
     setErrorMessage(undefined);
     setSuccessMessage(undefined);
 
     try {
       const nextConfig = await client.updateConfig({
-        enabled,
-        intervalSeconds: Number(nextFormState.intervalSeconds),
-        supabaseUrl: nextFormState.supabaseUrl.trim(),
-        serviceRoleKey: nextFormState.serviceRoleKey,
+        enabled: true,
+        intervalSeconds: Number(formState.intervalSeconds),
+        supabaseUrl: formState.supabaseUrl.trim(),
+        serviceRoleKey: formState.serviceRoleKey,
       });
       const nextStatus = await client.getStatus();
 
@@ -177,10 +170,9 @@ export function SyncSettingsPage({
       setFormState(createFormState(nextConfig));
       setSuccessMessage(t("success.settingsSaved"));
     } catch (error) {
-      setFormState(previousFormState);
       setErrorMessage(formatErrorMessage(error));
     } finally {
-      setIsTogglingEnabled(false);
+      setIsEnabling(false);
     }
   }
 
@@ -288,24 +280,6 @@ export function SyncSettingsPage({
             </div>
 
             <div className="flex flex-col gap-4">
-              <label className="flex items-center justify-between gap-4 rounded-[12px] bg-[var(--color-surface-muted)] px-4 py-3">
-                <span>
-                  <span className="block text-sm font-semibold text-[var(--color-text-primary)]">
-                    {t("form.enable.label")}
-                  </span>
-                  <span className="mt-1 block text-xs text-[var(--color-text-muted)]">
-                    {t("form.enable.description")}
-                  </span>
-                </span>
-                <input
-                  checked={formState.enabled}
-                  className="size-5 accent-[var(--color-accent)]"
-                  disabled={isTogglingEnabled}
-                  type="checkbox"
-                  onChange={(event) => void handleEnabledChange(event.target.checked)}
-                />
-              </label>
-
               <FieldLabel label={t("form.supabaseUrl.label")}>
                 <input
                   className="h-11 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
@@ -374,6 +348,14 @@ export function SyncSettingsPage({
                 type="submit"
               />
               <ActionButton
+                busy={isEnabling}
+                disabled={Boolean(intervalValidation)}
+                icon={<CheckCircle2 className="size-4" aria-hidden="true" />}
+                label={t("actions.saveAndEnable")}
+                type="button"
+                onClick={() => void handleSaveAndEnable()}
+              />
+              <ActionButton
                 busy={isRunning}
                 icon={<Play className="size-4" aria-hidden="true" />}
                 label={t("actions.runSync")}
@@ -399,7 +381,6 @@ export function SyncSettingsPage({
 /** Creates editable form state from persisted synchronization configuration. */
 function createFormState(config: SyncConfigDto): SyncSettingsFormState {
   return {
-    enabled: config.enabled,
     supabaseUrl: config.supabaseUrl,
     intervalSeconds: String(config.intervalSeconds),
     serviceRoleKey: "",
