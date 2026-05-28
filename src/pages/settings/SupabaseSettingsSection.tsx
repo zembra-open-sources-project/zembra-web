@@ -32,6 +32,9 @@ const initialFormState: SupabaseSettingsFormState = {
   supabaseUrl: "",
 };
 
+const settingsLineInputClassName =
+  "h-10 w-full max-w-[320px] border-0 border-b border-[var(--color-border)] bg-transparent px-0 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]";
+
 /** Renders the Supabase synchronization section inside the Settings modal. */
 export function SupabaseSettingsSection({
   client = defaultSyncClient,
@@ -217,7 +220,7 @@ export function SupabaseSettingsSection({
         <div className="border-t border-[var(--color-border-subtle)]">
           <SettingsFieldRow label={t("supabase.url")}>
             <input
-              className="h-10 w-full max-w-[340px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
+              className={settingsLineInputClassName}
               placeholder="https://project.supabase.co"
               value={formState.supabaseUrl}
               onChange={(event) =>
@@ -234,7 +237,7 @@ export function SupabaseSettingsSection({
             label={t("supabase.secretKey")}
           >
             <input
-              className="h-10 w-full max-w-[340px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
+              className={settingsLineInputClassName}
               placeholder={t("supabase.secretPlaceholder")}
               type="password"
               value={formState.secretKey}
@@ -252,7 +255,7 @@ export function SupabaseSettingsSection({
             label={t("supabase.intervalSeconds")}
           >
             <input
-              className="h-10 w-full max-w-[180px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
+              className={`${settingsLineInputClassName} sm:max-w-[160px]`}
               inputMode="numeric"
               min="0"
               placeholder="300"

@@ -38,7 +38,7 @@ export function SettingsModal({ client, onClose }: SettingsModalProps) {
         onClick={onClose}
       />
       <div
-        className="relative grid max-h-full w-full max-w-[980px] grid-cols-1 overflow-hidden rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-[var(--color-shadow-float)] md:grid-cols-[260px_minmax(0,1fr)]"
+        className="relative grid max-h-full w-full max-w-[880px] grid-cols-1 overflow-hidden rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-[var(--color-shadow-float)] md:grid-cols-[232px_minmax(0,1fr)]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-modal-title"
@@ -82,7 +82,7 @@ export function SettingsModal({ client, onClose }: SettingsModalProps) {
           </nav>
         </aside>
 
-        <main className="min-h-0 min-w-0 overflow-y-auto px-5 pb-6 pt-4 sm:px-8 md:px-10 md:pb-8 md:pt-8">
+        <main className="min-h-0 min-w-0 overflow-y-auto px-5 pb-6 pt-4 sm:px-8 md:px-9 md:pb-8 md:pt-8">
           <h1
             className="text-2xl font-semibold text-[var(--color-text-primary)]"
             id="settings-modal-title"
