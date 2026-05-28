@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { createRootRoute, createRoute, createRouter, RouterProvider } from "@tanstack/react-router";
-import { afterEach, beforeEach, expect, test } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { i18next } from "../../i18n";
 import { useNotesStore } from "../../features/notes/noteStore";
 import { ThemeProvider } from "../../app/ThemeProvider";
@@ -8,18 +8,17 @@ import { HomePage } from "./HomePage";
 
 beforeEach(async () => {
   await i18next.changeLanguage("zh-CN");
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: {
+      writeText: vi.fn(async () => undefined),
+    },
+  });
 });
 
 afterEach(() => {
-  useNotesStore.setState({
-    fields: [],
-    dailyNoteCounts: [],
-    keyword: "",
-    notes: [],
-    selectedField: undefined,
-    selectedTag: undefined,
-    tags: [],
-  });
+  useNotesStore.setState(useNotesStore.getInitialState(), true);
+  vi.restoreAllMocks();
 });
 
 /** Verifies that the sidebar activity heatmap renders daily note counts. */
@@ -146,6 +145,132 @@ test("renders actual note counts for all and field navigation", async () => {
   expect(await sidebarNavCount("inbox")).toBe("1");
   expect(await sidebarNavCount("project")).toBe("1");
   expect(await sidebarNavCount("empty")).toBe("0");
+});
+
+/** Verifies note link menu copy and hover preview behavior. */
+test("copies note links and previews linked note content", async () => {
+  renderHomePage();
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
+
+  const targetNoteId = "abcdef1234567890abcdef1234567890";
+
+  act(() => {
+    useNotesStore.setState({
+      notes: [
+        {
+          id: "source-note",
+          content: `source [[${targetNoteId}]]`,
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: [],
+        },
+        {
+          id: targetNoteId,
+          content: "target preview content",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: [],
+        },
+      ],
+    });
+  });
+
+  const sourceText = await screen.findByText("source");
+  const sourceCard = sourceText.closest("article");
+  expect(sourceCard).not.toBeNull();
+
+  fireEvent.click(
+    within(sourceCard as HTMLElement).getByRole("button", { name: "笔记操作" }),
+  );
+  fireEvent.click(
+    within(sourceCard as HTMLElement).getByRole("button", { name: "拷贝链接" }),
+  );
+
+  expect(navigator.clipboard.writeText).toHaveBeenCalledWith("source-note");
+  expect(await within(sourceCard as HTMLElement).findByText("abcdef")).not.toBeNull();
+  expect(within(sourceCard as HTMLElement).queryByText(targetNoteId)).toBeNull();
+
+  fireEvent.mouseEnter(
+    within(sourceCard as HTMLElement).getByRole("button", {
+      name: "引用笔记 abcdef",
+    }),
+  );
+
+  expect(await screen.findByText("target preview content")).not.toBeNull();
+});
+
+/** Verifies create and edit submissions include parsed note links. */
+test("submits parsed note links when creating and editing notes", async () => {
+  renderHomePage();
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
+
+  const targetNoteId = "abcdef1234567890abcdef1234567890";
+  const createNote = vi.fn(async () => undefined);
+  const updateNote = vi.fn(async () => undefined);
+
+  act(() => {
+    useNotesStore.setState({
+      createNote,
+      notes: [
+        {
+          id: "editable-note",
+          content: "editable content",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: [],
+        },
+      ],
+      updateNote,
+    });
+  });
+
+  const composer = await screen.findByPlaceholderText("现在的想法是...");
+  fireEvent.change(composer, {
+    target: { value: `new [[${targetNoteId}]] #api` },
+  });
+  fireEvent.submit(composer.closest("form") as HTMLFormElement);
+
+  await waitFor(() =>
+    expect(createNote).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: `new [[${targetNoteId}]] #api`,
+        links: [
+          {
+            anchorText: `[[${targetNoteId}]]`,
+            position: 4,
+            targetNoteRef: targetNoteId,
+          },
+        ],
+      }),
+    ),
+  );
+
+  const editableText = await screen.findByText("editable content");
+  const editableCard = editableText.closest("article");
+  expect(editableCard).not.toBeNull();
+
+  fireEvent.doubleClick(editableCard as HTMLElement);
+  const editor = within(editableCard as HTMLElement).getByRole("textbox");
+  fireEvent.change(editor, {
+    target: { value: `edited [[${targetNoteId}]]` },
+  });
+  fireEvent.click(within(editableCard as HTMLElement).getByRole("button", { name: "发送" }));
+
+  await waitFor(() =>
+    expect(updateNote).toHaveBeenCalledWith(
+      "editable-note",
+      expect.objectContaining({
+        content: `edited [[${targetNoteId}]]`,
+        links: [
+          {
+            anchorText: `[[${targetNoteId}]]`,
+            position: 7,
+            targetNoteRef: targetNoteId,
+          },
+        ],
+      }),
+    ),
+  );
 });
 
 /** Finds the count text rendered inside a sidebar navigation row. */

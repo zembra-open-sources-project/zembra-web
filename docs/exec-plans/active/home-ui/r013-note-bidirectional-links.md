@@ -89,7 +89,7 @@
 
 ### 任务 #7: 补充双链自动化测试
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/HomePage.test.tsx`, Modify `src/api/notes.client.test.ts`, Create/Modify `src/pages/home/homeUtils.test.ts`
 
@@ -101,7 +101,7 @@
 
 ### 任务 #8: 执行整体验证并回写计划
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `docs/exec-plans/active/home-ui/r013-note-bidirectional-links.md`
 
@@ -117,3 +117,4 @@
 - 2026-05-28：已完成 Stage #1，扩展 note links API 类型和 HTTP client，新增 `parseNoteLinks`、`formatShortNoteRef`、`parseRenderableNoteContent`，并通过 `npm run test -- src/api/notes.client.test.ts` 与 `npm run test -- src/pages/home/homeUtils.test.ts`。
 - 2026-05-28：已完成 Stage #2，新增 note preview 缓存读取 action，并在新建、编辑提交中随正文解析并发送 `links`；`npm run test -- src/pages/home/HomePage.test.tsx` 通过。
 - 2026-05-28：已完成 Stage #3，note card 三点菜单新增“拷贝链接”，展示态将 `[[完整uuid]]` 渲染为 6 位短 uuid，并支持 hover/focus 加载引用内容预览；`npm run test -- src/pages/home/HomePage.test.tsx` 通过。
+- 2026-05-28：已完成 Stage #4，补充双链首页专项测试，覆盖复制完整 note id、短 uuid 展示、hover 预览、新建和编辑提交 links；`npm run test` 通过 13 个测试文件 64 个测试，`npm run build` 通过。
