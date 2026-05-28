@@ -1,4 +1,8 @@
 export const home = {
+  actions: {
+    sync: "同步",
+    syncSummary: "已推送 {{pushed}} 則，已拉取 {{pulled}} 則",
+  },
   badge: {
     local: "LOCAL",
   },

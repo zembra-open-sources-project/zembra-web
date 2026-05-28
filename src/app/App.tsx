@@ -6,7 +6,6 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { HomePage } from "../pages/home/HomePage";
-import { SyncSettingsPage } from "../pages/settings/SyncSettingsPage";
 import { BackendConnectionToast } from "./BackendStatusToast";
 import { subscribeBackendConnectionFailed } from "./backendConnectionToast";
 import { BackendUrlGate } from "./BackendUrlGate";
@@ -20,13 +19,7 @@ const homeRoute = createRoute({
   component: HomePage,
 });
 
-const syncSettingsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/settings/sync",
-  component: SyncSettingsPage,
-});
-
-const routeTree = rootRoute.addChildren([homeRoute, syncSettingsRoute]);
+const routeTree = rootRoute.addChildren([homeRoute]);
 
 const router = createRouter({ routeTree });
 

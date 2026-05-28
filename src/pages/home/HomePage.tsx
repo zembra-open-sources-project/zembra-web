@@ -4,15 +4,20 @@ import {
   CircleHelp,
   Hash,
   List,
+  Loader2,
+  RefreshCw,
   Search,
   Settings,
 } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ThemeToggle } from "../../app/ThemeToggle";
 import { useEffect, useMemo, useState } from "react";
+import { syncClient as defaultSyncClient } from "../../api/client";
+import { ApiError } from "../../api/http";
+import type { SyncClient } from "../../api/sync.client";
 import { useNotesStore } from "../../features/notes/noteStore";
 import type { NoteDto } from "../../api/types";
+import { SettingsModal } from "../settings/SettingsModal";
 import { NoteCard } from "./NoteCard";
 import { NoteEditor } from "./NoteEditor";
 import {
@@ -31,14 +36,23 @@ import {
   parseTagNames,
 } from "./homeUtils";
 
+interface HomePageProps {
+  /** Optional synchronization client override used by tests. */
+  syncClient?: SyncClient;
+}
+
 /** Renders the redesigned Zembra note workspace shell. */
-export function HomePage() {
+export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
   const { i18n, t } = useTranslation("home");
   const [draft, setDraft] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState<string>();
   const [editDraft, setEditDraft] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncFeedback, setSyncFeedback] = useState<string | undefined>();
+  const [syncError, setSyncError] = useState<string | undefined>();
   const {
     notes,
     dailyNoteCounts,
@@ -179,6 +193,27 @@ export function HomePage() {
     }
   }
 
+  /** Triggers a manual synchronization cycle from the home workspace. */
+  async function handleManualSync() {
+    setIsSyncing(true);
+    setSyncFeedback(undefined);
+    setSyncError(undefined);
+
+    try {
+      const result = await syncClient.runSync();
+      setSyncFeedback(
+        t("actions.syncSummary", {
+          pulled: result.pulled,
+          pushed: result.pushed,
+        }),
+      );
+    } catch (error) {
+      setSyncError(formatErrorMessage(error));
+    } finally {
+      setIsSyncing(false);
+    }
+  }
+
   return (
     <main className="h-screen overflow-hidden bg-[var(--color-app-bg)] text-[var(--color-text-primary)]">
       <div className="mx-auto grid h-full w-full max-w-[1156px] grid-cols-1 gap-4 px-5 pt-1 lg:grid-cols-[300px_760px] lg:gap-16 lg:px-0">
@@ -203,20 +238,51 @@ export function HomePage() {
                     aria-hidden="true"
                   />
                 </button>
+                <button
+                  className="flex size-[34px] shrink-0 items-center justify-center rounded-[9px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)] disabled:cursor-not-allowed disabled:opacity-60"
+                  type="button"
+                  aria-label={t("actions.sync")}
+                  title={t("actions.sync")}
+                  disabled={isSyncing}
+                  onClick={() => void handleManualSync()}
+                >
+                  {isSyncing ? (
+                    <Loader2
+                      className="size-4 animate-spin text-[var(--color-accent)]"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <RefreshCw
+                      className="size-4 text-[var(--color-accent)]"
+                      aria-hidden="true"
+                    />
+                  )}
+                </button>
                 <ThemeToggle />
-                <Link
+                <button
                   className="flex size-[34px] shrink-0 items-center justify-center rounded-[9px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
                   title={t("form.settings.title", { ns: "settings" })}
-                  to="/settings/sync"
+                  type="button"
                   aria-label={t("form.settings.title", { ns: "settings" })}
+                  onClick={() => setIsSettingsOpen(true)}
                 >
                   <Settings
                     className="size-4 text-[var(--color-accent)]"
                     aria-hidden="true"
                   />
-                </Link>
+                </button>
               </div>
             </div>
+
+            {syncFeedback || syncError ? (
+              <p
+                className="mb-3 rounded-[10px] border px-3 py-2 text-sm data-[tone=error]:border-[var(--color-error-border)] data-[tone=error]:bg-[var(--color-error-soft)] data-[tone=error]:text-[var(--color-error)] data-[tone=success]:border-[var(--color-success-border)] data-[tone=success]:bg-[var(--color-success-soft)] data-[tone=success]:text-[var(--color-accent)]"
+                data-tone={syncError ? "error" : "success"}
+                role="status"
+              >
+                {syncError ?? syncFeedback}
+              </p>
+            ) : null}
 
             <div className="mb-5 hidden grid-cols-3 gap-4 lg:grid">
               <StatBlock label={t("stats.notes")} value={String(notes.length)} />
@@ -354,8 +420,23 @@ export function HomePage() {
           </div>
         </form>
       </div>
+      {isSettingsOpen ? (
+        <SettingsModal
+          client={syncClient}
+          onClose={() => setIsSettingsOpen(false)}
+        />
+      ) : null}
     </main>
   );
+}
+
+/** Formats an unknown thrown value into a short user-facing message. */
+function formatErrorMessage(error: unknown): string {
+  if (error instanceof ApiError || error instanceof Error) {
+    return error.message;
+  }
+
+  return "Request failed";
 }
 
 /** Creates toolbar definitions for the composer insertion buttons. */

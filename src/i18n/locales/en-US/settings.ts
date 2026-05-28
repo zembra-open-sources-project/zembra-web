@@ -1,57 +1,26 @@
 export const settings = {
   actions: {
-    runSync: "Sync",
-    saveAndEnable: "Save & Enable Sync",
     save: "Save",
-    testConnection: "Test",
+    test: "Test",
   },
-  description:
-    "Configure backend-managed Supabase synchronization without exposing stored service role secrets.",
+  close: "Close",
   form: {
-    intervalSeconds: {
-      errorPositiveInteger: "Interval seconds must be 0 or a positive integer",
-      label: "Interval seconds",
-    },
-    serviceRoleKey: {
-      label: "New service role key",
-      placeholder: "Leave blank to keep the existing key",
-    },
     settings: {
-      description: "Values are saved by the backend sync service.",
       title: "Settings",
     },
-    supabaseUrl: {
-      label: "Supabase URL",
-    },
   },
-  errors: {
-    enableBeforeRun: "Enable synchronization and save settings before running sync.",
-  },
-  home: "Home",
-  results: {
-    manualSync: "Manual Sync",
-    manualSyncSummary: "Pushed {{pushed}}, pulled {{pulled}}",
-    noSyncRun: "No sync run yet",
-    noTestRun: "No test run yet",
-    testConnection: "Test Connection",
-    title: "Results",
-  },
-  secret: {
-    configured: "Configured",
-    label: "Service role key",
-    notConfigured: "Not configured",
-  },
-  status: {
-    disabled: "Sync disabled",
-    enabled: "Sync enabled",
-    loading: "Loading status",
-    never: "Never",
-    noCursors: "No sync cursors yet",
-    title: "Status",
+  supabase: {
+    description: "Configure the backend-managed Supabase connection.",
+    enableSync: "Enable sync",
+    intervalSeconds: "Interval seconds",
+    intervalSecondsError: "Interval seconds must be 0 or a positive integer",
+    secretKey: "Secret key",
+    secretPlaceholder: "Leave blank to keep existing secret",
+    title: "Supabase",
+    url: "Supabase URL",
   },
   success: {
-    manualSyncFinished: "Manual sync finished",
     settingsSaved: "Settings saved",
   },
-  title: "Supabase Sync",
+  title: "Settings",
 };

@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { createRootRoute, createRoute, createRouter, RouterProvider } from "@tanstack/react-router";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
+import type { SyncClient } from "../../api/sync.client";
 import { i18next } from "../../i18n";
 import { useNotesStore } from "../../features/notes/noteStore";
 import { ThemeProvider } from "../../app/ThemeProvider";
@@ -315,6 +316,47 @@ test("submits parsed note links when creating and editing notes", async () => {
   );
 });
 
+/** Verifies the Settings button opens and closes the Settings modal. */
+test("opens and closes Settings modal from the home toolbar", async () => {
+  renderHomePage();
+
+  fireEvent.click(await screen.findByRole("button", { name: "设置" }));
+
+  expect(await screen.findByRole("dialog", { name: "设置" })).not.toBeNull();
+
+  fireEvent.click(screen.getAllByRole("button", { name: "关闭" })[1]);
+
+  await waitFor(() =>
+    expect(screen.queryByRole("dialog", { name: "设置" })).toBeNull(),
+  );
+});
+
+/** Verifies manual synchronization runs from the home toolbar. */
+test("runs manual sync from the home toolbar", async () => {
+  const syncClient = createMockSyncClient();
+  renderHomePage(syncClient);
+
+  fireEvent.click(await screen.findByRole("button", { name: "同步" }));
+
+  expect(await screen.findByText("已推送 2 条，已拉取 3 条")).not.toBeNull();
+  expect(syncClient.runSync).toHaveBeenCalled();
+});
+
+/** Verifies manual synchronization errors are shown near the home toolbar. */
+test("shows manual sync errors from the home toolbar", async () => {
+  const syncClient = {
+    ...createMockSyncClient(),
+    runSync: vi.fn(async () => {
+      throw new Error("Sync failed");
+    }),
+  };
+  renderHomePage(syncClient);
+
+  fireEvent.click(await screen.findByRole("button", { name: "同步" }));
+
+  expect(await screen.findByText("Sync failed")).not.toBeNull();
+});
+
 /** Finds the count text rendered inside a sidebar navigation row. */
 async function sidebarNavCount(label: string): Promise<string> {
   const rowLabel = await screen.findByText(label);
@@ -324,13 +366,43 @@ async function sidebarNavCount(label: string): Promise<string> {
   return row?.querySelector("span:last-child")?.textContent ?? "";
 }
 
+/** Creates a mock sync client for home toolbar interaction tests. */
+function createMockSyncClient(): SyncClient {
+  return {
+    getConfig: vi.fn(async () => ({
+      enabled: true,
+      intervalSeconds: 120,
+      serviceRoleKeyConfigured: true,
+      supabaseUrl: "https://project.supabase.co",
+    })),
+    getStatus: vi.fn(async () => ({
+      enabled: true,
+      states: [],
+    })),
+    runSync: vi.fn(async () => ({
+      pulled: 3,
+      pushed: 2,
+    })),
+    testConfig: vi.fn(async () => ({
+      message: "connected",
+      ok: true,
+    })),
+    updateConfig: vi.fn(async (input) => ({
+      enabled: input.enabled,
+      intervalSeconds: input.intervalSeconds,
+      serviceRoleKeyConfigured: true,
+      supabaseUrl: input.supabaseUrl,
+    })),
+  };
+}
+
 /** Renders HomePage with the providers required by its header controls. */
-function renderHomePage() {
+function renderHomePage(syncClient = createMockSyncClient()) {
   const rootRoute = createRootRoute();
   const homeRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/",
-    component: HomePage,
+    component: () => <HomePage syncClient={syncClient} />,
   });
   const router = createRouter({ routeTree: rootRoute.addChildren([homeRoute]) });
 

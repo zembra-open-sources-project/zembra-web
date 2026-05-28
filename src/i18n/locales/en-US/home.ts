@@ -1,4 +1,8 @@
 export const home = {
+  actions: {
+    sync: "Sync",
+    syncSummary: "Pushed {{pushed}}, pulled {{pulled}}",
+  },
   badge: {
     local: "LOCAL",
   },
