@@ -12,7 +12,7 @@
 
 | 位置 | 当前能力 | 本需求关系 |
 | --- | --- | --- |
-| `src/pages/home/NoteCard.tsx` | 已有 note card 展示态、三点菜单和删除动作 | 在三点菜单增加“拷贝链接”，展示正文时渲染双链短 uuid 与 hover 预览 |
+| `src/pages/home/NoteCard.tsx` | 已有 note card 展示态、三点菜单和删除动作 | 在三点菜单增加“Mention”，展示正文时渲染双链短 uuid 与 hover 预览 |
 | `src/pages/home/HomePage.tsx` | 新建和编辑提交前已解析 `#tag` 与 `@field` | 在同一提交链路中解析 `[[uuid]]` 并传入 create/update action |
 | `src/pages/home/homeUtils.ts` | 已承载首页纯解析和格式化函数 | 增加双链解析、短 uuid 格式化和正文渲染辅助逻辑 |
 | `src/api/notes.client.ts` | 已封装 `POST /notes`、`PATCH /notes/{note_ref}` 和 `GET /notes/{note_ref}` | 扩展 request/response 类型，发送 `links`，为 hover 预览复用 `getNote` |
@@ -38,7 +38,7 @@
 
 | 功能 | 说明 |
 | --- | --- |
-| 拷贝链接 | note card 三点菜单增加“拷贝链接”，复制完整 `note.id` |
+| Mention | note card 三点菜单增加“Mention”，自动插入 `[[完整note.id]]` |
 | 引用语法 | 新建和编辑输入支持 `[[<完整uuid>]]` |
 | 提交解析 | 前端解析正文中的引用，生成 `links: [{ target_note_ref, anchor_text, position }]` |
 | 后端校验 | 引用有效性由后端检查；前端只负责解析和提交结构化数据 |
@@ -61,7 +61,7 @@
 
 | 编号 | 验收项 |
 | --- | --- |
-| A1 | 点击 note card 三点菜单中的“拷贝链接”后，剪贴板内容为完整 `note.id` |
+| A1 | 点击 note card 三点菜单中的“Mention”后，当前草稿自动插入 `[[完整note.id]]` |
 | A2 | 新建正文包含 `[[完整uuid]]` 时，`POST /notes` 请求体包含对应 `links` |
 | A3 | 编辑正文包含 `[[完整uuid]]` 时，`PATCH /notes/{note_ref}` 请求体包含对应 `links` |
 | A4 | 编辑正文删除所有引用后，`PATCH /notes/{note_ref}` 发送 `links: []` 清空 outgoing links |
@@ -79,3 +79,7 @@
 | 引用有效性 | 由 backend 检查 |
 | hover 数据源 | 先查当前 feed，未命中再调用 `getNote(uuid)` |
 | 短 uuid 规则 | 显示完整 uuid 的前 6 位 |
+
+## 2026-05-28 UI 优化补充
+
+用户确认将 note card 菜单中的“拷贝链接”调整为“Mention”。点击 Mention 时不再写入剪贴板，而是自动插入合法引用文本 `[[完整note.id]]`。插入目标遵循当前写作上下文：如果当前有 note 正在编辑，则插入该编辑草稿；否则插入底部新建 note 输入框。插入位置本轮采用追加到草稿末尾的策略。

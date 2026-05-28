@@ -16,7 +16,7 @@
 
 | 目标 | 说明 |
 | --- | --- |
-| 快速复制引用 | note card 菜单提供“拷贝链接”，复制完整 `note.id` |
+| 快速插入引用 | note card 菜单提供“Mention”，插入 `[[完整note.id]]` |
 | 正文引用语法 | 新建和编辑正文支持 `[[完整uuid]]` |
 | 提交结构化 links | 前端解析引用并提交 `links` 数组 |
 | 后端校验 | 前端不预校验目标有效性，由 backend 返回错误 |
@@ -32,7 +32,7 @@
 | In Scope | `NotesClient.createNote()` 和 `updateNote()` 发送后端 `links` 字段 |
 | In Scope | `getNote()` 兼容后端当前 `NoteResponse` 返回结构 |
 | In Scope | 首页解析 `[[完整uuid]]`，提交完整替换 links |
-| In Scope | note card 三点菜单增加“拷贝链接” |
+| In Scope | note card 三点菜单增加“Mention”，自动插入合法引用文本 |
 | In Scope | note card 展示态渲染短 uuid 和 hover 预览 |
 | In Scope | i18n 文案覆盖 `zh-CN`、`zh-TW`、`en-US` |
 | In Scope | 补充 API、解析和 UI 行为测试 |
@@ -117,13 +117,13 @@ hover 预览只需要展示正文摘要，不改变 recent notes 排序，不刷
 
 | 区域 | 设计 |
 | --- | --- |
-| 三点菜单 | 增加“拷贝链接”，保留“删除” |
-| 复制成功 | 点击后关闭菜单，可用轻量菜单文案切换或 aria-live 状态提示 |
+| 三点菜单 | 增加“Mention”，保留“删除” |
+| Mention 插入 | 当前有编辑态 note 时插入编辑草稿，否则插入底部新建草稿 |
 | 正文渲染 | 保留 tag chip 渲染和展开/收起逻辑，正文文本中 link segment 渲染为短 uuid 按钮/文本 |
 | hover 浮层 | 贴近短 uuid 展示，使用现有 surface/border/shadow token |
 | 布局稳定 | 浮层使用 absolute 或 portal 式定位，不参与正文流式布局 |
 
-三点菜单中文案需要国际化。复制使用 `navigator.clipboard.writeText(note.id)`，测试环境可 mock clipboard。若 clipboard API 不可用，按钮点击应失败可控并保留菜单，不引入额外依赖。
+三点菜单中文案需要国际化。Mention 点击后插入 `[[完整note.id]]`，不依赖剪贴板 API，不引入额外依赖。
 
 ### 提交流程
 
@@ -151,8 +151,7 @@ hover 预览只需要展示正文摘要，不改变 recent notes 排序，不刷
 
 | Namespace | Key | 占位符 | zh-CN | en-US |
 | --- | --- | --- | --- | --- |
-| `home` | `note.copyLink` | 无 | 拷贝链接 | Copy link |
-| `home` | `note.copyLinkCopied` | 无 | 已拷贝 | Copied |
+| `home` | `note.mention` | 无 | Mention | Mention |
 | `home` | `note.linkPreview.loading` | 无 | 加载中 | Loading |
 | `home` | `note.linkPreview.unavailable` | 无 | 无法加载引用内容 | Preview unavailable |
 | `home` | `note.linkPreview.label` | `id` | 引用笔记 {{id}} | Linked note {{id}} |
@@ -165,7 +164,7 @@ hover 预览只需要展示正文摘要，不改变 recent notes 排序，不刷
 | --- | --- |
 | 解析单元测试 | `parseNoteLinks()` 识别完整 uuid、position、重复引用，并忽略非法格式 |
 | API 单元测试 | `createNote()` 和 `updateNote()` 发送 `links`；`getNote()` 正确映射 `NoteResponse` |
-| UI 单元测试 | 三点菜单点击“拷贝链接”写入完整 `note.id` |
+| UI 单元测试 | 三点菜单点击“Mention”向当前草稿插入 `[[完整note.id]]` |
 | UI 单元测试 | 新建和编辑正文包含 `[[uuid]]` 时触发带 links 的提交路径 |
 | UI 单元测试 | 展示态将完整引用显示为 6 位短 uuid |
 | UI 单元测试 | hover 短 uuid 时优先显示当前 feed 内容，未命中时调用远程预览 |

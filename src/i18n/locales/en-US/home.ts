@@ -24,8 +24,6 @@ export const home = {
   note: {
     actions: "Note actions",
     collapse: "Collapse",
-    copyLink: "Copy link",
-    copyLinkCopied: "Copied",
     delete: "Delete",
     deleting: "Deleting",
     edit: {
@@ -33,6 +31,7 @@ export const home = {
       saving: "Saving",
       warningMultipleFields: "Multiple fields detected. Only @{{field}} will be used.",
     },
+    mention: "Mention",
     empty: "No recent notes yet",
     expand: "Expand",
     linkPreview: {

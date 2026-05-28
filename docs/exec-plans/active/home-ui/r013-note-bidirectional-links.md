@@ -61,17 +61,17 @@
 
 ## Stage #3: Note Card 菜单与展示交互
 
-### 任务 #5: 增加 note card 拷贝链接动作
+### 任务 #5: 增加 note card Mention 动作
 
 **Status:** Finished
 
 **Files:** Modify `src/pages/home/NoteCard.tsx`, Modify `src/i18n/locales/zh-CN/home.ts`, Modify `src/i18n/locales/zh-TW/home.ts`, Modify `src/i18n/locales/en-US/home.ts`
 
-**Function:** 在 note card 三点菜单中增加“拷贝链接”，点击后复制完整 `note.id`。
+**Function:** 在 note card 三点菜单中增加“Mention”，点击后插入 `[[完整note.id]]`。
 
-**Implementation Notes:** 使用 `navigator.clipboard.writeText(note.id)`。成功后关闭菜单或短暂显示“已拷贝”。复制失败时不删除 note、不改变编辑状态，可保留菜单并让错误在 console 中可见。菜单仍保留删除按钮，删除的危险色样式只用于删除动作，复制动作使用普通菜单样式。
+**Implementation Notes:** Mention 不使用剪贴板。当前存在编辑态 note 时追加到 `editDraft`；否则追加到底部 `draft`。菜单仍保留删除按钮，删除的危险色样式只用于删除动作，Mention 动作使用普通菜单样式。
 
-**Expected Verification Result:** `HomePage.test.tsx` 中 mock clipboard，点击“拷贝链接”后断言写入完整 note id。
+**Expected Verification Result:** `HomePage.test.tsx` 中点击“Mention”后，底部草稿或当前编辑草稿出现合法 `[[完整note.id]]`。
 
 ### 任务 #6: 渲染短 uuid 与 hover 预览
 
@@ -95,7 +95,7 @@
 
 **Function:** 覆盖本需求的解析、API payload、复制菜单、提交 links 和 hover 预览关键路径。
 
-**Implementation Notes:** 测试优先验证用户可观察行为、语义结构和请求输入，不断言静态 Tailwind class。clipboard 使用 mock。hover 预览测试可通过 store state 预置目标 note 覆盖 feed 命中路径，并通过 mock action 覆盖远程路径。
+**Implementation Notes:** 测试优先验证用户可观察行为、语义结构和请求输入，不断言静态 Tailwind class。Mention 测试覆盖底部草稿和编辑草稿插入。hover 预览测试可通过 store state 预置目标 note 覆盖 feed 命中路径，并通过 mock action 覆盖远程路径。
 
 **Expected Verification Result:** 定向测试能防止 `links` 丢失、短 uuid 渲染失效、复制动作失效和 hover 预览失效。
 
@@ -118,3 +118,4 @@
 - 2026-05-28：已完成 Stage #2，新增 note preview 缓存读取 action，并在新建、编辑提交中随正文解析并发送 `links`；`npm run test -- src/pages/home/HomePage.test.tsx` 通过。
 - 2026-05-28：已完成 Stage #3，note card 三点菜单新增“拷贝链接”，展示态将 `[[完整uuid]]` 渲染为 6 位短 uuid，并支持 hover/focus 加载引用内容预览；`npm run test -- src/pages/home/HomePage.test.tsx` 通过。
 - 2026-05-28：已完成 Stage #4，补充双链首页专项测试，覆盖复制完整 note id、短 uuid 展示、hover 预览、新建和编辑提交 links；`npm run test` 通过 13 个测试文件 64 个测试，`npm run build` 通过。
+- 2026-05-28：根据 UI 优化反馈，将“拷贝链接”改为“Mention”，点击后自动追加合法 `[[完整note.id]]` 到当前编辑草稿或底部新建草稿；`npm run test -- src/pages/home/HomePage.test.tsx` 通过 7 个测试。

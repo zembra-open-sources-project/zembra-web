@@ -135,6 +135,22 @@ export function HomePage() {
     setEditDraft("");
   }
 
+  /** Inserts a note mention into the active editor draft. */
+  function handleMentionNote(noteId: string) {
+    const mention = `[[${noteId}]]`;
+
+    if (editingNoteId) {
+      setEditDraft((current) =>
+        current.trim().length > 0 ? `${current} ${mention}` : mention,
+      );
+      return;
+    }
+
+    setDraft((current) =>
+      current.trim().length > 0 ? `${current} ${mention}` : mention,
+    );
+  }
+
   /** Persists the current edit draft and exits edit mode on success. */
   async function handleEditSubmit() {
     if (!editingNoteId) {
@@ -291,6 +307,7 @@ export function HomePage() {
                   onEditStart={handleEditStart}
                   onEditSubmit={handleEditSubmit}
                   onLoadNotePreview={loadNotePreview}
+                  onMention={handleMentionNote}
                   fieldName={note.fieldId ? fieldNameById.get(note.fieldId) : undefined}
                   isEditing={editingNoteId === note.id}
                   isUpdating={isUpdating}

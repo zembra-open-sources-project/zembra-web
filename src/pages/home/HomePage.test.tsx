@@ -8,12 +8,6 @@ import { HomePage } from "./HomePage";
 
 beforeEach(async () => {
   await i18next.changeLanguage("zh-CN");
-  Object.defineProperty(navigator, "clipboard", {
-    configurable: true,
-    value: {
-      writeText: vi.fn(async () => undefined),
-    },
-  });
 });
 
 afterEach(() => {
@@ -147,18 +141,19 @@ test("renders actual note counts for all and field navigation", async () => {
   expect(await sidebarNavCount("empty")).toBe("0");
 });
 
-/** Verifies note link menu copy and hover preview behavior. */
-test("copies note links and previews linked note content", async () => {
+/** Verifies note mention insertion and hover preview behavior. */
+test("mentions note links and previews linked note content", async () => {
   renderHomePage();
   await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
 
+  const sourceNoteId = "fedcba1234567890fedcba1234567890";
   const targetNoteId = "abcdef1234567890abcdef1234567890";
 
   act(() => {
     useNotesStore.setState({
       notes: [
         {
-          id: "source-note",
+          id: sourceNoteId,
           content: `source [[${targetNoteId}]]`,
           createdAt: 1_779_382_320,
           updatedAt: 1_779_382_320,
@@ -183,10 +178,11 @@ test("copies note links and previews linked note content", async () => {
     within(sourceCard as HTMLElement).getByRole("button", { name: "笔记操作" }),
   );
   fireEvent.click(
-    within(sourceCard as HTMLElement).getByRole("button", { name: "拷贝链接" }),
+    within(sourceCard as HTMLElement).getByRole("button", { name: "Mention" }),
   );
 
-  expect(navigator.clipboard.writeText).toHaveBeenCalledWith("source-note");
+  expect((screen.getByPlaceholderText("现在的想法是...") as HTMLTextAreaElement).value)
+    .toBe(`[[${sourceNoteId}]]`);
   expect(await within(sourceCard as HTMLElement).findByText("abcdef")).not.toBeNull();
   expect(within(sourceCard as HTMLElement).queryByText(targetNoteId)).toBeNull();
 
@@ -197,6 +193,52 @@ test("copies note links and previews linked note content", async () => {
   );
 
   expect(await screen.findByText("target preview content")).not.toBeNull();
+});
+
+/** Verifies mention inserts into the active inline editor when a note is being edited. */
+test("mentions note links into the active edit draft", async () => {
+  renderHomePage();
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
+
+  act(() => {
+    useNotesStore.setState({
+      notes: [
+        {
+          id: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          content: "editable content",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: [],
+        },
+        {
+          id: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          content: "target content",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: [],
+        },
+      ],
+    });
+  });
+
+  const editableCard = (await screen.findByText("editable content")).closest("article");
+  const targetCard = (await screen.findByText("target content")).closest("article");
+  expect(editableCard).not.toBeNull();
+  expect(targetCard).not.toBeNull();
+
+  fireEvent.doubleClick(editableCard as HTMLElement);
+  fireEvent.click(
+    within(targetCard as HTMLElement).getByRole("button", { name: "笔记操作" }),
+  );
+  fireEvent.click(
+    within(targetCard as HTMLElement).getByRole("button", { name: "Mention" }),
+  );
+
+  expect((within(editableCard as HTMLElement).getByRole("textbox") as HTMLTextAreaElement).value)
+    .toBe("editable content [[bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb]]");
+  const noteEditors = screen.getAllByPlaceholderText("现在的想法是...");
+  expect((noteEditors[noteEditors.length - 1] as HTMLTextAreaElement).value)
+    .toBe("");
 });
 
 /** Verifies create and edit submissions include parsed note links. */

@@ -24,8 +24,6 @@ export const home = {
   note: {
     actions: "筆記操作",
     collapse: "收起",
-    copyLink: "拷貝連結",
-    copyLinkCopied: "已拷貝",
     delete: "刪除",
     deleting: "刪除中",
     edit: {
@@ -33,6 +31,7 @@ export const home = {
       saving: "儲存中",
       warningMultipleFields: "偵測到多個 Field，本次只使用 @{{field}}",
     },
+    mention: "Mention",
     empty: "暫無最近筆記",
     expand: "展開",
     linkPreview: {

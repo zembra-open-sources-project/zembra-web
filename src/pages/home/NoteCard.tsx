@@ -34,6 +34,7 @@ export function NoteCard({
   onEditStart,
   onEditSubmit,
   onLoadNotePreview,
+  onMention,
   tools,
 }: {
   canStartEditing: boolean;
@@ -50,13 +51,13 @@ export function NoteCard({
   onEditStart: (note: NoteDto) => void;
   onEditSubmit: () => Promise<void>;
   onLoadNotePreview: (noteRef: string) => Promise<NoteDto>;
+  onMention: (noteId: string) => void;
   tools: ComposerTool[];
 }) {
   const { t } = useTranslation("home");
   const [expanded, setExpanded] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
-  const [hasCopiedLink, setHasCopiedLink] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const displayContent = useMemo(
     () => stripRenderedTagMarkers(note.content, note.tags),
@@ -98,15 +99,10 @@ export function NoteCard({
     }
   }
 
-  /** Copies the full note identifier for use inside note links. */
-  async function handleCopyLinkClick() {
-    try {
-      await navigator.clipboard.writeText(note.id);
-      setHasCopiedLink(true);
-      setIsActionsOpen(false);
-    } catch (error) {
-      console.error("Failed to copy note link", error);
-    }
+  /** Inserts this note as a valid mention into the active note draft. */
+  function handleMentionClick() {
+    onMention(note.id);
+    setIsActionsOpen(false);
   }
 
   /** Enters edit mode when this card is allowed to own the draft. */
@@ -143,10 +139,10 @@ export function NoteCard({
               <div className="absolute right-0 top-9 z-30 min-w-28 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--color-shadow-float)]">
                 <button
                   className="block w-full px-3 py-2 text-left text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]"
-                  onClick={handleCopyLinkClick}
+                  onClick={handleMentionClick}
                   type="button"
                 >
-                  {hasCopiedLink ? t("note.copyLinkCopied") : t("note.copyLink")}
+                  {t("note.mention")}
                 </button>
                 <button
                   className="block w-full px-3 py-2 text-left text-sm text-[var(--color-error)] hover:bg-[var(--color-error-soft)] disabled:cursor-not-allowed disabled:opacity-60"
