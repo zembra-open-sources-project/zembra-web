@@ -58,6 +58,7 @@ export function SyncSettingsPage({
     useState<SyncSettingsFormState>(initialFormState);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isTogglingEnabled, setIsTogglingEnabled] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -73,6 +74,7 @@ export function SyncSettingsPage({
       ),
     [formState.intervalSeconds, t],
   );
+  const persistedSyncEnabled = status?.enabled ?? config?.enabled ?? false;
 
   useEffect(() => {
     let isMounted = true;
@@ -146,6 +148,42 @@ export function SyncSettingsPage({
     }
   }
 
+  /** Immediately persists synchronization enablement changes. */
+  async function handleEnabledChange(enabled: boolean) {
+    if (intervalValidation) {
+      setErrorMessage(intervalValidation);
+      return;
+    }
+
+    const previousFormState = formState;
+    const nextFormState = { ...formState, enabled };
+
+    setFormState(nextFormState);
+    setIsTogglingEnabled(true);
+    setErrorMessage(undefined);
+    setSuccessMessage(undefined);
+
+    try {
+      const nextConfig = await client.updateConfig({
+        enabled,
+        intervalSeconds: Number(nextFormState.intervalSeconds),
+        supabaseUrl: nextFormState.supabaseUrl.trim(),
+        serviceRoleKey: nextFormState.serviceRoleKey,
+      });
+      const nextStatus = await client.getStatus();
+
+      setConfig(nextConfig);
+      setStatus(nextStatus);
+      setFormState(createFormState(nextConfig));
+      setSuccessMessage(t("success.settingsSaved"));
+    } catch (error) {
+      setFormState(previousFormState);
+      setErrorMessage(formatErrorMessage(error));
+    } finally {
+      setIsTogglingEnabled(false);
+    }
+  }
+
   /** Tests the current form state without saving it. */
   async function handleTestConnection() {
     if (intervalValidation) {
@@ -173,6 +211,13 @@ export function SyncSettingsPage({
 
   /** Triggers one manual push and pull synchronization run. */
   async function handleRunSync() {
+    if (!persistedSyncEnabled) {
+      setErrorMessage(t("errors.enableBeforeRun"));
+      setSuccessMessage(undefined);
+      setRunResult(undefined);
+      return;
+    }
+
     setIsRunning(true);
     setErrorMessage(undefined);
     setSuccessMessage(undefined);
@@ -215,7 +260,7 @@ export function SyncSettingsPage({
           <div className="flex items-center gap-3">
             <LanguageMenu />
             <ThemeToggle />
-            <StatusPill enabled={status?.enabled ?? config?.enabled ?? false} />
+            <StatusPill enabled={persistedSyncEnabled} />
           </div>
         </header>
 
@@ -255,13 +300,9 @@ export function SyncSettingsPage({
                 <input
                   checked={formState.enabled}
                   className="size-5 accent-[var(--color-accent)]"
+                  disabled={isTogglingEnabled}
                   type="checkbox"
-                  onChange={(event) =>
-                    setFormState((current) => ({
-                      ...current,
-                      enabled: event.target.checked,
-                    }))
-                  }
+                  onChange={(event) => void handleEnabledChange(event.target.checked)}
                 />
               </label>
 

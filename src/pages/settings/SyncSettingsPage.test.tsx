@@ -135,4 +135,35 @@ describe("SyncSettingsPage", () => {
     expect(client.runSync).toHaveBeenCalled();
     expect(client.getStatus).toHaveBeenCalledTimes(2);
   });
+
+  test("persists synchronization enablement when the checkbox changes", async () => {
+    client = {
+      ...createMockPageClient(),
+      getConfig: vi.fn(async () => ({
+        enabled: false,
+        intervalSeconds: 120,
+        supabaseUrl: "https://project.supabase.co",
+        serviceRoleKeyConfigured: true,
+      })),
+      getStatus: vi.fn(async () => ({
+        enabled: false,
+        states: [],
+      })),
+    };
+
+    renderSettingsPage(<SyncSettingsPage client={client} />);
+
+    await screen.findByDisplayValue("https://project.supabase.co");
+    fireEvent.click(screen.getByRole("checkbox"));
+
+    await waitFor(() => {
+      expect(client.updateConfig).toHaveBeenCalledWith({
+        enabled: true,
+        intervalSeconds: 120,
+        supabaseUrl: "https://project.supabase.co",
+        serviceRoleKey: "",
+      });
+    });
+    expect(await screen.findByText("Settings saved")).not.toBeNull();
+  });
 });

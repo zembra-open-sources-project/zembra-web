@@ -27,6 +27,9 @@ export const settings = {
       label: "Supabase URL",
     },
   },
+  errors: {
+    enableBeforeRun: "Enable synchronization and save settings before running sync.",
+  },
   home: "Home",
   results: {
     manualSync: "Manual Sync",

@@ -26,6 +26,9 @@ export const settings = {
       label: "Supabase URL",
     },
   },
+  errors: {
+    enableBeforeRun: "请先启用同步并保存设置，再运行同步。",
+  },
   home: "首页",
   results: {
     manualSync: "手动同步",
