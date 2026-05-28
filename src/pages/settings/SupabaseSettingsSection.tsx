@@ -213,7 +213,7 @@ export function SupabaseSettingsSection({
         <Alert tone="success" message={successMessage} />
       ) : null}
 
-      <form className="mt-4 flex min-w-0 flex-col gap-4" onSubmit={handleSave}>
+      <form className="mt-4 flex min-w-0 flex-col gap-3" onSubmit={handleSave}>
         <FieldLabel label={t("supabase.url")}>
           <input
             className="h-11 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
@@ -263,13 +263,8 @@ export function SupabaseSettingsSection({
           />
         </FieldLabel>
 
-        <div className="flex items-center justify-between gap-4 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3">
-          <div className="min-w-0">
-            <div className="text-sm font-semibold text-[var(--color-text-secondary)]">
-              {t("supabase.enableSync")}
-            </div>
-          </div>
-          <label className="relative inline-flex h-7 w-12 shrink-0 items-center">
+        <SettingRow label={t("supabase.enableSync")}>
+          <label className="relative inline-flex h-7 w-12 shrink-0 items-center justify-self-end">
             <input
               checked={syncEnabled}
               className="peer sr-only"
@@ -284,7 +279,7 @@ export function SupabaseSettingsSection({
             <span className="absolute inset-0 rounded-full bg-[var(--color-border)] transition peer-checked:bg-[var(--color-accent)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent)]" />
             <span className="absolute left-1 size-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
           </label>
-        </div>
+        </SettingRow>
 
         {testResult ? (
           <p className="text-sm text-[var(--color-text-secondary)]" role="status">
@@ -354,17 +349,35 @@ function FieldLabel({
   label: string;
 }) {
   return (
-    <label className="block min-w-0">
-      <span className="mb-2 block text-sm font-semibold text-[var(--color-text-secondary)]">
+    <label className="grid min-w-0 grid-cols-[150px_minmax(0,1fr)] items-center gap-4 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3">
+      <span className="min-w-0 text-sm font-semibold text-[var(--color-text-secondary)]">
         {label}
       </span>
-      {children}
+      <span className="min-w-0">{children}</span>
       {error ? (
-        <span className="mt-2 block text-xs text-[var(--color-error)]">
+        <span className="col-start-2 block text-xs text-[var(--color-error)]">
           {error}
         </span>
       ) : null}
     </label>
+  );
+}
+
+/** Renders one compact settings row with label and control on the same line. */
+function SettingRow({
+  children,
+  label,
+}: {
+  children: ReactNode;
+  label: string;
+}) {
+  return (
+    <div className="grid min-w-0 grid-cols-[150px_minmax(0,1fr)] items-center gap-4 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3">
+      <div className="min-w-0 text-sm font-semibold text-[var(--color-text-secondary)]">
+        {label}
+      </div>
+      <div className="min-w-0">{children}</div>
+    </div>
   );
 }
 
