@@ -332,7 +332,7 @@ export function SyncSettingsPage({
               <SecretState configured={config?.serviceRoleKeyConfigured ?? false} />
             </div>
 
-            <div className="mt-6 flex flex-nowrap items-center gap-3 overflow-x-auto">
+            <div className="mt-6 flex flex-nowrap items-center justify-between gap-3 overflow-x-auto">
               <ActionButton
                 busy={isTesting}
                 icon={<TestTube2 className="size-4" aria-hidden="true" />}
