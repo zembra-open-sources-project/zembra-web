@@ -214,7 +214,7 @@ export function SupabaseSettingsSection({
         <div className="overflow-hidden rounded-[16px] bg-[var(--color-surface-muted)] shadow-[inset_0_0_0_1px_var(--color-border)]">
           <FieldLabel label={t("supabase.url")}>
             <input
-              className="h-9 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
+              className="h-9 w-full rounded-[6px] bg-transparent px-2 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:bg-[var(--color-surface)] focus:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
               placeholder="https://project.supabase.co"
               value={formState.supabaseUrl}
               onChange={(event) =>
@@ -228,7 +228,7 @@ export function SupabaseSettingsSection({
 
           <FieldLabel label={t("supabase.secretKey")}>
             <input
-              className="h-9 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
+              className="h-9 w-full rounded-[6px] bg-transparent px-2 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:bg-[var(--color-surface)] focus:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
               placeholder={t("supabase.secretPlaceholder")}
               type="password"
               value={formState.secretKey}
@@ -246,7 +246,7 @@ export function SupabaseSettingsSection({
             label={t("supabase.intervalSeconds")}
           >
             <input
-              className="h-9 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
+              className="h-9 w-full rounded-[6px] bg-transparent px-2 text-right text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:bg-[var(--color-surface)] focus:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
               inputMode="numeric"
               min="0"
               placeholder="300"
