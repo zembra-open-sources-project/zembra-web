@@ -129,6 +129,7 @@ describe("createNotesHttpClient", () => {
       expect(JSON.parse(String(init?.body))).toEqual({
         content: "new note",
         field: undefined,
+        links: [],
         role: "Human",
         tags: ["api"],
       });
@@ -158,6 +159,57 @@ describe("createNotesHttpClient", () => {
       id: "note-1",
       tags: ["api"],
     });
+  });
+
+  test("creates notes with parsed note links", async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      expect(JSON.parse(String(init?.body))).toMatchObject({
+        links: [
+          {
+            anchor_text: "[[abcdef1234567890abcdef1234567890]]",
+            position: 4,
+            target_note_ref: "abcdef1234567890abcdef1234567890",
+          },
+        ],
+      });
+
+      return jsonResponse(
+        {
+          note: {
+            id: "note-1",
+            content: "new note",
+            role: "Human",
+            field_id: null,
+            created_at: 10,
+            updated_at: 10,
+          },
+          metadata: {
+            backlinks: [],
+            field: null,
+            outgoing_links: [],
+            role: "Human",
+            tags: [],
+          },
+        },
+        { status: 201 },
+      );
+    });
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+
+    await expect(
+      client.createNote({
+        content: "new note",
+        links: [
+          {
+            anchorText: "[[abcdef1234567890abcdef1234567890]]",
+            position: 4,
+            targetNoteRef: "abcdef1234567890abcdef1234567890",
+          },
+        ],
+      }),
+    ).resolves.toMatchObject({ id: "note-1" });
   });
 
   test("throws ApiError for backend error responses", async () => {
@@ -193,25 +245,36 @@ describe("createNotesHttpClient", () => {
           content: "edited note",
           device_id: "device-1",
           field: "project",
+          links: [
+            {
+              anchor_text: "[[abcdef1234567890abcdef1234567890]]",
+              position: 12,
+              target_note_ref: "abcdef1234567890abcdef1234567890",
+            },
+          ],
           tags: ["api", "edit"],
         });
 
         return jsonResponse({
-          id: "abc123",
-          content: "edited note",
-          role: "Human",
-          field_id: "field-project",
-          created_at: 1,
-          updated_at: 3,
+          note: {
+            id: "abc123",
+            content: "edited note",
+            role: "Human",
+            field_id: "field-project",
+            created_at: 1,
+            updated_at: 3,
+          },
+          metadata: {
+            backlinks: [],
+            field: "project",
+            outgoing_links: [],
+            role: "Human",
+            tags: ["api", "edit"],
+          },
         });
       }
 
-      return jsonResponse({
-        tags: [
-          { id: "tag-1", name: "api", created_at: 1 },
-          { id: "tag-2", name: "edit", created_at: 2 },
-        ],
-      });
+      throw new Error(`Unexpected URL: ${url}`);
     });
     globalThis.fetch = fetchMock as typeof fetch;
 
@@ -222,6 +285,13 @@ describe("createNotesHttpClient", () => {
         content: "edited note",
         deviceId: "device-1",
         field: "project",
+        links: [
+          {
+            anchorText: "[[abcdef1234567890abcdef1234567890]]",
+            position: 12,
+            targetNoteRef: "abcdef1234567890abcdef1234567890",
+          },
+        ],
         tags: ["api", "edit"],
       }),
     ).resolves.toEqual({
@@ -232,7 +302,40 @@ describe("createNotesHttpClient", () => {
       updatedAt: 3,
       tags: ["api", "edit"],
     });
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("reads a single note from the OpenAPI note response shape", async () => {
+    const fetchMock = vi.fn(async () =>
+      jsonResponse({
+        note: {
+          id: "abc123",
+          content: "preview note",
+          role: "Human",
+          field_id: null,
+          created_at: 1,
+          updated_at: 2,
+        },
+        metadata: {
+          backlinks: [],
+          field: null,
+          outgoing_links: [],
+          role: "Human",
+          tags: ["preview"],
+        },
+      }),
+    );
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+
+    await expect(client.getNote("abc123")).resolves.toEqual({
+      id: "abc123",
+      content: "preview note",
+      createdAt: 1,
+      updatedAt: 2,
+      tags: ["preview"],
+    });
   });
 });
 
@@ -248,7 +351,13 @@ describe("mapNoteResponseToDto", () => {
           created_at: 1,
           updated_at: 2,
         },
-        metadata: { tags: ["tag"], role: "Human", field: "field" },
+        metadata: {
+          backlinks: [],
+          field: "field",
+          outgoing_links: [],
+          role: "Human",
+          tags: ["tag"],
+        },
       }),
     ).toEqual({
       id: "note-1",

@@ -10,6 +10,7 @@ import type {
   ListNoteTagsResponse,
   ListNotesResponse,
   NoteDto,
+  NoteLinkInput,
   NoteRecord,
   NoteResponse,
   NotesQuery,
@@ -97,11 +98,11 @@ export function createNotesHttpClient(
     },
     async getNote(noteRef) {
       const resolvedBaseUrl = resolveBackendBaseUrl(baseUrl);
-      const note = await requestJson<NoteRecord>(
+      const response = await requestJson<NoteResponse>(
         resolvedBaseUrl,
         `/notes/${encodeURIComponent(noteRef)}`,
       );
-      return mapNoteRecordToDto(note, await listTagNames(resolvedBaseUrl, note.id));
+      return mapNoteResponseToDto(response);
     },
     async createNote(input) {
       const resolvedBaseUrl = resolveBackendBaseUrl(baseUrl);
@@ -114,6 +115,7 @@ export function createNotesHttpClient(
             content: input.content,
             device_id: input.deviceId,
             field: input.field,
+            links: mapNoteLinksToRequest(input.links ?? []),
             role: input.role ?? "Human",
             tags: input.tags ?? [],
           },
@@ -124,7 +126,7 @@ export function createNotesHttpClient(
     },
     async updateNote(noteRef, input) {
       const resolvedBaseUrl = resolveBackendBaseUrl(baseUrl);
-      const note = await requestJson<NoteRecord>(
+      const response = await requestJson<NoteResponse>(
         resolvedBaseUrl,
         `/notes/${encodeURIComponent(noteRef)}`,
         {
@@ -133,12 +135,15 @@ export function createNotesHttpClient(
             content: input.content,
             device_id: input.deviceId,
             field: input.field,
+            links: input.links
+              ? mapNoteLinksToRequest(input.links)
+              : input.links,
             tags: input.tags,
           },
         },
       );
 
-      return mapNoteRecordToDto(note, await listTagNames(resolvedBaseUrl, note.id));
+      return mapNoteResponseToDto(response);
     },
     async deleteNote(noteRef) {
       const resolvedBaseUrl = resolveBackendBaseUrl(baseUrl);
@@ -151,6 +156,15 @@ export function createNotesHttpClient(
       );
     },
   };
+}
+
+/** Maps frontend link inputs to the backend request field names. */
+function mapNoteLinksToRequest(links: NoteLinkInput[]) {
+  return links.map((link) => ({
+    anchor_text: link.anchorText,
+    position: link.position,
+    target_note_ref: link.targetNoteRef,
+  }));
 }
 
 /** Creates the initial mock notes client used before the backend API is connected. */

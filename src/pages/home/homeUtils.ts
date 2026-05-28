@@ -1,4 +1,11 @@
 import type { NoteDto } from "../../api/types";
+import type { NoteLinkInput } from "../../api/types";
+
+export type RenderableNoteContentSegment =
+  | { text: string; type: "text" }
+  | { anchorText: string; targetNoteRef: string; type: "link" };
+
+const fullNoteLinkPattern = /\[\[([A-Fa-f0-9]{32})\]\]/g;
 
 /** Applies current home feed filters to recent notes. */
 export function filterVisibleNotes(
@@ -76,6 +83,49 @@ export function parseFieldNames(content: string): string[] {
     content.matchAll(/(?:^|\s)@([^\s#@]+)/g),
     (match) => match[1],
   );
+}
+
+/** Extracts full UUID note links from note content for backend submission. */
+export function parseNoteLinks(content: string): NoteLinkInput[] {
+  return Array.from(content.matchAll(fullNoteLinkPattern), (match) => ({
+    anchorText: match[0],
+    position: match.index ?? null,
+    targetNoteRef: match[1],
+  }));
+}
+
+/** Formats a full note reference as the compact card display label. */
+export function formatShortNoteRef(noteRef: string): string {
+  return noteRef.slice(0, 6);
+}
+
+/** Splits note content into plain text and note-link display segments. */
+export function parseRenderableNoteContent(
+  content: string,
+): RenderableNoteContentSegment[] {
+  const segments: RenderableNoteContentSegment[] = [];
+  let lastIndex = 0;
+
+  for (const match of content.matchAll(fullNoteLinkPattern)) {
+    const start = match.index ?? 0;
+
+    if (start > lastIndex) {
+      segments.push({ text: content.slice(lastIndex, start), type: "text" });
+    }
+
+    segments.push({
+      anchorText: match[0],
+      targetNoteRef: match[1],
+      type: "link",
+    });
+    lastIndex = start + match[0].length;
+  }
+
+  if (lastIndex < content.length) {
+    segments.push({ text: content.slice(lastIndex), type: "text" });
+  }
+
+  return segments.length > 0 ? segments : [{ text: content, type: "text" }];
 }
 
 /** Formats a Unix timestamp for note card metadata. */

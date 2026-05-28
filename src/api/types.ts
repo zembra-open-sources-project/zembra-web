@@ -32,6 +32,16 @@ export interface RecentNotesQuery {
   noteUuid?: string;
 }
 
+/** Describes one client-parsed outgoing note link. */
+export interface NoteLinkInput {
+  /** Target note full ID or accepted backend reference. */
+  targetNoteRef: string;
+  /** Optional source text that produced the link. */
+  anchorText?: string | null;
+  /** Optional zero-based source position in the note body. */
+  position?: number | null;
+}
+
 /** Describes input required to create a note through the API boundary. */
 export interface CreateNoteInput {
   /** Main note body using lightweight Markdown-compatible text. */
@@ -44,6 +54,8 @@ export interface CreateNoteInput {
   role?: string;
   /** Optional device identifier used for revision tracking. */
   deviceId?: string;
+  /** Outgoing links parsed from the note body. */
+  links?: NoteLinkInput[];
 }
 
 /** Describes input required to update a note through the API boundary. */
@@ -56,6 +68,8 @@ export interface UpdateNoteInput {
   field?: string | null;
   /** Optional device identifier used for revision tracking. */
   deviceId?: string;
+  /** Optional replacement outgoing links parsed from the note body. */
+  links?: NoteLinkInput[];
 }
 
 /** Represents structured error details returned by the backend. */
@@ -90,6 +104,22 @@ export interface NoteRecord {
   deleted_at?: number | null;
 }
 
+/** Represents a backend note-to-note link record. */
+export interface NoteLinkRecord {
+  /** Stable link row identifier. */
+  id: string;
+  /** Identifier of the note containing the link. */
+  source_note_id: string;
+  /** Identifier of the referenced note. */
+  target_note_id: string;
+  /** Optional client-parsed link text. */
+  anchor_text?: string | null;
+  /** Optional zero-based source position. */
+  position?: number | null;
+  /** Unix timestamp for link creation. */
+  created_at: number;
+}
+
 /** Represents user-facing note metadata resolved by the backend. */
 export interface NoteMetadata {
   /** Resolved tag names. */
@@ -98,6 +128,10 @@ export interface NoteMetadata {
   role: string;
   /** Optional resolved field name. */
   field?: string | null;
+  /** Links from this note to other visible notes. */
+  outgoing_links?: NoteLinkRecord[];
+  /** Links from other visible notes to this note. */
+  backlinks?: NoteLinkRecord[];
 }
 
 /** Represents the backend single-note response wrapper. */
