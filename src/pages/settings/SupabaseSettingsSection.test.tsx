@@ -65,6 +65,25 @@ describe("SupabaseSettingsSection", () => {
     expect(screen.queryByText(/Configured|Not configured/)).toBeNull();
   });
 
+  test("places Enable sync after required connection fields", async () => {
+    renderSupabaseSection();
+
+    await screen.findByDisplayValue("https://project.supabase.co");
+
+    const urlLabel = screen.getByText("Supabase URL");
+    const intervalLabel = screen.getByText("Interval seconds");
+    const enableSwitch = screen.getByRole("switch", { name: "Enable sync" });
+
+    expect(
+      urlLabel.compareDocumentPosition(enableSwitch) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).not.toBe(0);
+    expect(
+      intervalLabel.compareDocumentPosition(enableSwitch) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).not.toBe(0);
+  });
+
   test("tests candidate configuration without saving or running sync", async () => {
     renderSupabaseSection();
 

@@ -214,29 +214,6 @@ export function SupabaseSettingsSection({
       ) : null}
 
       <form className="mt-4 flex min-w-0 flex-col gap-4" onSubmit={handleSave}>
-        <div className="flex items-center justify-between gap-4 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3">
-          <div className="min-w-0">
-            <div className="text-sm font-semibold text-[var(--color-text-secondary)]">
-              {t("supabase.enableSync")}
-            </div>
-          </div>
-          <label className="relative inline-flex h-7 w-12 shrink-0 items-center">
-            <input
-              checked={syncEnabled}
-              className="peer sr-only"
-              disabled={isLoading || isTogglingEnabled}
-              role="switch"
-              type="checkbox"
-              aria-label={t("supabase.enableSync")}
-              onChange={(event) =>
-                void handleSyncEnabledChange(event.target.checked)
-              }
-            />
-            <span className="absolute inset-0 rounded-full bg-[var(--color-border)] transition peer-checked:bg-[var(--color-accent)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent)]" />
-            <span className="absolute left-1 size-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
-          </label>
-        </div>
-
         <FieldLabel label={t("supabase.url")}>
           <input
             className="h-11 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-strong)]"
@@ -285,6 +262,29 @@ export function SupabaseSettingsSection({
             }
           />
         </FieldLabel>
+
+        <div className="flex items-center justify-between gap-4 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3">
+          <div className="min-w-0">
+            <div className="text-sm font-semibold text-[var(--color-text-secondary)]">
+              {t("supabase.enableSync")}
+            </div>
+          </div>
+          <label className="relative inline-flex h-7 w-12 shrink-0 items-center">
+            <input
+              checked={syncEnabled}
+              className="peer sr-only"
+              disabled={isLoading || isTogglingEnabled}
+              role="switch"
+              type="checkbox"
+              aria-label={t("supabase.enableSync")}
+              onChange={(event) =>
+                void handleSyncEnabledChange(event.target.checked)
+              }
+            />
+            <span className="absolute inset-0 rounded-full bg-[var(--color-border)] transition peer-checked:bg-[var(--color-accent)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent)]" />
+            <span className="absolute left-1 size-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
+          </label>
+        </div>
 
         {testResult ? (
           <p className="text-sm text-[var(--color-text-secondary)]" role="status">
