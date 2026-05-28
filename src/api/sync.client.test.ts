@@ -31,7 +31,7 @@ describe("createSyncHttpClient", () => {
         enabled: true,
         interval_seconds: 120,
         supabase_url: "https://project.supabase.co",
-        service_role_key_configured: true,
+        secret_key_configured: true,
       });
     }) as typeof fetch;
 
@@ -53,14 +53,14 @@ describe("createSyncHttpClient", () => {
         enabled: true,
         interval_seconds: 60,
         supabase_url: "https://project.supabase.co",
-        service_role_key: "new-key",
+        secret_key: "new-key",
       });
 
       return jsonResponse({
         enabled: true,
         interval_seconds: 60,
         supabase_url: "https://project.supabase.co",
-        service_role_key_configured: true,
+        secret_key_configured: true,
       });
     });
     globalThis.fetch = fetchMock as typeof fetch;
@@ -97,7 +97,7 @@ describe("createSyncHttpClient", () => {
       expect(init?.method).toBe("POST");
       expect(JSON.parse(String(init?.body))).toEqual({
         supabase_url: "https://project.supabase.co",
-        service_role_key: "candidate-key",
+        secret_key: "candidate-key",
       });
 
       return jsonResponse({ ok: true, message: "connected" });
@@ -174,7 +174,7 @@ describe("sync client mapping helpers", () => {
         enabled: true,
         interval_seconds: 30,
         supabase_url: "https://project.supabase.co",
-        service_role_key_configured: false,
+        secret_key_configured: false,
       }),
     ).toEqual({
       enabled: true,
@@ -207,7 +207,7 @@ describe("sync client mapping helpers", () => {
   test("normalizes blank test fields to null", () => {
     expect(createTestSyncConfigRequest({ serviceRoleKey: " " })).toEqual({
       supabase_url: null,
-      service_role_key: null,
+      secret_key: null,
     });
   });
 });

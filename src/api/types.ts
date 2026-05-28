@@ -244,8 +244,8 @@ export interface SyncConfigResponse {
   interval_seconds: number;
   /** Supabase project URL used by the backend REST client. */
   supabase_url: string;
-  /** Whether a service role key is configured on the backend. */
-  service_role_key_configured: boolean;
+  /** Whether a Supabase secret key is configured on the backend. */
+  secret_key_configured: boolean;
 }
 
 /** Describes input required to persist synchronization settings. */
@@ -268,8 +268,8 @@ export interface UpdateSyncConfigRequest {
   interval_seconds: number;
   /** Supabase project URL used by the backend REST client. */
   supabase_url: string;
-  /** Optional new service role key. */
-  service_role_key?: string | null;
+  /** Optional new Supabase secret key. */
+  secret_key?: string | null;
 }
 
 /** Describes input used to test synchronization settings without saving them. */
@@ -284,8 +284,8 @@ export interface TestSyncConfigInput {
 export interface TestSyncConfigRequest {
   /** Optional Supabase project URL candidate. */
   supabase_url?: string | null;
-  /** Optional service role key candidate. */
-  service_role_key?: string | null;
+  /** Optional Supabase secret key candidate. */
+  secret_key?: string | null;
 }
 
 /** Represents a sanitized synchronization configuration test result. */

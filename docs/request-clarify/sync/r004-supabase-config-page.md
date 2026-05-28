@@ -11,8 +11,8 @@
 | 项目 | 结论 |
 | --- | --- |
 | OpenAPI 地址 | `http://127.0.0.1:3000/api-docs/openapi.json` |
-| 读取配置 | `GET /sync/config`，返回安全展示用配置，不暴露 `service_role_key` |
-| 保存配置 | `PUT /sync/config`，保存 `enabled`、`interval_seconds`、`supabase_url` 和可选 `service_role_key` |
+| 读取配置 | `GET /sync/config`，返回安全展示用配置，不暴露 `secret_key` |
+| 保存配置 | `PUT /sync/config`，保存 `enabled`、`interval_seconds`、`supabase_url` 和可选 `secret_key` |
 | 测试配置 | `POST /sync/config/test`，测试候选配置，不持久化 |
 | 查询状态 | `GET /sync/status`，返回同步启用状态和 cursor rows |
 | 手动同步 | `POST /sync/run`，执行一次 push 和 pull 同步周期 |
@@ -24,9 +24,9 @@
 | --- | --- |
 | 页面入口 | 首页左侧栏顶部新增 Settings 入口。 |
 | 页面形态 | 点击 Settings 后进入独立页面，推荐路由为 `/settings/sync`。 |
-| 配置字段 | `enabled`、`supabase_url`、`interval_seconds`、`service_role_key`。 |
-| Secret 展示 | 只展示 `service_role_key_configured` 的已配置/未配置状态；输入框只用于设置新 key。 |
-| Secret 保存 | `service_role_key` 留空保存时不覆盖已有 key；填写时提交新 key。 |
+| 配置字段 | `enabled`、`supabase_url`、`interval_seconds`、`secret_key`。 |
+| Secret 展示 | 只展示 `secret_key_configured` 的已配置/未配置状态；输入框只用于设置新 key。 |
+| Secret 保存 | `secret_key` 留空保存时不覆盖已有 key；填写时提交新 key。 |
 | 间隔校验 | `interval_seconds` 允许 `0` 和正整数；前端只做整数校验，不重新定义 `0` 的后端语义。 |
 | 手动同步 | 配置页包含手动同步能力，优先提供 `Run Sync`。 |
 | 数据访问 | 前端通过 API Client 访问后端，不直接引入 Supabase SDK。 |
@@ -35,7 +35,7 @@
 
 - 不让 React UI 组件直接调用 Supabase 查询。
 - 不新增 SQLite driver、ORM 或数据库 migration 运行时依赖。
-- 不在前端存储或回显 `service_role_key` 明文。
+- 不在前端存储或回显 `secret_key` 明文。
 - 不实现 UI 自动化测试，除非后续用户明确要求。
 
 ## 验收标准

@@ -15,7 +15,7 @@
 
 **Function:** 定义 Supabase 同步配置、状态、测试结果和手动同步结果的前端 DTO、后端响应类型与输入类型。
 
-**Implementation Notes:** 后端响应字段保持 `snake_case` 类型定义，前端 DTO 使用 `camelCase`。`service_role_key` 只出现在保存和测试输入中，不出现在读取配置 DTO 中。
+**Implementation Notes:** 后端响应字段保持 `snake_case` 类型定义，前端 DTO 使用 `camelCase`。`secret_key` 只出现在保存和测试输入中，不出现在读取配置 DTO 中。
 
 **Expected Verification Result:** TypeScript 能识别 sync client 所需全部类型，UI 层不需要直接引用后端 `snake_case` 字段。
 

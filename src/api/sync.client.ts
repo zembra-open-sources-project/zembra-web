@@ -138,7 +138,7 @@ export function mapSyncConfigResponseToDto(
     enabled: response.enabled,
     intervalSeconds: response.interval_seconds,
     supabaseUrl: response.supabase_url,
-    serviceRoleKeyConfigured: response.service_role_key_configured,
+    serviceRoleKeyConfigured: response.secret_key_configured,
   };
 }
 
@@ -200,7 +200,7 @@ export function createUpdateSyncConfigRequest(
   };
 
   if (trimmedKey) {
-    request.service_role_key = trimmedKey;
+    request.secret_key = trimmedKey;
   }
 
   return request;
@@ -212,7 +212,7 @@ export function createTestSyncConfigRequest(
 ): TestSyncConfigRequest {
   return {
     supabase_url: normalizeOptionalString(input.supabaseUrl),
-    service_role_key: normalizeOptionalString(input.serviceRoleKey),
+    secret_key: normalizeOptionalString(input.serviceRoleKey),
   };
 }
 

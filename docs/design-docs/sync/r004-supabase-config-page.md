@@ -10,7 +10,7 @@
 
 ### 需求背景（WHY）
 
-后端已经提供 `/sync/*` API，WebUI 需要提供一个安全的配置入口，让用户不用直接改后端配置文件即可管理 Supabase 同步能力。前端必须继续保持 API Client 边界，不直接引入 Supabase SDK，也不暴露 `service_role_key` 明文。
+后端已经提供 `/sync/*` API，WebUI 需要提供一个安全的配置入口，让用户不用直接改后端配置文件即可管理 Supabase 同步能力。前端必须继续保持 API Client 边界，不直接引入 Supabase SDK，也不暴露 `secret_key` 明文。
 
 ### 需求目标（GOAL）
 
@@ -20,7 +20,7 @@
 | 配置读取 | 进入页面后调用 `GET /sync/config` 和 `GET /sync/status`。 |
 | 配置测试 | 点击 Test 调用 `POST /sync/config/test`，只测试候选值，不保存。 |
 | 配置保存 | 点击 Save 调用 `PUT /sync/config`，保存表单值。 |
-| Secret 处理 | 只展示 `service_role_key_configured`；输入框只用于设置新 key，留空不覆盖。 |
+| Secret 处理 | 只展示 `secret_key_configured`；输入框只用于设置新 key，留空不覆盖。 |
 | 手动同步 | 点击 Run Sync 调用 `POST /sync/run`，展示 pushed/pulled 结果或错误。 |
 
 ### 范围边界
@@ -54,7 +54,7 @@
 | `SyncStatusDto` | `enabled`、`states` | 展示同步状态和 cursor。 |
 | `SyncRunResultDto` | `pushed`、`pulled` | 展示手动同步结果。 |
 
-后端字段使用 `snake_case`，client 映射为前端 `camelCase`。`service_role_key` 保存时仅在用户填写新 key 后加入请求体；空字符串会被 client 转为 `null` 或省略，避免覆盖已有 key。
+后端字段使用 `snake_case`，client 映射为前端 `camelCase`。`secret_key` 保存时仅在用户填写新 key 后加入请求体；空字符串会被 client 转为省略，避免覆盖已有 key。
 
 ### 页面结构
 
