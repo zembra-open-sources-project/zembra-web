@@ -27,6 +27,7 @@ import {
   countTags,
   filterVisibleNotes,
   parseFieldNames,
+  parseNoteLinks,
   parseTagNames,
 } from "./homeUtils";
 
@@ -52,6 +53,7 @@ export function HomePage() {
     createNote,
     loadDailyNoteCounts,
     loadFields,
+    loadNotePreview,
     loadRecentNotes,
     loadTags,
     deleteNote,
@@ -100,12 +102,14 @@ export function HomePage() {
     const field =
       fields.find((item) => item.id === selectedField)?.name ?? "inbox";
     const tags = parseTagNames(content);
+    const links = parseNoteLinks(content);
 
     setIsSubmitting(true);
     try {
       await createNote({
         content,
         field,
+        links,
         role: "Human",
         tags,
       });
@@ -150,6 +154,7 @@ export function HomePage() {
       await updateNote(editingNoteId, {
         content,
         field: fieldNames[0] ?? null,
+        links: parseNoteLinks(content),
         tags: parseTagNames(content),
       });
       handleEditCancel();
@@ -285,6 +290,7 @@ export function HomePage() {
                   onEditDraftChange={setEditDraft}
                   onEditStart={handleEditStart}
                   onEditSubmit={handleEditSubmit}
+                  onLoadNotePreview={loadNotePreview}
                   fieldName={note.fieldId ? fieldNameById.get(note.fieldId) : undefined}
                   isEditing={editingNoteId === note.id}
                   isUpdating={isUpdating}

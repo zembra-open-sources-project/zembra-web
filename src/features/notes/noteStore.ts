@@ -18,6 +18,8 @@ interface NotesState {
   tags: TagDto[];
   /** Daily note counts used by the home activity heatmap. */
   dailyNoteCounts: DailyNoteCount[];
+  /** Cached notes loaded only for link previews. */
+  notePreviewById: Record<string, NoteDto>;
   /** Search keyword entered by the user. */
   keyword: string;
   /** Tag selected by the user. */
@@ -40,6 +42,8 @@ interface NotesState {
   updateNote: (noteRef: string, input: UpdateNoteInput) => Promise<void>;
   /** Deletes a note and removes it from the recent feed. */
   deleteNote: (noteRef: string) => Promise<void>;
+  /** Loads a note for link preview without changing the recent feed. */
+  loadNotePreview: (noteRef: string) => Promise<NoteDto>;
   /** Loads fields from the active taxonomy client. */
   loadFields: () => Promise<void>;
   /** Loads tags from the active taxonomy client. */
@@ -52,6 +56,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   fields: [],
   tags: [],
   dailyNoteCounts: [],
+  notePreviewById: {},
   keyword: "",
   selectedTag: undefined,
   selectedField: undefined,
@@ -103,6 +108,29 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     set((state) => ({
       notes: state.notes.filter((note) => note.id !== noteRef),
     }));
+  },
+  loadNotePreview: async (noteRef) => {
+    const state = get();
+    const feedNote = state.notes.find((note) => note.id === noteRef);
+
+    if (feedNote) {
+      return feedNote;
+    }
+
+    const cachedNote = state.notePreviewById[noteRef];
+
+    if (cachedNote) {
+      return cachedNote;
+    }
+
+    const note = await notesClient.getNote(noteRef);
+    set((current) => ({
+      notePreviewById: {
+        ...current.notePreviewById,
+        [note.id]: note,
+      },
+    }));
+    return note;
   },
   loadFields: async () => {
     const existingFields = get().fields;

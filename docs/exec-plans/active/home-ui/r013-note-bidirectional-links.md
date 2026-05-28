@@ -37,7 +37,7 @@
 
 ### 任务 #3: 扩展 notes store 的预览读取能力
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/features/notes/noteStore.ts`
 
@@ -49,7 +49,7 @@
 
 ### 任务 #4: 在新建和编辑提交中发送 links
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/HomePage.tsx`
 
@@ -115,3 +115,4 @@
 
 - 2026-05-28：已完成需求澄清、设计文档和执行计划。确认前端解析 `[[完整uuid]]` 后提交后端 `links`，展示态显示 6 位短 uuid，hover 预览先查当前 feed、未命中再读取后端。
 - 2026-05-28：已完成 Stage #1，扩展 note links API 类型和 HTTP client，新增 `parseNoteLinks`、`formatShortNoteRef`、`parseRenderableNoteContent`，并通过 `npm run test -- src/api/notes.client.test.ts` 与 `npm run test -- src/pages/home/homeUtils.test.ts`。
+- 2026-05-28：已完成 Stage #2，新增 note preview 缓存读取 action，并在新建、编辑提交中随正文解析并发送 `links`；`npm run test -- src/pages/home/HomePage.test.tsx` 通过。

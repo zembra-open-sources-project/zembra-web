@@ -28,6 +28,7 @@ export function NoteCard({
   onEditDraftChange,
   onEditStart,
   onEditSubmit,
+  onLoadNotePreview,
   tools,
 }: {
   canStartEditing: boolean;
@@ -43,6 +44,7 @@ export function NoteCard({
   onEditDraftChange: (draft: string) => void;
   onEditStart: (note: NoteDto) => void;
   onEditSubmit: () => Promise<void>;
+  onLoadNotePreview: (noteRef: string) => Promise<NoteDto>;
   tools: ComposerTool[];
 }) {
   const { t } = useTranslation("home");
