@@ -43,6 +43,7 @@ export const home = {
       loading: "Loading",
       unavailable: "Preview unavailable",
     },
+    roleLabel: "Role: {{role}}",
   },
   search: {
     placeholder: "Search notes, Fields, Tags",
@@ -51,7 +52,9 @@ export const home = {
     all: "All",
     emptyTags: "No tags yet",
     fields: "Fields",
+    roles: "Roles",
     tags: "Tags",
+    unknownRole: "Unknown",
   },
   stats: {
     fields: "Fields",

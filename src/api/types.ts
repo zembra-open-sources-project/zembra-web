@@ -4,6 +4,8 @@ export interface NoteDto {
   id: string;
   /** Main note body using lightweight Markdown-compatible text. */
   content: string;
+  /** Role that created the note. */
+  role: string;
   /** Optional field identifier associated with the note. */
   fieldId?: string;
   /** Unix timestamp for note creation. */
@@ -30,6 +32,8 @@ export interface RecentNotesQuery {
   limit?: number;
   /** Optional full note ID used as a pagination cursor. */
   noteUuid?: string;
+  /** Optional creator role used for filtering recent notes. */
+  role?: string;
 }
 
 /** Describes one client-parsed outgoing note link. */

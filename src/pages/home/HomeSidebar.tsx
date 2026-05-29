@@ -99,7 +99,7 @@ export function SidebarSection({
   );
 }
 
-/** Renders a sidebar navigation row for fields or tags. */
+/** Renders a sidebar navigation row for fields, tags, or roles. */
 export function NavItem({
   active,
   count,
@@ -113,7 +113,7 @@ export function NavItem({
   disabled?: boolean;
   label: string;
   onClick: () => void;
-  prefix: string;
+  prefix: ReactNode;
 }) {
   return (
     <button
@@ -123,7 +123,7 @@ export function NavItem({
       type="button"
       onClick={onClick}
     >
-      <span className="text-center text-lg font-bold leading-none text-[var(--color-accent)]">
+      <span className="flex min-w-0 items-center justify-center text-center text-lg font-bold leading-none text-[var(--color-accent)]">
         {prefix}
       </span>
       <span className="min-w-0 truncate">{label}</span>

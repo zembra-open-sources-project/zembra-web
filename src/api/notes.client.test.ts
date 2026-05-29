@@ -52,6 +52,7 @@ describe("createNotesHttpClient", () => {
       {
         id: "recent-1",
         content: "recent note",
+        role: "Human",
         fieldId: "field-1",
         createdAt: 1,
         updatedAt: 2,
@@ -59,6 +60,49 @@ describe("createNotesHttpClient", () => {
       },
     ]);
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  test("lists recent notes with a role filter", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+
+      if (url.endsWith("/notes/recent")) {
+        expect(init?.method).toBe("POST");
+        expect(JSON.parse(String(init?.body))).toEqual({
+          limit: 50,
+          role: "Agent",
+        });
+
+        return jsonResponse({
+          notes: [
+            {
+              id: "agent-note",
+              content: "agent note",
+              role: "Agent",
+              field_id: null,
+              created_at: 1,
+              updated_at: 2,
+            },
+          ],
+        });
+      }
+
+      return jsonResponse({ tags: [] });
+    });
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+
+    await expect(client.listRecentNotes({ role: "Agent" })).resolves.toEqual([
+      {
+        id: "agent-note",
+        content: "agent note",
+        role: "Agent",
+        createdAt: 1,
+        updatedAt: 2,
+        tags: [],
+      },
+    ]);
   });
 
   test("lists daily note counts with the stats endpoint", async () => {
@@ -114,6 +158,7 @@ describe("createNotesHttpClient", () => {
       {
         id: "abc123",
         content: "hello #work",
+        role: "Human",
         fieldId: "field-1",
         createdAt: 1,
         updatedAt: 2,
@@ -297,6 +342,7 @@ describe("createNotesHttpClient", () => {
     ).resolves.toEqual({
       id: "abc123",
       content: "edited note",
+      role: "Human",
       fieldId: "field-project",
       createdAt: 1,
       updatedAt: 3,
@@ -332,6 +378,7 @@ describe("createNotesHttpClient", () => {
     await expect(client.getNote("abc123")).resolves.toEqual({
       id: "abc123",
       content: "preview note",
+      role: "Human",
       createdAt: 1,
       updatedAt: 2,
       tags: ["preview"],
@@ -362,6 +409,7 @@ describe("mapNoteResponseToDto", () => {
     ).toEqual({
       id: "note-1",
       content: "content",
+      role: "Human",
       fieldId: "field-1",
       createdAt: 1,
       updatedAt: 2,

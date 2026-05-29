@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  countRoles,
   formatShortNoteRef,
   parseNoteLinks,
   parseRenderableNoteContent,
@@ -61,5 +62,50 @@ describe("note link parsing", () => {
         type: "link",
       },
     ]);
+  });
+});
+
+describe("role counting", () => {
+  test("counts note usage by creator role", () => {
+    expect(
+      countRoles([
+        {
+          id: "note-1",
+          content: "human note",
+          role: "Human",
+          createdAt: 1,
+          updatedAt: 1,
+          tags: [],
+        },
+        {
+          id: "note-2",
+          content: "agent note",
+          role: "Agent",
+          createdAt: 1,
+          updatedAt: 1,
+          tags: [],
+        },
+        {
+          id: "note-3",
+          content: "another agent note",
+          role: "Agent",
+          createdAt: 1,
+          updatedAt: 1,
+          tags: [],
+        },
+        {
+          id: "note-4",
+          content: "unknown role note",
+          role: "",
+          createdAt: 1,
+          updatedAt: 1,
+          tags: [],
+        },
+      ]),
+    ).toEqual(new Map([
+      ["Human", 1],
+      ["Agent", 2],
+      ["", 1],
+    ]));
   });
 });

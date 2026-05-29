@@ -12,6 +12,8 @@ import type {
 interface NotesState {
   /** Recent notes currently visible in the home feed. */
   notes: NoteDto[];
+  /** Recent notes loaded without a role filter for role navigation counts. */
+  roleNavigationNotes: NoteDto[];
   /** Fields available for note organization. */
   fields: FieldDto[];
   /** Tags available for note organization. */
@@ -26,12 +28,16 @@ interface NotesState {
   selectedTag?: string;
   /** Field selected by the user. */
   selectedField?: string;
+  /** Role selected by the user. */
+  selectedRole?: string;
   /** Replaces the active search keyword. */
   setKeyword: (keyword: string) => void;
   /** Replaces the selected tag filter. */
   setSelectedTag: (tag?: string) => void;
   /** Replaces the selected field filter. */
   setSelectedField: (field?: string) => void;
+  /** Replaces the selected role filter and reloads recent notes. */
+  setSelectedRole: (role?: string) => Promise<void>;
   /** Loads recent notes from the home feed endpoint. */
   loadRecentNotes: () => Promise<void>;
   /** Loads visible note counts for the past 30 days. */
@@ -53,6 +59,7 @@ interface NotesState {
 /** Stores note list state for the card note interface. */
 export const useNotesStore = create<NotesState>((set, get) => ({
   notes: [],
+  roleNavigationNotes: [],
   fields: [],
   tags: [],
   dailyNoteCounts: [],
@@ -60,12 +67,37 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   keyword: "",
   selectedTag: undefined,
   selectedField: undefined,
+  selectedRole: undefined,
   setKeyword: (keyword) => set({ keyword }),
   setSelectedTag: (selectedTag) => set({ selectedTag }),
   setSelectedField: (selectedField) => set({ selectedField }),
+  setSelectedRole: async (selectedRole) => {
+    set({ selectedRole });
+    const notes = await notesClient.listRecentNotes({
+      limit: 50,
+      role: selectedRole,
+    });
+    set((state) => ({
+      notes,
+      roleNavigationNotes:
+        selectedRole === undefined || state.roleNavigationNotes.length === 0
+          ? notes
+          : state.roleNavigationNotes,
+    }));
+  },
   loadRecentNotes: async () => {
-    const notes = await notesClient.listRecentNotes({ limit: 50 });
-    set({ notes });
+    const selectedRole = get().selectedRole;
+    const notes = await notesClient.listRecentNotes({
+      limit: 50,
+      role: selectedRole,
+    });
+    set((state) => ({
+      notes,
+      roleNavigationNotes:
+        selectedRole === undefined || state.roleNavigationNotes.length === 0
+          ? notes
+          : state.roleNavigationNotes,
+    }));
   },
   loadDailyNoteCounts: async () => {
     const dailyNoteCounts = await notesClient.listDailyNoteCounts();
@@ -74,10 +106,17 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   createNote: async (input) => {
     const note = await notesClient.createNote(input);
     set((state) => ({
-      notes: [note, ...state.notes.filter((item) => item.id !== note.id)].slice(
-        0,
-        50,
-      ),
+      notes:
+        state.selectedRole === undefined || state.selectedRole === note.role
+          ? [note, ...state.notes.filter((item) => item.id !== note.id)].slice(
+              0,
+              50,
+            )
+          : state.notes,
+      roleNavigationNotes: [
+        note,
+        ...state.roleNavigationNotes.filter((item) => item.id !== note.id),
+      ].slice(0, 50),
     }));
 
     const [fields, tags, dailyNoteCounts] = await Promise.all([
@@ -90,10 +129,17 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   updateNote: async (noteRef, input) => {
     const note = await notesClient.updateNote(noteRef, input);
     set((state) => ({
-      notes: [note, ...state.notes.filter((item) => item.id !== note.id)].slice(
-        0,
-        50,
-      ),
+      notes:
+        state.selectedRole === undefined || state.selectedRole === note.role
+          ? [note, ...state.notes.filter((item) => item.id !== note.id)].slice(
+              0,
+              50,
+            )
+          : state.notes.filter((item) => item.id !== note.id),
+      roleNavigationNotes: [
+        note,
+        ...state.roleNavigationNotes.filter((item) => item.id !== note.id),
+      ].slice(0, 50),
     }));
 
     const [fields, tags, dailyNoteCounts] = await Promise.all([
@@ -107,6 +153,9 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     await notesClient.deleteNote(noteRef);
     set((state) => ({
       notes: state.notes.filter((note) => note.id !== noteRef),
+      roleNavigationNotes: state.roleNavigationNotes.filter(
+        (note) => note.id !== noteRef,
+      ),
     }));
   },
   loadNotePreview: async (noteRef) => {

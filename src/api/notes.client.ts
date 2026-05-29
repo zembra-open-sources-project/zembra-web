@@ -59,6 +59,7 @@ export function createNotesHttpClient(
           body: {
             limit: query.limit ?? 50,
             note_uuid: query.noteUuid,
+            role: query.role,
           },
         },
       );
@@ -174,6 +175,7 @@ export function createMockNotesClient(): NotesClient {
     {
       id: "demo-note-1",
       content: "今天先把卡片笔记的输入、标签筛选和轻量部署路径搭起来。",
+      role: "Human",
       createdAt: now - 7200,
       updatedAt: now - 3600,
       tags: ["产品", "初始化"],
@@ -181,6 +183,7 @@ export function createMockNotesClient(): NotesClient {
     {
       id: "demo-note-2",
       content: "数据库契约来自 vendor/zembra-schema，前端只通过 API Client 消费业务数据。",
+      role: "Agent",
       createdAt: now - 5400,
       updatedAt: now - 1800,
       tags: ["架构", "schema"],
@@ -189,7 +192,10 @@ export function createMockNotesClient(): NotesClient {
 
   return {
     async listRecentNotes(query = {}) {
-      return filterNotes(notes.slice(0, query.limit ?? 50), {});
+      const roleMatchedNotes = notes.filter((note) =>
+        query.role === undefined ? true : note.role === query.role,
+      );
+      return filterNotes(roleMatchedNotes.slice(0, query.limit ?? 50), {});
     },
     async listDailyNoteCounts() {
       return createMockDailyNoteCounts(now);
@@ -216,6 +222,7 @@ export function createMockNotesClient(): NotesClient {
       const note: NoteDto = {
         id: `demo-note-${timestamp}`,
         content: input.content,
+        role: input.role ?? "Human",
         createdAt: timestamp,
         updatedAt: timestamp,
         tags: input.tags ?? [],
@@ -272,6 +279,7 @@ export function mapNoteRecordToDto(note: NoteRecord, tags: string[] = []): NoteD
   return {
     id: note.id,
     content: note.content,
+    role: note.role,
     fieldId: note.field_id ?? undefined,
     createdAt: note.created_at,
     updatedAt: note.updated_at,

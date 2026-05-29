@@ -1,4 +1,4 @@
-import { MoreHorizontal } from "lucide-react";
+import { Bot, MoreHorizontal, User } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -59,6 +59,7 @@ export function NoteCard({
   const [hasOverflow, setHasOverflow] = useState(false);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const displayRole = note.role || t("sidebar.unknownRole");
   const displayContent = useMemo(
     () => stripRenderedTagMarkers(note.content, note.tags),
     [note.content, note.tags],
@@ -124,8 +125,21 @@ export function NoteCard({
             <span className="ml-1 font-bold text-[var(--color-text-secondary)]">@{fieldName}</span>
           ) : null}
         </div>
-        {!isEditing ? (
-          <div className="relative -mr-2 -mt-1 shrink-0">
+        <div className="flex shrink-0 items-start gap-1.5">
+          <span
+            aria-label={t("note.roleLabel", { role: displayRole })}
+            className="inline-flex h-7 max-w-32 items-center gap-1.5 rounded-[8px] bg-[var(--color-surface-muted)] px-2 text-xs font-semibold text-[var(--color-text-secondary)] shadow-[inset_0_0_0_1px_var(--color-border-subtle)]"
+            title={displayRole}
+          >
+            {note.role === "Human" ? (
+              <User className="size-3.5 shrink-0 text-[var(--color-accent)]" aria-hidden="true" />
+            ) : (
+              <Bot className="size-3.5 shrink-0 text-[var(--color-accent)]" aria-hidden="true" />
+            )}
+            <span className="min-w-0 truncate">{displayRole}</span>
+          </span>
+          {!isEditing ? (
+            <div className="relative -mr-2 -mt-1 shrink-0">
             <button
               aria-expanded={isActionsOpen}
               aria-label={t("note.actions")}
@@ -155,7 +169,8 @@ export function NoteCard({
               </div>
             ) : null}
           </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
       {isEditing ? (
         <form

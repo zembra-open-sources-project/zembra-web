@@ -50,6 +50,17 @@ export function countFields(notes: NoteDto[]): Map<string, number> {
   return counts;
 }
 
+/** Counts note usage by creator role for the sidebar role navigation. */
+export function countRoles(notes: NoteDto[]): Map<string, number> {
+  const counts = new Map<string, number>();
+
+  notes.forEach((note) => {
+    counts.set(note.role, (counts.get(note.role) ?? 0) + 1);
+  });
+
+  return counts;
+}
+
 /** Extracts inline tag names from composer content. */
 export function parseTagNames(content: string): string[] {
   return Array.from(

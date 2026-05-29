@@ -1,12 +1,14 @@
 import {
   AtSign,
   Bold,
+  Bot,
   CircleHelp,
   Hash,
   List,
   Loader2,
   RefreshCw,
   Search,
+  User,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ThemeToggle } from "../../app/ThemeToggle";
@@ -28,6 +30,7 @@ import {
 import type { ComposerTool } from "./homeTypes";
 import {
   countFields,
+  countRoles,
   countTags,
   filterVisibleNotes,
   parseFieldNames,
@@ -53,15 +56,18 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
   const [syncError, setSyncError] = useState<string | undefined>();
   const {
     notes,
+    roleNavigationNotes,
     dailyNoteCounts,
     fields,
     tags,
     keyword,
     selectedTag,
     selectedField,
+    selectedRole,
     setKeyword,
     setSelectedTag,
     setSelectedField,
+    setSelectedRole,
     createNote,
     loadDailyNoteCounts,
     loadFields,
@@ -90,6 +96,13 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
   );
   const tagUsage = useMemo(() => countTags(notes), [notes]);
   const fieldUsage = useMemo(() => countFields(notes), [notes]);
+  const roleUsage = useMemo(
+    () => countRoles(roleNavigationNotes.length > 0 ? roleNavigationNotes : notes),
+    [notes, roleNavigationNotes],
+  );
+  const roleTotalCount = roleNavigationNotes.length > 0
+    ? roleNavigationNotes.length
+    : notes.length;
   const editFieldNames = useMemo(() => parseFieldNames(editDraft), [editDraft]);
   const editWarning =
     editFieldNames.length > 1
@@ -281,7 +294,37 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
           </div>
 
           <div className="hidden min-h-0 flex-1 overflow-y-auto pb-44 pr-1 lg:block">
-            <SidebarSection className="mt-4" title={t("sidebar.fields")}>
+            <SidebarSection className="mt-4" title={t("sidebar.roles")}>
+              <NavItem
+                active={selectedRole === undefined}
+                count={roleTotalCount}
+                label={t("sidebar.all")}
+                prefix={<List className="size-4" aria-hidden="true" />}
+                onClick={() => void setSelectedRole(undefined)}
+              />
+              {Array.from(roleUsage.entries()).map(([role, count]) => {
+                const label = role || t("sidebar.unknownRole");
+
+                return (
+                  <NavItem
+                    active={selectedRole === role}
+                    count={count}
+                    key={role || "unknown-role"}
+                    label={label}
+                    prefix={
+                      role === "Human" ? (
+                        <User className="size-4" aria-hidden="true" />
+                      ) : (
+                        <Bot className="size-4" aria-hidden="true" />
+                      )
+                    }
+                    onClick={() => void setSelectedRole(role)}
+                  />
+                );
+              })}
+            </SidebarSection>
+
+            <SidebarSection title={t("sidebar.fields")}>
               <NavItem
                 active={selectedField === undefined}
                 count={notes.length}

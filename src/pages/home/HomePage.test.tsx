@@ -80,6 +80,7 @@ test("renders tag chips without repeating inline tag markers", async () => {
       {
         id: "tagged-note",
         content: "#zembra 界面不要追求agent",
+        role: "Human",
         createdAt: 1_779_382_320,
         updatedAt: 1_779_382_320,
         tags: ["zembra"],
@@ -112,6 +113,7 @@ test("renders actual note counts for all and field navigation", async () => {
         {
           id: "note-1",
           content: "inbox note",
+          role: "Human",
           createdAt: 1_779_382_320,
           updatedAt: 1_779_382_320,
           fieldId: "inbox-field",
@@ -120,6 +122,7 @@ test("renders actual note counts for all and field navigation", async () => {
         {
           id: "note-2",
           content: "project note",
+          role: "Agent",
           createdAt: 1_779_382_320,
           updatedAt: 1_779_382_320,
           fieldId: "project-field",
@@ -128,6 +131,7 @@ test("renders actual note counts for all and field navigation", async () => {
         {
           id: "note-3",
           content: "unfiled note",
+          role: "Human",
           createdAt: 1_779_382_320,
           updatedAt: 1_779_382_320,
           tags: [],
@@ -136,10 +140,55 @@ test("renders actual note counts for all and field navigation", async () => {
     });
   });
 
-  expect(await sidebarNavCount("全部")).toBe("3");
+  expect(await sidebarNavCount("全部", 1)).toBe("3");
   expect(await sidebarNavCount("inbox")).toBe("1");
   expect(await sidebarNavCount("project")).toBe("1");
   expect(await sidebarNavCount("empty")).toBe("0");
+});
+
+/** Verifies role navigation is optional and filters the feed when selected. */
+test("renders optional role navigation and filters fields and tags by role", async () => {
+  renderHomePage();
+
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
+
+  expect(await screen.findByText("Roles")).not.toBeNull();
+  expect(await sidebarNavCount("Human")).toBe("1");
+  expect(await sidebarNavCount("Agent")).toBe("1");
+  expect(useNotesStore.getState().selectedRole).toBeUndefined();
+  expect(useNotesStore.getState().notes.map((note) => note.role).sort()).toEqual([
+    "Agent",
+    "Human",
+  ]);
+
+  await act(async () => {
+    fireEvent.click(await screen.findByRole("button", { name: /Agent/ }));
+  });
+
+  await waitFor(() =>
+    expect(screen.queryByText(/今天先把卡片笔记/)).toBeNull(),
+  );
+  expect(await screen.findByText(/数据库契约来自/)).not.toBeNull();
+  expect(await sidebarNavCount("架构")).toBe("1");
+  expect(screen.queryByText("初始化")).toBeNull();
+
+  await act(async () => {
+    fireEvent.click(screen.getAllByRole("button", { name: /全部/ })[0]);
+  });
+
+  await waitFor(() => expect(useNotesStore.getState().selectedRole).toBeUndefined());
+  expect(useNotesStore.getState().notes.map((note) => note.role).sort()).toEqual([
+    "Agent",
+    "Human",
+  ]);
+});
+
+/** Verifies note cards expose human and agent role badges. */
+test("renders note card role badges with human and bot labels", async () => {
+  renderHomePage();
+
+  expect(await screen.findByLabelText("创建角色：Human")).not.toBeNull();
+  expect(await screen.findByLabelText("创建角色：Agent")).not.toBeNull();
 });
 
 /** Verifies note mention insertion and hover preview behavior. */
@@ -156,6 +205,7 @@ test("mentions note links and previews linked note content", async () => {
         {
           id: sourceNoteId,
           content: `source [[${targetNoteId}]]`,
+          role: "Agent",
           createdAt: 1_779_382_320,
           updatedAt: 1_779_382_320,
           tags: [],
@@ -163,6 +213,7 @@ test("mentions note links and previews linked note content", async () => {
         {
           id: targetNoteId,
           content: "target preview content",
+          role: "Human",
           createdAt: 1_779_382_320,
           updatedAt: 1_779_382_320,
           tags: [],
@@ -207,6 +258,7 @@ test("mentions note links into the active edit draft", async () => {
         {
           id: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
           content: "editable content",
+          role: "Human",
           createdAt: 1_779_382_320,
           updatedAt: 1_779_382_320,
           tags: [],
@@ -214,6 +266,7 @@ test("mentions note links into the active edit draft", async () => {
         {
           id: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
           content: "target content",
+          role: "Agent",
           createdAt: 1_779_382_320,
           updatedAt: 1_779_382_320,
           tags: [],
@@ -258,6 +311,7 @@ test("submits parsed note links when creating and editing notes", async () => {
         {
           id: "editable-note",
           content: "editable content",
+          role: "Human",
           createdAt: 1_779_382_320,
           updatedAt: 1_779_382_320,
           tags: [],
@@ -358,10 +412,15 @@ test("shows manual sync errors from the home toolbar", async () => {
 });
 
 /** Finds the count text rendered inside a sidebar navigation row. */
-async function sidebarNavCount(label: string): Promise<string> {
-  const rowLabel = await screen.findByText(label);
-  const row = rowLabel.closest("button");
-  expect(row).not.toBeNull();
+async function sidebarNavCount(label: string, index = 0): Promise<string> {
+  const row = await waitFor(() => {
+    const matchingButtons = screen
+      .getAllByText(label)
+      .map((item) => item.closest("button"))
+      .filter((item): item is HTMLButtonElement => item !== null);
+    expect(matchingButtons[index]).not.toBeUndefined();
+    return matchingButtons[index];
+  });
 
   return row?.querySelector("span:last-child")?.textContent ?? "";
 }

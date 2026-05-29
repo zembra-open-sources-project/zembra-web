@@ -43,6 +43,7 @@ export const home = {
       loading: "加载中",
       unavailable: "无法加载引用内容",
     },
+    roleLabel: "创建角色：{{role}}",
   },
   search: {
     placeholder: "搜索笔记、Field、Tag",
@@ -51,7 +52,9 @@ export const home = {
     all: "全部",
     emptyTags: "暂无标签",
     fields: "Fields",
+    roles: "Roles",
     tags: "Tags",
+    unknownRole: "Unknown",
   },
   stats: {
     fields: "Fields",
