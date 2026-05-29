@@ -184,11 +184,60 @@ test("renders optional role navigation and filters fields and tags by role", asy
 });
 
 /** Verifies note cards expose human and agent role badges. */
-test("renders note card role badges with human and bot labels", async () => {
+test("renders note card role badges as icons without visible role text", async () => {
   renderHomePage();
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
 
-  expect(await screen.findByLabelText("创建角色：Human")).not.toBeNull();
-  expect(await screen.findByLabelText("创建角色：Agent")).not.toBeNull();
+  act(() => {
+    useNotesStore.setState({
+      notes: [
+        {
+          id: "human-badge-note",
+          content: "human badge card",
+          role: "Human",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: [],
+        },
+        {
+          id: "bot-badge-note",
+          content: "bot badge card",
+          role: "Agent",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: [],
+        },
+      ],
+      roleNavigationNotes: [
+        {
+          id: "human-badge-note",
+          content: "human badge card",
+          role: "Human",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: [],
+        },
+        {
+          id: "bot-badge-note",
+          content: "bot badge card",
+          role: "Agent",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: [],
+        },
+      ],
+    });
+  });
+
+  const humanCard = (await screen.findByText("human badge card")).closest("article");
+  const botCard = (await screen.findByText("bot badge card")).closest("article");
+  expect(humanCard).not.toBeNull();
+  expect(botCard).not.toBeNull();
+
+  expect(within(humanCard as HTMLElement).getByLabelText("创建角色：Human")).not.toBeNull();
+  expect(within(botCard as HTMLElement).getByLabelText("创建角色：Agent")).not.toBeNull();
+  expect(within(humanCard as HTMLElement).queryByText("Human")).toBeNull();
+  expect(within(botCard as HTMLElement).queryByText("Agent")).toBeNull();
 });
 
 /** Verifies note mention insertion and hover preview behavior. */

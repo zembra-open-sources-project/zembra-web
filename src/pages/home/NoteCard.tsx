@@ -128,7 +128,7 @@ export function NoteCard({
         <div className="flex shrink-0 items-start gap-1.5">
           <span
             aria-label={t("note.roleLabel", { role: displayRole })}
-            className="inline-flex h-7 max-w-32 items-center gap-1.5 rounded-[8px] bg-[var(--color-surface-muted)] px-2 text-xs font-semibold text-[var(--color-text-secondary)] shadow-[inset_0_0_0_1px_var(--color-border-subtle)]"
+            className="inline-flex size-7 items-center justify-center rounded-[8px] bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] shadow-[inset_0_0_0_1px_var(--color-border-subtle)]"
             title={displayRole}
           >
             {note.role === "Human" ? (
@@ -136,7 +136,6 @@ export function NoteCard({
             ) : (
               <Bot className="size-3.5 shrink-0 text-[var(--color-accent)]" aria-hidden="true" />
             )}
-            <span className="min-w-0 truncate">{displayRole}</span>
           </span>
           {!isEditing ? (
             <div className="relative -mr-2 -mt-1 shrink-0">
