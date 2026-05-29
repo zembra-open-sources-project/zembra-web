@@ -128,13 +128,13 @@ export function NoteCard({
         <div className="flex shrink-0 items-start gap-1.5">
           <span
             aria-label={t("note.roleLabel", { role: displayRole })}
-            className="inline-flex size-7 items-center justify-center rounded-[8px] bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] shadow-[inset_0_0_0_1px_var(--color-border-subtle)]"
+            className="inline-flex size-7 items-center justify-center text-[var(--color-accent)]"
             title={displayRole}
           >
             {note.role === "Human" ? (
-              <User className="size-3.5 shrink-0 text-[var(--color-accent)]" aria-hidden="true" />
+              <User className="size-4 shrink-0" aria-hidden="true" />
             ) : (
-              <Bot className="size-3.5 shrink-0 text-[var(--color-accent)]" aria-hidden="true" />
+              <Bot className="size-4 shrink-0" aria-hidden="true" />
             )}
           </span>
           {!isEditing ? (
