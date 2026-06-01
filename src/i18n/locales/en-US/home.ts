@@ -50,9 +50,12 @@ export const home = {
   },
   sidebar: {
     all: "All",
+    collapseTag: "Collapse {{tag}}",
     emptyTags: "No tags yet",
+    expandTag: "Expand {{tag}}",
     fields: "Fields",
     roles: "Roles",
+    tagPathLabel: "Tag {{path}}",
     tags: "Tags",
     unknownRole: "Unknown",
   },

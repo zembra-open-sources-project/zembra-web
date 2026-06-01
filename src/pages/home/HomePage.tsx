@@ -26,13 +26,17 @@ import {
   NavItem,
   SidebarSection,
   StatBlock,
+  TagTreeItem,
 } from "./HomeSidebar";
 import type { ComposerTool } from "./homeTypes";
 import {
+  buildTagTree,
   countFields,
   countRoles,
   countTags,
+  findSelectedTagRootPath,
   filterVisibleNotes,
+  noteMatchesTagPath,
   parseFieldNames,
   parseNoteLinks,
   parseTagNames,
@@ -95,6 +99,7 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
     [keyword, notes, selectedField, selectedTag],
   );
   const tagUsage = useMemo(() => countTags(notes), [notes]);
+  const tagTree = useMemo(() => buildTagTree(tags), [tags]);
   const fieldUsage = useMemo(() => countFields(notes), [notes]);
   const roleUsage = useMemo(
     () => countRoles(roleNavigationNotes.length > 0 ? roleNavigationNotes : notes),
@@ -108,6 +113,9 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
     editFieldNames.length > 1
       ? t("note.edit.warningMultipleFields", { field: editFieldNames[0] })
       : undefined;
+  const [expandedTagRoots, setExpandedTagRoots] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   useEffect(() => {
     void loadDailyNoteCounts();
@@ -115,6 +123,24 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
     void loadTags();
     void loadRecentNotes();
   }, [loadDailyNoteCounts, loadFields, loadRecentNotes, loadTags]);
+
+  useEffect(() => {
+    const rootPath = findSelectedTagRootPath(tagTree, selectedTag);
+
+    if (!rootPath) {
+      return;
+    }
+
+    setExpandedTagRoots((current) => {
+      if (current.has(rootPath)) {
+        return current;
+      }
+
+      const next = new Set(current);
+      next.add(rootPath);
+      return next;
+    });
+  }, [selectedTag, tagTree]);
 
   /** Persists the current composer draft as a new note. */
   async function handleCreateSubmit() {
@@ -142,6 +168,21 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  /** Toggles one root tag branch in the sidebar tree. */
+  function handleTagRootToggle(path: string) {
+    setExpandedTagRoots((current) => {
+      const next = new Set(current);
+
+      if (next.has(path)) {
+        next.delete(path);
+      } else {
+        next.add(path);
+      }
+
+      return next;
+    });
   }
 
   /** Starts editing a note when no other card owns a draft. */
@@ -345,7 +386,7 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
             </SidebarSection>
 
             <SidebarSection title={t("sidebar.tags")}>
-              {tags.length === 0 ? (
+              {tagTree.length === 0 ? (
                 <NavItem
                   active={false}
                   count={0}
@@ -355,16 +396,26 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
                   onClick={() => undefined}
                 />
               ) : null}
-              {tags.map((tag) => (
-                <NavItem
-                  active={selectedTag === tag.name}
-                  count={tagUsage.get(tag.name) ?? 0}
-                  key={tag.name}
-                  label={tag.name}
-                  prefix="#"
-                  onClick={() =>
-                    setSelectedTag(selectedTag === tag.name ? undefined : tag.name)
+              {tagTree.map((node) => (
+                <TagTreeItem
+                  activePath={selectedTag}
+                  childCounts={tagUsage}
+                  collapsedLabel={t("sidebar.expandTag", {
+                    tag: node.tag.name,
+                  })}
+                  expanded={expandedTagRoots.has(node.tag.path)}
+                  expandedLabel={t("sidebar.collapseTag", {
+                    tag: node.tag.name,
+                  })}
+                  key={node.tag.path}
+                  node={node}
+                  rootCount={notes.filter((note) =>
+                    noteMatchesTagPath(note.tags, node.tag.path),
+                  ).length}
+                  onSelect={(path) =>
+                    setSelectedTag(selectedTag === path ? undefined : path)
                   }
+                  onToggle={handleTagRootToggle}
                 />
               ))}
             </SidebarSection>

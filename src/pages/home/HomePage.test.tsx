@@ -96,6 +96,35 @@ test("renders tag chips without repeating inline tag markers", async () => {
   expect(within(noteCard as HTMLElement).queryByText(/^#zembra 界面/)).toBeNull();
 });
 
+/** Verifies two-level tag chips render as readable paths without duplicate markers. */
+test("renders hierarchical tag chips as readable paths", async () => {
+  renderHomePage();
+
+  useNotesStore.setState({
+    notes: [
+      {
+        id: "tagged-path-note",
+        content: "#books/hands-on-gpt useful note",
+        role: "Human",
+        createdAt: 1_779_382_320,
+        updatedAt: 1_779_382_320,
+        tags: ["books/hands-on-gpt"],
+      },
+    ],
+  });
+
+  const noteText = await screen.findByText("useful note");
+  const noteCard = noteText.closest("article");
+  expect(noteCard).not.toBeNull();
+
+  expect(
+    within(noteCard as HTMLElement).getByText("#books > hands-on-gpt"),
+  ).not.toBeNull();
+  expect(
+    within(noteCard as HTMLElement).queryByText(/^#books\/hands-on-gpt/),
+  ).toBeNull();
+});
+
 /** Verifies field navigation counts use actual note membership. */
 test("renders actual note counts for all and field navigation", async () => {
   renderHomePage();
@@ -181,6 +210,86 @@ test("renders optional role navigation and filters fields and tags by role", asy
     "Agent",
     "Human",
   ]);
+});
+
+/** Verifies tag navigation renders a collapsed two-level tree and filters subtrees. */
+test("renders hierarchical tag navigation and filters by root or child path", async () => {
+  renderHomePage();
+
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
+
+  act(() => {
+    useNotesStore.setState({
+      notes: [
+        {
+          id: "root-tag-note",
+          content: "root books note",
+          role: "Human",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: ["books"],
+        },
+        {
+          id: "child-tag-note",
+          content: "hands on gpt note",
+          role: "Human",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: ["books/hands-on-gpt"],
+        },
+        {
+          id: "other-tag-note",
+          content: "projects note",
+          role: "Human",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: ["projects"],
+        },
+      ],
+      tags: [
+        {
+          id: "tag-books",
+          name: "books",
+          path: "books",
+          depth: 0,
+          createdAt: 1_779_382_320,
+        },
+        {
+          id: "tag-books-gpt",
+          name: "hands-on-gpt",
+          parentTagId: "tag-books",
+          path: "books/hands-on-gpt",
+          depth: 1,
+          createdAt: 1_779_382_320,
+        },
+        {
+          id: "tag-projects",
+          name: "projects",
+          path: "projects",
+          depth: 0,
+          createdAt: 1_779_382_320,
+        },
+      ],
+    });
+  });
+
+  expect(await screen.findByText("books")).not.toBeNull();
+  expect(screen.queryByText("hands-on-gpt")).toBeNull();
+
+  fireEvent.click(screen.getByRole("button", { name: "展开 books" }));
+
+  expect(await screen.findByText("hands-on-gpt")).not.toBeNull();
+
+  fireEvent.click(sidebarButtonForText("books"));
+
+  expect(await screen.findByText("root books note")).not.toBeNull();
+  expect(await screen.findByText("hands on gpt note")).not.toBeNull();
+  await waitFor(() => expect(screen.queryByText("projects note")).toBeNull());
+
+  fireEvent.click(sidebarButtonForText("hands-on-gpt"));
+
+  expect(await screen.findByText("hands on gpt note")).not.toBeNull();
+  await waitFor(() => expect(screen.queryByText("root books note")).toBeNull());
 });
 
 /** Verifies note cards expose human and agent role badges. */
@@ -472,6 +581,20 @@ async function sidebarNavCount(label: string, index = 0): Promise<string> {
   });
 
   return row?.querySelector("span:last-child")?.textContent ?? "";
+}
+
+/** Finds the sidebar button whose visible label text matches exactly. */
+function sidebarButtonForText(label: string): HTMLButtonElement {
+  const button = screen
+    .getAllByText(label)
+    .map((item) => item.closest("button"))
+    .find((item): item is HTMLButtonElement => item !== null);
+
+  if (!button) {
+    throw new Error(`Missing sidebar button for ${label}`);
+  }
+
+  return button;
 }
 
 /** Creates a mock sync client for home toolbar interaction tests. */

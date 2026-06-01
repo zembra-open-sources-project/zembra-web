@@ -1,7 +1,8 @@
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronRight } from "lucide-react";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { DailyNoteCount } from "../../api/types";
+import type { TagTreeNode } from "./homeUtils";
 import { formatHeatmapDate, getHeatmapLevel } from "./homeUtils";
 
 /** Renders a single statistic block in the sidebar. */
@@ -129,5 +130,75 @@ export function NavItem({
       <span className="min-w-0 truncate">{label}</span>
       <span className="text-xs text-[var(--color-text-muted)]">{count}</span>
     </button>
+  );
+}
+
+/** Renders one root tag with optional second-level child tags. */
+export function TagTreeItem({
+  activePath,
+  childCounts,
+  collapsedLabel,
+  expanded,
+  expandedLabel,
+  node,
+  onSelect,
+  onToggle,
+  rootCount,
+}: {
+  activePath?: string;
+  childCounts: Map<string, number>;
+  collapsedLabel: string;
+  expanded: boolean;
+  expandedLabel: string;
+  node: TagTreeNode;
+  onSelect: (path: string) => void;
+  onToggle: (path: string) => void;
+  rootCount: number;
+}) {
+  const hasChildren = node.children.length > 0;
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="grid grid-cols-[1fr_32px] items-center gap-1">
+        <NavItem
+          active={activePath === node.tag.path}
+          count={rootCount}
+          label={node.tag.name}
+          prefix="#"
+          onClick={() => onSelect(node.tag.path)}
+        />
+        {hasChildren ? (
+          <button
+            aria-expanded={expanded}
+            aria-label={expanded ? expandedLabel : collapsedLabel}
+            className="flex size-8 items-center justify-center rounded-[9px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
+            type="button"
+            onClick={() => onToggle(node.tag.path)}
+          >
+            {expanded ? (
+              <ChevronDown className="size-4" aria-hidden="true" />
+            ) : (
+              <ChevronRight className="size-4" aria-hidden="true" />
+            )}
+          </button>
+        ) : (
+          <span aria-hidden="true" />
+        )}
+      </div>
+      {hasChildren && expanded ? (
+        <div className="ml-7 flex flex-col gap-1">
+          {node.children.map((child) => (
+            <NavItem
+              active={activePath === child.path}
+              count={childCounts.get(child.path) ?? 0}
+              key={child.path}
+              label={child.name}
+              prefix=""
+              onClick={() => onSelect(child.path)}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }

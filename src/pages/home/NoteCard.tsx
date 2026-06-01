@@ -13,6 +13,7 @@ import { NoteEditor } from "./NoteEditor";
 import type { ComposerTool } from "./homeTypes";
 import {
   formatNoteTimestamp,
+  formatTagPathLabel,
   formatShortNoteRef,
   parseRenderableNoteContent,
   stripRenderedTagMarkers,
@@ -202,7 +203,7 @@ export function NoteCard({
                 className="mr-1.5 inline-flex h-[25px] items-center rounded-[7px] bg-[var(--color-accent-soft)] px-2 text-[13px] font-semibold text-[var(--color-accent)]"
                 key={tag}
               >
-                #{tag}
+                #{formatTagPathLabel(tag)}
               </span>
             ))}
             {contentSegments.map((segment, index) =>

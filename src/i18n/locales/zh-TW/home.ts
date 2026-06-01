@@ -50,9 +50,12 @@ export const home = {
   },
   sidebar: {
     all: "全部",
+    collapseTag: "收合 {{tag}}",
     emptyTags: "暫無標籤",
+    expandTag: "展開 {{tag}}",
     fields: "Fields",
     roles: "Roles",
+    tagPathLabel: "標籤 {{path}}",
     tags: "Tags",
     unknownRole: "Unknown",
   },
