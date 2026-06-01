@@ -53,11 +53,11 @@
 
 **Files:** Modify `src/pages/home/NoteCard.tsx`, Modify `src/pages/home/homeUtils.ts`, Modify `src/pages/home/HomePage.test.tsx`
 
-**Function:** note card 中二级 tag chip 使用清晰层级路径表达，正文中的 inline tag marker 不重复展示。
+**Function:** note card 中二级 tag chip 使用完整原始路径表达，正文中的 inline tag marker 不重复展示。
 
-**Implementation Notes:** 渲染 tag chip 时使用格式化 helper 或小组件，把 `books/hands-on-gpt` 展示为 `#books > hands-on-gpt` 或 icon 连接。保留单级 tag 的 `#inbox` 形态。`stripRenderedTagMarkers()` 继续用完整 path 匹配正文中的 `#books/hands-on-gpt`，保证 note body 不重复显示 marker。测试验证可见文本和 marker 移除行为，不断言 chip 的颜色、尺寸、间距或 Tailwind class。
+**Implementation Notes:** 渲染 tag chip 时保留原始 path，把 `books/hands-on-gpt` 展示为 `#books/hands-on-gpt`。保留单级 tag 的 `#inbox` 形态。`stripRenderedTagMarkers()` 继续用完整 path 匹配正文中的 `#books/hands-on-gpt`，保证 note body 不重复显示 marker。测试验证可见文本和 marker 移除行为，不断言 chip 的颜色、尺寸、间距或 Tailwind class。
 
-**Expected Verification Result:** HomePage 测试能断言二级 tag chip 展示为清晰路径表达，且正文不再重复出现原始 `#books/hands-on-gpt` marker。
+**Expected Verification Result:** HomePage 测试能断言二级 tag chip 展示为原始路径表达，且正文不再重复出现原始 `#books/hands-on-gpt` marker。
 
 ## Stage #3: 回归测试与计划回写
 
@@ -89,5 +89,6 @@
 
 - 2026-06-01：已完成需求澄清、设计文档和执行计划。实现范围确认：web UI 只支持二级 tag；创建/编辑继续提交完整 path；sidebar Tags 使用可折叠二级树；父 tag 筛选整个子树；默认只展开当前选中 tag 所在父节点；note chip 使用更清晰路径展示。
 - 2026-06-01：已完成 Stage #1，扩展 `TagRecord`/`TagDto` 接收 `parent_tag_id`、`path`、`depth` 并更新 taxonomy client 映射；新增二级 tag path 解析、格式化、树构建、父子筛选和选中 root 查找工具。`npm run test -- src/api/taxonomy.client.test.ts src/pages/home/homeUtils.test.ts` 通过。
-- 2026-06-01：已完成 Stage #2，Tags sidebar 改为二级折叠树，父 tag 筛选整个子树、child tag 精确筛选，note card tag chip 改为 `#root > child` 路径展示，并补充 HomePage/i18n 行为测试。`npm run test -- src/pages/home/HomePage.test.tsx src/i18n/resources.test.ts` 和 `npm run build` 通过。
+- 2026-06-01：已完成 Stage #2，Tags sidebar 改为二级折叠树，父 tag 筛选整个子树、child tag 精确筛选，note card tag chip 最终按验收口径改为 `#root/child` 原始路径展示，并补充 HomePage/i18n 行为测试。`npm run test -- src/pages/home/HomePage.test.tsx src/i18n/resources.test.ts` 和 `npm run build` 通过。
 - 2026-06-01：已完成 Stage #3，执行全量回归验证并回写计划状态。`npm run test` 通过 14 个测试文件 85 个测试，`npm run build` 通过。
+- 2026-06-01：验收通过后完成收尾修正：`/notes/{note_ref}/tags` 的前端映射改为使用 `TagRecord.path`，避免二级 tag 被降级为叶子 `name`；sidebar 展开箭头复用 `#` 前缀位，子级缩进收窄；note chip 显示保持原始 path。最终验证 `npm run test -- src/pages/home/HomePage.test.tsx src/pages/home/homeUtils.test.ts` 和 `npm run build` 通过。
