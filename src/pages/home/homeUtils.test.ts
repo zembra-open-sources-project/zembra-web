@@ -81,7 +81,7 @@ describe("hierarchical tag helpers", () => {
 
   test("formats tag paths with a readable separator", () => {
     expect(formatTagPathLabel("books/hands-on-gpt")).toBe(
-      "books > hands-on-gpt",
+      "books/hands-on-gpt",
     );
   });
 

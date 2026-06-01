@@ -93,7 +93,7 @@ export function splitTagPath(path: string): string[] {
 
 /** Formats a tag path for compact text-only display. */
 export function formatTagPathLabel(path: string): string {
-  return splitTagPath(path).join(" > ");
+  return splitTagPath(path).join("/");
 }
 
 /** Returns whether a note tag collection matches the selected tag path. */

@@ -96,8 +96,8 @@ test("renders tag chips without repeating inline tag markers", async () => {
   expect(within(noteCard as HTMLElement).queryByText(/^#zembra 界面/)).toBeNull();
 });
 
-/** Verifies two-level tag chips render as readable paths without duplicate markers. */
-test("renders hierarchical tag chips as readable paths", async () => {
+/** Verifies two-level tag chips render as raw paths without duplicate markers. */
+test("renders hierarchical tag chips as raw paths", async () => {
   renderHomePage();
 
   useNotesStore.setState({
@@ -118,10 +118,10 @@ test("renders hierarchical tag chips as readable paths", async () => {
   expect(noteCard).not.toBeNull();
 
   expect(
-    within(noteCard as HTMLElement).getByText("#books > hands-on-gpt"),
+    within(noteCard as HTMLElement).getByText("#books/hands-on-gpt"),
   ).not.toBeNull();
   expect(
-    within(noteCard as HTMLElement).queryByText(/^#books\/hands-on-gpt/),
+    within(noteCard as HTMLElement).queryByText(/^#books\/hands-on-gpt useful note/),
   ).toBeNull();
 });
 
