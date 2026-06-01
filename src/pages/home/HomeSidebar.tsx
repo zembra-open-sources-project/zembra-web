@@ -1,5 +1,5 @@
 import { CalendarDays, ChevronDown, ChevronRight } from "lucide-react";
-import { Fragment, ReactNode } from "react";
+import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { DailyNoteCount } from "../../api/types";
 import type { TagTreeNode } from "./homeUtils";
@@ -157,47 +157,62 @@ export function TagTreeItem({
 }) {
   const hasChildren = node.children.length > 0;
 
+  if (!hasChildren) {
+    return (
+      <NavItem
+        active={activePath === node.tag.path}
+        count={rootCount}
+        label={node.tag.name}
+        prefix="#"
+        onClick={() => onSelect(node.tag.path)}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col gap-1">
-      <div className="grid grid-cols-[24px_1fr] items-center gap-1">
-        {hasChildren ? (
-          <button
-            aria-expanded={expanded}
-            aria-label={expanded ? expandedLabel : collapsedLabel}
-            className="flex size-8 items-center justify-center rounded-[9px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
-            type="button"
-            onClick={() => onToggle(node.tag.path)}
-          >
+      <div
+        className="group grid min-h-9 grid-cols-[42px_1fr_auto] items-center gap-2.5 rounded-[9px] px-3 py-2 text-left text-[15px] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted)] data-[active=true]:bg-[var(--color-accent-soft)] data-[active=true]:text-[var(--color-text-primary)] data-[active=true]:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
+        data-active={activePath === node.tag.path}
+      >
+        <button
+          aria-expanded={expanded}
+          aria-label={expanded ? expandedLabel : collapsedLabel}
+          className="flex size-8 items-center justify-center rounded-[7px] text-[var(--color-accent)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
+          type="button"
+          onClick={() => onToggle(node.tag.path)}
+        >
+          <span className="text-lg font-bold leading-none group-hover:hidden group-focus-within:hidden">
+            #
+          </span>
+          <span className="hidden group-hover:flex group-focus-within:flex">
             {expanded ? (
               <ChevronDown className="size-4" aria-hidden="true" />
             ) : (
               <ChevronRight className="size-4" aria-hidden="true" />
             )}
-          </button>
-        ) : (
-          <span aria-hidden="true" />
-        )}
-        <NavItem
-          active={activePath === node.tag.path}
-          count={rootCount}
-          label={node.tag.name}
-          prefix="#"
+          </span>
+        </button>
+        <button
+          className="min-w-0 truncate text-left"
+          type="button"
           onClick={() => onSelect(node.tag.path)}
-        />
+        >
+          {node.tag.name}
+        </button>
+        <span className="text-xs text-[var(--color-text-muted)]">{rootCount}</span>
       </div>
       {hasChildren && expanded ? (
-        <div className="grid grid-cols-[24px_1fr] gap-x-1 gap-y-1">
+        <div className="ml-[60px] flex flex-col gap-1">
           {node.children.map((child) => (
-            <Fragment key={child.path}>
-              <span aria-hidden="true" />
-              <NavItem
-                active={activePath === child.path}
-                count={childCounts.get(child.path) ?? 0}
-                label={child.name}
-                prefix=""
-                onClick={() => onSelect(child.path)}
-              />
-            </Fragment>
+            <NavItem
+              active={activePath === child.path}
+              count={childCounts.get(child.path) ?? 0}
+              key={child.path}
+              label={child.name}
+              prefix="#"
+              onClick={() => onSelect(child.path)}
+            />
           ))}
         </div>
       ) : null}
