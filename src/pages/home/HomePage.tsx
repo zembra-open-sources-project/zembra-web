@@ -409,9 +409,17 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
                   })}
                   key={node.tag.path}
                   node={node}
-                  rootCount={notes.filter((note) =>
-                    noteMatchesTagPath(note.tags, node.tag.path),
-                  ).length}
+                  rootCount={Math.max(
+                    notes.filter((note) =>
+                      noteMatchesTagPath(note.tags, node.tag.path),
+                    ).length,
+                    (tagUsage.get(node.tag.path) ?? tagUsage.get(node.tag.name) ?? 0) +
+                      node.children.reduce(
+                        (total, child) =>
+                          total + (tagUsage.get(child.path) ?? tagUsage.get(child.name) ?? 0),
+                        0,
+                      ),
+                  )}
                   onSelect={(path) =>
                     setSelectedTag(selectedTag === path ? undefined : path)
                   }

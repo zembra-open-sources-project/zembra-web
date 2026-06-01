@@ -172,13 +172,13 @@ export function TagTreeItem({
   return (
     <div className="flex flex-col gap-1">
       <div
-        className="group grid min-h-9 grid-cols-[42px_1fr_auto] items-center gap-2.5 rounded-[9px] px-3 py-2 text-left text-[15px] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted)] data-[active=true]:bg-[var(--color-accent-soft)] data-[active=true]:text-[var(--color-text-primary)] data-[active=true]:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
+        className="group grid min-h-9 grid-cols-[24px_1fr_auto] items-center gap-2.5 rounded-[9px] px-3 py-2 text-left text-[15px] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted)] data-[active=true]:bg-[var(--color-accent-soft)] data-[active=true]:text-[var(--color-text-primary)] data-[active=true]:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
         data-active={activePath === node.tag.path}
       >
         <button
           aria-expanded={expanded}
           aria-label={expanded ? expandedLabel : collapsedLabel}
-          className="flex size-8 items-center justify-center rounded-[7px] text-[var(--color-accent)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
+          className="flex min-w-0 items-center justify-center rounded-[7px] text-[var(--color-accent)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
           type="button"
           onClick={() => onToggle(node.tag.path)}
         >
@@ -203,11 +203,11 @@ export function TagTreeItem({
         <span className="text-xs text-[var(--color-text-muted)]">{rootCount}</span>
       </div>
       {hasChildren && expanded ? (
-        <div className="ml-[60px] flex flex-col gap-1">
+        <div className="ml-[58px] flex flex-col gap-1">
           {node.children.map((child) => (
             <NavItem
               active={activePath === child.path}
-              count={childCounts.get(child.path) ?? 0}
+              count={childCounts.get(child.path) ?? childCounts.get(child.name) ?? 0}
               key={child.path}
               label={child.name}
               prefix="#"
