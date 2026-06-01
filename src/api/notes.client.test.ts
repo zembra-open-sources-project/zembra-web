@@ -41,7 +41,15 @@ describe("createNotesHttpClient", () => {
       }
 
       return jsonResponse({
-        tags: [{ id: "tag-1", name: "recent", created_at: 1 }],
+        tags: [
+          {
+            id: "tag-1",
+            name: "recent",
+            path: "recent",
+            depth: 0,
+            created_at: 1,
+          },
+        ],
       });
     });
     globalThis.fetch = fetchMock as typeof fetch;
@@ -147,14 +155,23 @@ describe("createNotesHttpClient", () => {
       }
 
       return jsonResponse({
-        tags: [{ id: "tag-1", name: "work", created_at: 1 }],
+        tags: [
+          {
+            id: "tag-1",
+            name: "api",
+            parent_tag_id: "tag-root",
+            path: "work/api",
+            depth: 1,
+            created_at: 1,
+          },
+        ],
       });
     });
     globalThis.fetch = fetchMock as typeof fetch;
 
     const client = createNotesHttpClient({ baseUrl: "http://server.test" });
 
-    await expect(client.listNotes({ tag: "work" })).resolves.toEqual([
+    await expect(client.listNotes({ tag: "work/api" })).resolves.toEqual([
       {
         id: "abc123",
         content: "hello #work",
@@ -162,7 +179,7 @@ describe("createNotesHttpClient", () => {
         fieldId: "field-1",
         createdAt: 1,
         updatedAt: 2,
-        tags: ["work"],
+        tags: ["work/api"],
       },
     ]);
     expect(fetchMock).toHaveBeenCalledTimes(2);

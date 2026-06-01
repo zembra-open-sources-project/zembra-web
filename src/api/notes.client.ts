@@ -287,14 +287,14 @@ export function mapNoteRecordToDto(note: NoteRecord, tags: string[] = []): NoteD
   };
 }
 
-/** Loads tag names for a note from the backend. */
+/** Loads tag paths for a note from the backend. */
 async function listTagNames(baseUrl: string, noteRef: string): Promise<string[]> {
   const response = await requestJson<ListNoteTagsResponse>(
     baseUrl,
     `/notes/${encodeURIComponent(noteRef)}/tags`,
   );
 
-  return response.tags.map((tag) => tag.name);
+  return response.tags.map((tag) => tag.path);
 }
 
 /** Applies UI-level keyword and tag filters to note DTOs. */
