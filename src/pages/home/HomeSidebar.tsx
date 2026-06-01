@@ -1,5 +1,5 @@
 import { CalendarDays, ChevronDown, ChevronRight } from "lucide-react";
-import { ReactNode } from "react";
+import { Fragment, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { DailyNoteCount } from "../../api/types";
 import type { TagTreeNode } from "./homeUtils";
@@ -159,14 +159,7 @@ export function TagTreeItem({
 
   return (
     <div className="flex flex-col gap-1">
-      <div className="grid grid-cols-[1fr_32px] items-center gap-1">
-        <NavItem
-          active={activePath === node.tag.path}
-          count={rootCount}
-          label={node.tag.name}
-          prefix="#"
-          onClick={() => onSelect(node.tag.path)}
-        />
+      <div className="grid grid-cols-[24px_1fr] items-center gap-1">
         {hasChildren ? (
           <button
             aria-expanded={expanded}
@@ -184,18 +177,27 @@ export function TagTreeItem({
         ) : (
           <span aria-hidden="true" />
         )}
+        <NavItem
+          active={activePath === node.tag.path}
+          count={rootCount}
+          label={node.tag.name}
+          prefix="#"
+          onClick={() => onSelect(node.tag.path)}
+        />
       </div>
       {hasChildren && expanded ? (
-        <div className="ml-7 flex flex-col gap-1">
+        <div className="grid grid-cols-[24px_1fr] gap-x-1 gap-y-1">
           {node.children.map((child) => (
-            <NavItem
-              active={activePath === child.path}
-              count={childCounts.get(child.path) ?? 0}
-              key={child.path}
-              label={child.name}
-              prefix=""
-              onClick={() => onSelect(child.path)}
-            />
+            <Fragment key={child.path}>
+              <span aria-hidden="true" />
+              <NavItem
+                active={activePath === child.path}
+                count={childCounts.get(child.path) ?? 0}
+                label={child.name}
+                prefix=""
+                onClick={() => onSelect(child.path)}
+              />
+            </Fragment>
           ))}
         </div>
       ) : null}
