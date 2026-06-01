@@ -30,6 +30,7 @@ import {
 } from "./HomeSidebar";
 import type { ComposerTool } from "./homeTypes";
 import {
+  buildTagFilterMatch,
   buildTagTree,
   countFields,
   countRoles,
@@ -90,16 +91,21 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
     () => new Map(fields.map((field) => [field.id, field.name])),
     [fields],
   );
+  const tagUsage = useMemo(() => countTags(notes), [notes]);
+  const tagTree = useMemo(() => buildTagTree(tags), [tags]);
+  const selectedTagMatch = useMemo(
+    () => buildTagFilterMatch(tagTree, selectedTag),
+    [selectedTag, tagTree],
+  );
   const visibleNotes = useMemo(
     () => filterVisibleNotes(notes, {
       fieldId: selectedField,
       keyword,
       tag: selectedTag,
+      tagMatch: selectedTagMatch,
     }),
-    [keyword, notes, selectedField, selectedTag],
+    [keyword, notes, selectedField, selectedTag, selectedTagMatch],
   );
-  const tagUsage = useMemo(() => countTags(notes), [notes]);
-  const tagTree = useMemo(() => buildTagTree(tags), [tags]);
   const fieldUsage = useMemo(() => countFields(notes), [notes]);
   const roleUsage = useMemo(
     () => countRoles(roleNavigationNotes.length > 0 ? roleNavigationNotes : notes),

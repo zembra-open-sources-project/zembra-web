@@ -292,6 +292,51 @@ test("renders hierarchical tag navigation and filters by root or child path", as
   await waitFor(() => expect(screen.queryByText("root books note")).toBeNull());
 });
 
+/** Verifies hierarchical tag filtering accepts legacy leaf-only note tags. */
+test("filters hierarchical tag navigation with leaf-only note tags", async () => {
+  renderHomePage();
+
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
+
+  act(() => {
+    useNotesStore.setState({
+      notes: [
+        {
+          id: "legacy-child-tag-note",
+          content: "legacy agent test note",
+          role: "Human",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: ["test"],
+        },
+      ],
+      tags: [
+        {
+          id: "tag-agent",
+          name: "Agent",
+          path: "Agent",
+          depth: 0,
+          createdAt: 1_779_382_320,
+        },
+        {
+          id: "tag-agent-test",
+          name: "test",
+          parentTagId: "tag-agent",
+          path: "Agent/test",
+          depth: 1,
+          createdAt: 1_779_382_320,
+        },
+      ],
+    });
+  });
+
+  fireEvent.click(screen.getByRole("button", { name: "展开 Agent" }));
+  fireEvent.click(sidebarButtonForText("test"));
+
+  expect(await screen.findByText("legacy agent test note")).not.toBeNull();
+  expect(screen.queryByText("最近还没有笔记")).toBeNull();
+});
+
 /** Verifies note cards expose human and agent role badges. */
 test("renders note card role badges as icons without visible role text", async () => {
   renderHomePage();

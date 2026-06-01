@@ -12,18 +12,25 @@ export interface TagTreeNode {
   children: TagDto[];
 }
 
+export interface TagFilterMatch {
+  /** Full tag paths that should match the selected sidebar tag. */
+  paths: string[];
+  /** Legacy or display names that should match the selected sidebar tag. */
+  names: string[];
+}
+
 const fullNoteLinkPattern = /\[\[([A-Fa-f0-9]{32})\]\]/g;
 
 /** Applies current home feed filters to recent notes. */
 export function filterVisibleNotes(
   notes: NoteDto[],
-  query: { fieldId?: string; keyword: string; tag?: string },
+  query: { fieldId?: string; keyword: string; tag?: string; tagMatch?: TagFilterMatch },
 ): NoteDto[] {
   const keyword = query.keyword.trim();
 
   return notes.filter((note) => {
     const keywordMatched = !keyword || note.content.includes(keyword);
-    const tagMatched = noteMatchesTagPath(note.tags, query.tag);
+    const tagMatched = noteMatchesTagPath(note.tags, query.tag, query.tagMatch);
     const fieldMatched = !query.fieldId || note.fieldId === query.fieldId;
     return keywordMatched && tagMatched && fieldMatched;
   });
@@ -93,14 +100,18 @@ export function formatTagPathLabel(path: string): string {
 export function noteMatchesTagPath(
   noteTags: string[],
   selectedTag?: string,
+  match?: TagFilterMatch,
 ): boolean {
   if (!selectedTag) {
     return true;
   }
 
-  const childPrefix = `${selectedTag}/`;
-  return noteTags.some(
-    (tag) => tag === selectedTag || tag.startsWith(childPrefix),
+  const pathMatches = match?.paths ?? [selectedTag];
+  const nameMatches = match?.names ?? [];
+
+  return noteTags.some((tag) =>
+    pathMatches.some((path) => tag === path || tag.startsWith(`${path}/`)) ||
+    nameMatches.includes(tag)
   );
 }
 
@@ -148,6 +159,36 @@ export function findSelectedTagRootPath(
     node.tag.path === selectedTag ||
     node.children.some((child) => child.path === selectedTag)
   ))?.tag.path;
+}
+
+/** Builds matching aliases for selected tree tags, including legacy leaf names. */
+export function buildTagFilterMatch(
+  tree: TagTreeNode[],
+  selectedTag?: string,
+): TagFilterMatch | undefined {
+  if (!selectedTag) {
+    return undefined;
+  }
+
+  for (const node of tree) {
+    if (node.tag.path === selectedTag) {
+      return {
+        paths: [node.tag.path, ...node.children.map((child) => child.path)],
+        names: [node.tag.name, ...node.children.map((child) => child.name)],
+      };
+    }
+
+    const child = node.children.find((item) => item.path === selectedTag);
+
+    if (child) {
+      return {
+        paths: [child.path],
+        names: [child.name],
+      };
+    }
+  }
+
+  return { paths: [selectedTag], names: [] };
 }
 
 /** Removes tag markers that are already rendered as note chips. */
