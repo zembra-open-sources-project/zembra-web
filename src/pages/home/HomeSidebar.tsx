@@ -203,7 +203,7 @@ export function TagTreeItem({
         <span className="text-xs text-[var(--color-text-muted)]">{rootCount}</span>
       </div>
       {hasChildren && expanded ? (
-        <div className="ml-[58px] flex flex-col gap-1">
+        <div className="ml-6 flex flex-col gap-1">
           {node.children.map((child) => (
             <NavItem
               active={activePath === child.path}
