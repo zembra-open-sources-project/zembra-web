@@ -1,9 +1,16 @@
-import type { NoteDto } from "../../api/types";
+import type { NoteDto, TagDto } from "../../api/types";
 import type { NoteLinkInput } from "../../api/types";
 
 export type RenderableNoteContentSegment =
   | { text: string; type: "text" }
   | { anchorText: string; targetNoteRef: string; type: "link" };
+
+export interface TagTreeNode {
+  /** Tag represented by this tree node. */
+  tag: TagDto;
+  /** Direct second-level children of this root tag. */
+  children: TagDto[];
+}
 
 const fullNoteLinkPattern = /\[\[([A-Fa-f0-9]{32})\]\]/g;
 
@@ -16,7 +23,7 @@ export function filterVisibleNotes(
 
   return notes.filter((note) => {
     const keywordMatched = !keyword || note.content.includes(keyword);
-    const tagMatched = !query.tag || note.tags.includes(query.tag);
+    const tagMatched = noteMatchesTagPath(note.tags, query.tag);
     const fieldMatched = !query.fieldId || note.fieldId === query.fieldId;
     return keywordMatched && tagMatched && fieldMatched;
   });
@@ -69,6 +76,80 @@ export function parseTagNames(content: string): string[] {
   );
 }
 
+/** Splits a full tag path into non-empty hierarchy segments. */
+export function splitTagPath(path: string): string[] {
+  return path
+    .split("/")
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+}
+
+/** Formats a tag path for compact text-only display. */
+export function formatTagPathLabel(path: string): string {
+  return splitTagPath(path).join(" > ");
+}
+
+/** Returns whether a note tag collection matches the selected tag path. */
+export function noteMatchesTagPath(
+  noteTags: string[],
+  selectedTag?: string,
+): boolean {
+  if (!selectedTag) {
+    return true;
+  }
+
+  const childPrefix = `${selectedTag}/`;
+  return noteTags.some(
+    (tag) => tag === selectedTag || tag.startsWith(childPrefix),
+  );
+}
+
+/** Builds a stable two-level tag tree for the home sidebar. */
+export function buildTagTree(tags: TagDto[]): TagTreeNode[] {
+  const rootsByPath = new Map<string, TagTreeNode>();
+  const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+
+  tags.forEach((tag) => {
+    if (tag.depth === 0 || !tag.parentTagId) {
+      ensureRootNode(rootsByPath, tag);
+    }
+  });
+
+  tags.forEach((tag) => {
+    if (tag.depth !== 1 || !tag.parentTagId) {
+      return;
+    }
+
+    const parent = tagsById.get(tag.parentTagId);
+    const root = parent ?? createRootFromChildPath(tag);
+    const rootNode = ensureRootNode(rootsByPath, root);
+
+    if (!rootNode.children.some((child) => child.path === tag.path)) {
+      rootNode.children.push(tag);
+    }
+  });
+
+  return Array.from(rootsByPath.values()).map((node) => ({
+    ...node,
+    children: [...node.children].sort(compareTagsByPath),
+  })).sort((left, right) => compareTagsByPath(left.tag, right.tag));
+}
+
+/** Finds the root path that owns a selected tag path. */
+export function findSelectedTagRootPath(
+  tree: TagTreeNode[],
+  selectedTag?: string,
+): string | undefined {
+  if (!selectedTag) {
+    return undefined;
+  }
+
+  return tree.find((node) => (
+    node.tag.path === selectedTag ||
+    node.children.some((child) => child.path === selectedTag)
+  ))?.tag.path;
+}
+
 /** Removes tag markers that are already rendered as note chips. */
 export function stripRenderedTagMarkers(content: string, tags: string[]): string {
   if (tags.length === 0) {
@@ -86,6 +167,39 @@ export function stripRenderedTagMarkers(content: string, tags: string[]): string
       return leading;
     })
     .trimStart();
+}
+
+/** Ensures a root node exists for a tag path and returns it. */
+function ensureRootNode(
+  rootsByPath: Map<string, TagTreeNode>,
+  tag: TagDto,
+): TagTreeNode {
+  const existing = rootsByPath.get(tag.path);
+
+  if (existing) {
+    return existing;
+  }
+
+  const node = { tag, children: [] };
+  rootsByPath.set(tag.path, node);
+  return node;
+}
+
+/** Creates a synthetic root tag for child records whose parent is missing. */
+function createRootFromChildPath(tag: TagDto): TagDto {
+  const [rootName = tag.name] = splitTagPath(tag.path);
+  return {
+    id: `orphan-root:${rootName}`,
+    name: rootName,
+    path: rootName,
+    depth: 0,
+    createdAt: tag.createdAt,
+  };
+}
+
+/** Sorts tag DTOs by path for stable sidebar rendering. */
+function compareTagsByPath(left: TagDto, right: TagDto): number {
+  return left.path.localeCompare(right.path);
 }
 
 /** Extracts inline field names from note content in document order. */

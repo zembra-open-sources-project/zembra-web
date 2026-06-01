@@ -48,10 +48,24 @@ describe("createTaxonomyHttpClient", () => {
     const fetchMock = vi.fn(async (_input: RequestInfo | URL) =>
       jsonResponse({
         tags: [
-          { id: "tag-1", name: "Agents", created_at: 10 },
-          { id: "tag-2", name: "hermes", created_at: 20 },
+          {
+            id: "tag-1",
+            name: "Agents",
+            parent_tag_id: null,
+            path: "Agents",
+            depth: 0,
+            created_at: 10,
+          },
+          {
+            id: "tag-2",
+            name: "hermes",
+            parent_tag_id: "tag-1",
+            path: "Agents/hermes",
+            depth: 1,
+            created_at: 20,
+          },
         ],
-        names: ["Agents", "hermes"],
+        names: ["Agents", "Agents/hermes"],
       }),
     );
     globalThis.fetch = fetchMock as typeof fetch;
@@ -59,8 +73,21 @@ describe("createTaxonomyHttpClient", () => {
     const client = createTaxonomyHttpClient({ baseUrl: "http://server.test" });
 
     await expect(client.listTags()).resolves.toEqual([
-      { id: "tag-1", name: "Agents", createdAt: 10 },
-      { id: "tag-2", name: "hermes", createdAt: 20 },
+      {
+        id: "tag-1",
+        name: "Agents",
+        path: "Agents",
+        depth: 0,
+        createdAt: 10,
+      },
+      {
+        id: "tag-2",
+        name: "hermes",
+        parentTagId: "tag-1",
+        path: "Agents/hermes",
+        depth: 1,
+        createdAt: 20,
+      },
     ]);
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
       "http://server.test/tags?all=true",
@@ -90,12 +117,37 @@ describe("mapTagRecordToDto", () => {
       mapTagRecordToDto({
         id: "tag-1",
         name: "Agents",
+        parent_tag_id: null,
+        path: "Agents",
+        depth: 0,
         created_at: 10,
       }),
     ).toEqual({
       id: "tag-1",
       name: "Agents",
+      path: "Agents",
+      depth: 0,
       createdAt: 10,
+    });
+  });
+
+  test("maps child tag records with parent and path fields", () => {
+    expect(
+      mapTagRecordToDto({
+        id: "tag-2",
+        name: "hermes",
+        parent_tag_id: "tag-1",
+        path: "Agents/hermes",
+        depth: 1,
+        created_at: 20,
+      }),
+    ).toEqual({
+      id: "tag-2",
+      name: "hermes",
+      parentTagId: "tag-1",
+      path: "Agents/hermes",
+      depth: 1,
+      createdAt: 20,
     });
   });
 });

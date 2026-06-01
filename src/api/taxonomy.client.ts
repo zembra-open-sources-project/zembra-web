@@ -67,8 +67,20 @@ export function createMockTaxonomyClient(): TaxonomyClient {
     },
     async listTags() {
       return [
-        { id: "mock-tag-product", name: "产品", createdAt: 1 },
-        { id: "mock-tag-architecture", name: "架构", createdAt: 2 },
+        {
+          id: "mock-tag-product",
+          name: "产品",
+          path: "产品",
+          depth: 0,
+          createdAt: 1,
+        },
+        {
+          id: "mock-tag-architecture",
+          name: "架构",
+          path: "架构",
+          depth: 0,
+          createdAt: 2,
+        },
       ];
     },
   };
@@ -88,6 +100,9 @@ export function mapTagRecordToDto(tag: TagRecord): TagDto {
   return {
     id: tag.id,
     name: tag.name,
+    parentTagId: tag.parent_tag_id ?? undefined,
+    path: tag.path,
+    depth: tag.depth,
     createdAt: tag.created_at,
   };
 }

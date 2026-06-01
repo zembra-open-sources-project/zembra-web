@@ -1,9 +1,15 @@
 import { describe, expect, test } from "vitest";
 import {
+  buildTagTree,
   countRoles,
+  findSelectedTagRootPath,
+  formatTagPathLabel,
   formatShortNoteRef,
+  noteMatchesTagPath,
   parseNoteLinks,
   parseRenderableNoteContent,
+  parseTagNames,
+  stripRenderedTagMarkers,
 } from "./homeUtils";
 
 const firstNoteId = "abcdef1234567890abcdef1234567890";
@@ -62,6 +68,140 @@ describe("note link parsing", () => {
         type: "link",
       },
     ]);
+  });
+});
+
+describe("hierarchical tag helpers", () => {
+  test("extracts two-level tag paths from inline content", () => {
+    expect(parseTagNames("read #books/hands-on-gpt next #inbox")).toEqual([
+      "books/hands-on-gpt",
+      "inbox",
+    ]);
+  });
+
+  test("formats tag paths with a readable separator", () => {
+    expect(formatTagPathLabel("books/hands-on-gpt")).toBe(
+      "books > hands-on-gpt",
+    );
+  });
+
+  test("removes rendered two-level tag markers from note content", () => {
+    expect(
+      stripRenderedTagMarkers("#books/hands-on-gpt useful note", [
+        "books/hands-on-gpt",
+      ]),
+    ).toBe("useful note");
+  });
+
+  test("matches parent tag paths as a subtree and child paths exactly", () => {
+    expect(noteMatchesTagPath(["books/hands-on-gpt"], "books")).toBe(true);
+    expect(noteMatchesTagPath(["books/hands-on-gpt"], "books/hands-on-gpt"))
+      .toBe(true);
+    expect(noteMatchesTagPath(["books/other"], "books/hands-on-gpt")).toBe(
+      false,
+    );
+    expect(noteMatchesTagPath(["notebooks"], "books")).toBe(false);
+  });
+
+  test("builds a stable two-level tag tree", () => {
+    expect(
+      buildTagTree([
+        {
+          id: "tag-books-gpt",
+          name: "hands-on-gpt",
+          parentTagId: "tag-books",
+          path: "books/hands-on-gpt",
+          depth: 1,
+          createdAt: 2,
+        },
+        {
+          id: "tag-books",
+          name: "books",
+          path: "books",
+          depth: 0,
+          createdAt: 1,
+        },
+      ]),
+    ).toEqual([
+      {
+        tag: {
+          id: "tag-books",
+          name: "books",
+          path: "books",
+          depth: 0,
+          createdAt: 1,
+        },
+        children: [
+          {
+            id: "tag-books-gpt",
+            name: "hands-on-gpt",
+            parentTagId: "tag-books",
+            path: "books/hands-on-gpt",
+            depth: 1,
+            createdAt: 2,
+          },
+        ],
+      },
+    ]);
+  });
+
+  test("keeps orphan child tags under a synthetic root", () => {
+    expect(
+      buildTagTree([
+        {
+          id: "tag-orphan",
+          name: "missing",
+          parentTagId: "missing-parent",
+          path: "projects/missing",
+          depth: 1,
+          createdAt: 3,
+        },
+      ]),
+    ).toEqual([
+      {
+        tag: {
+          id: "orphan-root:projects",
+          name: "projects",
+          path: "projects",
+          depth: 0,
+          createdAt: 3,
+        },
+        children: [
+          {
+            id: "tag-orphan",
+            name: "missing",
+            parentTagId: "missing-parent",
+            path: "projects/missing",
+            depth: 1,
+            createdAt: 3,
+          },
+        ],
+      },
+    ]);
+  });
+
+  test("finds the root path for selected child tags", () => {
+    const tree = buildTagTree([
+      {
+        id: "tag-books",
+        name: "books",
+        path: "books",
+        depth: 0,
+        createdAt: 1,
+      },
+      {
+        id: "tag-books-gpt",
+        name: "hands-on-gpt",
+        parentTagId: "tag-books",
+        path: "books/hands-on-gpt",
+        depth: 1,
+        createdAt: 2,
+      },
+    ]);
+
+    expect(findSelectedTagRootPath(tree, "books/hands-on-gpt")).toBe("books");
+    expect(findSelectedTagRootPath(tree, "books")).toBe("books");
+    expect(findSelectedTagRootPath(tree)).toBeUndefined();
   });
 });
 

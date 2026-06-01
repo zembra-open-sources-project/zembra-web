@@ -11,7 +11,7 @@
 
 ### 任务 #1: 扩展结构化 tag API 类型
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/api/types.ts`, Modify `src/api/taxonomy.client.ts`, Modify `src/api/taxonomy.client.test.ts`
 
@@ -23,7 +23,7 @@
 
 ### 任务 #2: 增加二级 tag 解析、格式化和筛选工具
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/homeUtils.ts`, Modify `src/pages/home/homeUtils.test.ts`
 
@@ -88,3 +88,4 @@
 ## 开发记录
 
 - 2026-06-01：已完成需求澄清、设计文档和执行计划。实现范围确认：web UI 只支持二级 tag；创建/编辑继续提交完整 path；sidebar Tags 使用可折叠二级树；父 tag 筛选整个子树；默认只展开当前选中 tag 所在父节点；note chip 使用更清晰路径展示。
+- 2026-06-01：已完成 Stage #1，扩展 `TagRecord`/`TagDto` 接收 `parent_tag_id`、`path`、`depth` 并更新 taxonomy client 映射；新增二级 tag path 解析、格式化、树构建、父子筛选和选中 root 查找工具。`npm run test -- src/api/taxonomy.client.test.ts src/pages/home/homeUtils.test.ts` 通过。
