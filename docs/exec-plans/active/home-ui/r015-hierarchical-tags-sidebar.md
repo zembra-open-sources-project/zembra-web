@@ -63,7 +63,7 @@
 
 ### 任务 #5: 补充端到端行为覆盖
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/HomePage.test.tsx`, Modify `src/i18n/resources.test.ts`
 
@@ -75,7 +75,7 @@
 
 ### 任务 #6: 执行整体验证并回写计划
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `docs/exec-plans/active/home-ui/r015-hierarchical-tags-sidebar.md`
 
@@ -90,3 +90,4 @@
 - 2026-06-01：已完成需求澄清、设计文档和执行计划。实现范围确认：web UI 只支持二级 tag；创建/编辑继续提交完整 path；sidebar Tags 使用可折叠二级树；父 tag 筛选整个子树；默认只展开当前选中 tag 所在父节点；note chip 使用更清晰路径展示。
 - 2026-06-01：已完成 Stage #1，扩展 `TagRecord`/`TagDto` 接收 `parent_tag_id`、`path`、`depth` 并更新 taxonomy client 映射；新增二级 tag path 解析、格式化、树构建、父子筛选和选中 root 查找工具。`npm run test -- src/api/taxonomy.client.test.ts src/pages/home/homeUtils.test.ts` 通过。
 - 2026-06-01：已完成 Stage #2，Tags sidebar 改为二级折叠树，父 tag 筛选整个子树、child tag 精确筛选，note card tag chip 改为 `#root > child` 路径展示，并补充 HomePage/i18n 行为测试。`npm run test -- src/pages/home/HomePage.test.tsx src/i18n/resources.test.ts` 和 `npm run build` 通过。
+- 2026-06-01：已完成 Stage #3，执行全量回归验证并回写计划状态。`npm run test` 通过 14 个测试文件 85 个测试，`npm run build` 通过。
