@@ -573,6 +573,105 @@ test("submits parsed note links when creating and editing notes", async () => {
   );
 });
 
+/** Verifies create submissions prefer inline fields before sidebar defaults. */
+test("submits the first inline field when creating notes", async () => {
+  renderHomePage();
+  await waitFor(() => expect(useNotesStore.getState().fields.length).toBeGreaterThan(0));
+
+  const createNote = vi.fn(async () => undefined);
+
+  act(() => {
+    useNotesStore.setState({
+      createNote,
+      fields: [
+        { id: "field-selected", name: "selected-default", createdAt: 1 },
+      ],
+      selectedField: "field-selected",
+    });
+  });
+
+  const composer = await screen.findByPlaceholderText("现在的想法是...");
+  fireEvent.change(composer, {
+    target: { value: "@alpha @beta field-driven note #topic" },
+  });
+  fireEvent.submit(composer.closest("form") as HTMLFormElement);
+
+  await waitFor(() =>
+    expect(createNote).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: "@alpha @beta field-driven note #topic",
+        field: "alpha",
+        tags: ["topic"],
+      }),
+    ),
+  );
+});
+
+/** Verifies create submissions keep the selected field when no inline field exists. */
+test("uses the selected field when creating notes without inline fields", async () => {
+  renderHomePage();
+  await waitFor(() => expect(useNotesStore.getState().fields.length).toBeGreaterThan(0));
+
+  const createNote = vi.fn(async () => undefined);
+
+  act(() => {
+    useNotesStore.setState({
+      createNote,
+      fields: [
+        { id: "field-selected", name: "selected-default", createdAt: 1 },
+      ],
+      selectedField: "field-selected",
+    });
+  });
+
+  const composer = await screen.findByPlaceholderText("现在的想法是...");
+  fireEvent.change(composer, {
+    target: { value: "field fallback note #topic" },
+  });
+  fireEvent.submit(composer.closest("form") as HTMLFormElement);
+
+  await waitFor(() =>
+    expect(createNote).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: "field fallback note #topic",
+        field: "selected-default",
+        tags: ["topic"],
+      }),
+    ),
+  );
+});
+
+/** Verifies create submissions fall back to inbox without inline or selected fields. */
+test("uses inbox when creating notes without inline or selected fields", async () => {
+  renderHomePage();
+  await waitFor(() => expect(useNotesStore.getState().fields.length).toBeGreaterThan(0));
+
+  const createNote = vi.fn(async () => undefined);
+
+  act(() => {
+    useNotesStore.setState({
+      createNote,
+      selectedField: undefined,
+    });
+  });
+
+  const composer = await screen.findByPlaceholderText("现在的想法是...");
+  fireEvent.change(composer, {
+    target: { value: "default field note #topic" },
+  });
+  fireEvent.submit(composer.closest("form") as HTMLFormElement);
+
+  await waitFor(() =>
+    expect(createNote).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: "default field note #topic",
+        field: "inbox",
+        tags: ["topic"],
+      }),
+    ),
+  );
+});
+
 /** Verifies the Settings button opens and closes the Settings modal. */
 test("opens and closes Settings modal from the home toolbar", async () => {
   renderHomePage();

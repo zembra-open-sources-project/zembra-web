@@ -156,8 +156,11 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
       return;
     }
 
+    const fieldNames = parseFieldNames(content);
     const field =
-      fields.find((item) => item.id === selectedField)?.name ?? "inbox";
+      fieldNames[0] ??
+      fields.find((item) => item.id === selectedField)?.name ??
+      "inbox";
     const tags = parseTagNames(content);
     const links = parseNoteLinks(content);
 
