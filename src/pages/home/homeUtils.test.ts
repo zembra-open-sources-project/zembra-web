@@ -9,6 +9,7 @@ import {
   parseNoteLinks,
   parseRenderableNoteContent,
   parseTagNames,
+  stripRenderedFieldMarker,
   stripRenderedTagMarkers,
 } from "./homeUtils";
 
@@ -91,6 +92,18 @@ describe("hierarchical tag helpers", () => {
         "books/hands-on-gpt",
       ]),
     ).toBe("useful note");
+  });
+
+  test("removes rendered field markers from note content", () => {
+    expect(stripRenderedFieldMarker("@alpha useful note", "alpha")).toBe(
+      "useful note",
+    );
+  });
+
+  test("keeps non-rendered field markers in note content", () => {
+    expect(stripRenderedFieldMarker("@beta useful note", "alpha")).toBe(
+      "@beta useful note",
+    );
   });
 
   test("matches parent tag paths as a subtree and child paths exactly", () => {

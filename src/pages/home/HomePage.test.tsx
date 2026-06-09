@@ -96,6 +96,36 @@ test("renders tag chips without repeating inline tag markers", async () => {
   expect(within(noteCard as HTMLElement).queryByText(/^#zembra 界面/)).toBeNull();
 });
 
+/** Verifies rendered field metadata is not duplicated in note body text. */
+test("renders field metadata without repeating inline field markers", async () => {
+  renderHomePage();
+
+  useNotesStore.setState({
+    fields: [
+      { id: "field-alpha", name: "alpha", createdAt: 1 },
+    ],
+    notes: [
+      {
+        id: "field-note",
+        content: "@alpha reusable note",
+        role: "Human",
+        fieldId: "field-alpha",
+        createdAt: 1_779_382_320,
+        updatedAt: 1_779_382_320,
+        tags: [],
+      },
+    ],
+  });
+
+  const noteText = await screen.findByText("reusable note");
+  const noteCard = noteText.closest("article");
+  expect(noteCard).not.toBeNull();
+
+  expect(within(noteCard as HTMLElement).getByText("@alpha")).not.toBeNull();
+  expect(within(noteCard as HTMLElement).queryByText(/^@alpha reusable note/))
+    .toBeNull();
+});
+
 /** Verifies two-level tag chips render as raw paths without duplicate markers. */
 test("renders hierarchical tag chips as raw paths", async () => {
   renderHomePage();

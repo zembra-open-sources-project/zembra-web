@@ -210,6 +210,26 @@ export function stripRenderedTagMarkers(content: string, tags: string[]): string
     .trimStart();
 }
 
+/** Removes a field marker that is already rendered as note metadata. */
+export function stripRenderedFieldMarker(
+  content: string,
+  fieldName?: string,
+): string {
+  if (!fieldName) {
+    return content;
+  }
+
+  return content
+    .replace(/(^|\s)@([^\s#@]+)/g, (match, leading: string, field: string) => {
+      if (field !== fieldName) {
+        return match;
+      }
+
+      return leading;
+    })
+    .trimStart();
+}
+
 /** Ensures a root node exists for a tag path and returns it. */
 function ensureRootNode(
   rootsByPath: Map<string, TagTreeNode>,

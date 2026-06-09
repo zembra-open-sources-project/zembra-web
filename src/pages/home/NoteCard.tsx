@@ -16,6 +16,7 @@ import {
   formatTagPathLabel,
   formatShortNoteRef,
   parseRenderableNoteContent,
+  stripRenderedFieldMarker,
   stripRenderedTagMarkers,
 } from "./homeUtils";
 
@@ -62,8 +63,12 @@ export function NoteCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const displayRole = note.role || t("sidebar.unknownRole");
   const displayContent = useMemo(
-    () => stripRenderedTagMarkers(note.content, note.tags),
-    [note.content, note.tags],
+    () =>
+      stripRenderedFieldMarker(
+        stripRenderedTagMarkers(note.content, note.tags),
+        fieldName,
+      ),
+    [fieldName, note.content, note.tags],
   );
   const contentSegments = useMemo(
     () => parseRenderableNoteContent(displayContent),
