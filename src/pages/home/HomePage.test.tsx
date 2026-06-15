@@ -155,6 +155,51 @@ test("renders hierarchical tag chips as raw paths", async () => {
   ).toBeNull();
 });
 
+/** Verifies note cards render GFM Markdown semantics without executing raw HTML. */
+test("renders note card content as GFM markdown", async () => {
+  renderHomePage();
+
+  act(() => {
+    useNotesStore.setState({
+      notes: [
+        {
+          id: "markdown-note",
+          content: [
+            "- first item",
+            "- second item",
+            "",
+            "**important** and `inline code`",
+            "",
+            "[OpenAI](https://openai.com)",
+            "",
+            "<span>raw html</span>",
+          ].join("\n"),
+          role: "Human",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: [],
+        },
+      ],
+    });
+  });
+
+  const list = await screen.findByRole("list");
+  expect(within(list).getByText("first item")).not.toBeNull();
+  expect(within(list).getByText("second item")).not.toBeNull();
+  expect((await screen.findByText("important")).tagName.toLowerCase()).toBe("strong");
+  expect((await screen.findByText("inline code")).tagName.toLowerCase()).toBe("code");
+
+  const externalLink = await screen.findByRole("link", { name: "OpenAI" });
+  expect(externalLink.getAttribute("href")).toBe("https://openai.com");
+  expect(externalLink.getAttribute("target")).toBe("_blank");
+  expect(externalLink.getAttribute("rel")).toBe("noreferrer");
+
+  const noteCard = list.closest("article");
+  expect(noteCard).not.toBeNull();
+  expect((noteCard as HTMLElement).querySelector(".note-markdown span")).toBeNull();
+  expect((noteCard as HTMLElement).textContent).toContain("<span>raw html</span>");
+});
+
 /** Verifies field navigation counts use actual note membership. */
 test("renders actual note counts for all and field navigation", async () => {
   renderHomePage();
