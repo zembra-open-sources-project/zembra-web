@@ -135,6 +135,14 @@ button[data-active="true"] {
   padding-left: 1.35rem;
 }
 
+.note-markdown ul {
+  list-style-type: disc;
+}
+
+.note-markdown ol {
+  list-style-type: decimal;
+}
+
 .note-markdown li {
   margin: 0.15rem 0;
   padding-left: 0.1rem;
