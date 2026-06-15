@@ -40,18 +40,19 @@ export function NoteMarkdownContent({
   const components = createMarkdownComponents(onLoadNotePreview);
 
   return (
-    <ReactMarkdown
-      className="note-markdown"
-      components={components}
-      remarkPlugins={[remarkGfm, remarkNoteLinks]}
-      urlTransform={(url, key, node) =>
-        url.startsWith(noteLinkUrlPrefix)
-          ? url
-          : defaultUrlTransform(url, key, node)
-      }
-    >
-      {content}
-    </ReactMarkdown>
+    <div className="note-markdown">
+      <ReactMarkdown
+        components={components}
+        remarkPlugins={[remarkGfm, remarkNoteLinks]}
+        urlTransform={(url) =>
+          url.startsWith(noteLinkUrlPrefix)
+            ? url
+            : defaultUrlTransform(url)
+        }
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
   );
 }
 

@@ -186,16 +186,27 @@ test("renders note card content as GFM markdown", async () => {
   const list = await screen.findByRole("list");
   expect(within(list).getByText("first item")).not.toBeNull();
   expect(within(list).getByText("second item")).not.toBeNull();
-  expect((await screen.findByText("important")).tagName.toLowerCase()).toBe("strong");
-  expect((await screen.findByText("inline code")).tagName.toLowerCase()).toBe("code");
+  const noteCard = list.closest("article");
+  expect(noteCard).not.toBeNull();
+  expect((noteCard as HTMLElement).querySelector("strong")?.textContent).toBe(
+    "important",
+  );
+  expect((noteCard as HTMLElement).querySelector("code")?.textContent).toBe(
+    "inline code",
+  );
 
-  const externalLink = await screen.findByRole("link", { name: "OpenAI" });
+  const externalLink = (noteCard as HTMLElement).querySelector(
+    'a[href="https://openai.com"]',
+  );
+  expect(externalLink).not.toBeNull();
+  if (!externalLink) {
+    throw new Error("Expected Markdown link to render");
+  }
+  expect(externalLink?.textContent).toBe("OpenAI");
   expect(externalLink.getAttribute("href")).toBe("https://openai.com");
   expect(externalLink.getAttribute("target")).toBe("_blank");
   expect(externalLink.getAttribute("rel")).toBe("noreferrer");
 
-  const noteCard = list.closest("article");
-  expect(noteCard).not.toBeNull();
   expect((noteCard as HTMLElement).querySelector(".note-markdown span")).toBeNull();
   expect((noteCard as HTMLElement).textContent).toContain("<span>raw html</span>");
 });

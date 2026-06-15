@@ -9,7 +9,7 @@
 
 ### 任务 #1: 引入 GFM Markdown renderer 依赖
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `package.json`, Modify `package-lock.json`
 
@@ -21,7 +21,7 @@
 
 ### 任务 #2: 拆出 NoteMarkdownContent 展示组件
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Create `src/pages/home/NoteMarkdownContent.tsx`, Modify `src/pages/home/NoteCard.tsx`
 
@@ -33,7 +33,7 @@
 
 ### 任务 #3: 保留 Zembra 双链预览能力
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/NoteCard.tsx`, Modify `src/pages/home/NoteMarkdownContent.tsx`, Verify `src/pages/home/homeUtils.ts`
 
@@ -47,7 +47,7 @@
 
 ### 任务 #1: 配置 Markdown 组件映射
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/NoteMarkdownContent.tsx`
 
@@ -59,7 +59,7 @@
 
 ### 任务 #2: 补充 Markdown 内容样式
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/styles/main.css`, Modify `src/pages/home/NoteMarkdownContent.tsx`
 
@@ -71,7 +71,7 @@
 
 ### 任务 #3: 保持 tag / field marker 去重和折叠逻辑
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/NoteCard.tsx`, Verify `src/pages/home/homeUtils.ts`
 
@@ -85,7 +85,7 @@
 
 ### 任务 #1: 增加 Markdown 渲染行为测试
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/HomePage.test.tsx`
 
@@ -97,7 +97,7 @@
 
 ### 任务 #2: 运行自动化验证
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Verify `src/pages/home/HomePage.test.tsx`, Verify `src/pages/home/homeUtils.test.ts`, Verify `package.json`
 
@@ -109,7 +109,7 @@
 
 ### 任务 #3: 浏览器手工回归检查
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Verify `http://localhost:5173/`
 
@@ -121,7 +121,7 @@
 
 ### 任务 #4: 回写计划状态并提交
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `docs/exec-plans/active/home-ui/r017-note-card-markdown-rendering.md`
 
