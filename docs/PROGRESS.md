@@ -14,3 +14,4 @@
 - R012 `3ea1de1` 完成首页组件边界治理，将 note card、note editor、sidebar 与 heatmap 拆为独立组件，并把过滤、计数、解析和格式化逻辑迁移到 `homeUtils.ts`；同时将页面文件模块化要求沉淀到 `AGENTS.md`，明确页面只负责编排，复杂控件和纯工具函数必须独立维护。
 - R015 `82748da` 完成 zembra-schema v0.4 二级 tag 的 Web UI 适配：前端保留 `TagRecord.path` 作为 note tag、筛选和 chip 展示标识，支持 `#root/child` 输入解析、父 tag 子树筛选、child tag 精确筛选，以及 sidebar 二级折叠树。验收后将 chip 显示统一为原始路径 `#root/child`，并修正树行箭头占位、子级缩进和旧叶子名兼容筛选问题。
 - R016 `535ab42` 根据 `docs/exec-plans/active/home-ui/r016-create-note-field-priority.md` 修复首页创建 note 的 field 解析优先级：创建提交先读取正文第一个 `@field`，没有 inline field 时才回退到当前选中 field，最后使用 `inbox`，并补充通用测试避免绑定截图内容或固定 field 名称。
+- R017 `bb7e229` 根据 `docs/exec-plans/active/home-ui/r017-note-card-markdown-rendering.md` 完成 NoteCard 展示态 GFM Markdown 渲染，采用成熟 renderer 保留 `[[note_ref]]` 双链预览、外链新窗口、HTML 转义、行内代码样式和 tag/field 去重，并恢复 Markdown 列表 marker。
