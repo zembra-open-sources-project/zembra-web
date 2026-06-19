@@ -58,6 +58,7 @@ describe("SupabaseSettingsSection", () => {
 
     expect(await screen.findByDisplayValue("https://project.supabase.co")).not.toBeNull();
     expect(screen.getByDisplayValue("120")).not.toBeNull();
+    expect(screen.getByDisplayValue("••••••••")).not.toBeNull();
     expect(
       (screen.getByRole("switch", { name: "Enable sync" }) as HTMLInputElement)
         .checked,
@@ -105,11 +106,12 @@ describe("SupabaseSettingsSection", () => {
     renderSupabaseSection();
 
     const urlInput = await screen.findByDisplayValue("https://project.supabase.co");
-    const keyInput = screen.getByPlaceholderText("Keep existing");
+    const keyInput = screen.getByLabelText("Secret key");
 
     fireEvent.change(urlInput, {
       target: { value: "https://next.supabase.co" },
     });
+    fireEvent.focus(keyInput);
     fireEvent.change(keyInput, { target: { value: "   " } });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
@@ -122,6 +124,7 @@ describe("SupabaseSettingsSection", () => {
       });
     });
     expect(await screen.findByText("Settings saved")).not.toBeNull();
+    expect(screen.getByDisplayValue("••••••••")).not.toBeNull();
     expect(client.runSync).not.toHaveBeenCalled();
   });
 

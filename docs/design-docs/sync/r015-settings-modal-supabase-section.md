@@ -135,7 +135,6 @@ Supabase section 使用设置项行布局，而不是表单工作台布局：
 | `settings.supabase.enableSync` | Enable sync | 启用同步 | 啟用同步 |
 | `settings.supabase.url` | Supabase URL | Supabase URL | Supabase URL |
 | `settings.supabase.secretKey` | Secret key | Secret key | Secret key |
-| `settings.supabase.secretPlaceholder` | Leave blank to keep existing secret | 留空则保留现有 secret | 留空則保留現有 secret |
 | `settings.supabase.intervalSeconds` | Interval seconds | 同步间隔秒数 | 同步間隔秒數 |
 | `settings.actions.test` | Test | 测试 | 測試 |
 | `settings.actions.save` | Save | 保存 | 儲存 |

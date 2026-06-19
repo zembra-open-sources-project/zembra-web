@@ -162,7 +162,8 @@
 
 - 修改 `src/i18n/locales/en-US/settings.ts`、`src/i18n/locales/zh-CN/settings.ts`、`src/i18n/locales/zh-TW/settings.ts`。
 - `settings.title` 使用 Settings / 设置 / 設定。
-- Supabase section 使用 `settings.supabase.*` 结构，包含 `enableSync`、`url`、`secretKey`、`secretPlaceholder`、`intervalSeconds`。
+- Supabase section 使用 `settings.supabase.*` 结构，包含 `enableSync`、`url`、`secretKey`、`intervalSeconds`。
+- Secret key 已配置时输入框显示掩码值，编辑时切换为空白新 key 输入；不再使用 placeholder 表达“保留现有值”。
 - actions 只保留 `Test`、`Save` 和关闭相关文案；删除 `Save & Enable Sync` 文案。
 - 修改或新增 home namespace 中 `home.actions.sync` 文案，确保首页 Sync 入口可翻译。
 - UI 中不得出现 `service role key`、`role key`、`Configured` / `Not configured` 的 secret 状态文案。

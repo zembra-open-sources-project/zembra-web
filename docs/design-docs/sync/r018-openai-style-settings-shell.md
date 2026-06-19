@@ -107,7 +107,7 @@ Modal surface
 | 设置项 | 控件 | 行为 |
 | --- | --- | --- |
 | Supabase URL | 文本输入框 | 编辑候选 URL，Save 时保存。 |
-| Secret key | 密码输入框 | 留空保留现有 secret。 |
+| Secret key | 密码输入框 | 已配置时显示掩码值；编辑时输入新 key，空白保存不覆盖现有 secret。 |
 | Interval seconds | 数字输入框 | 保持非负整数校验。 |
 | Enable sync | switch | 切换时立即持久化，失败回滚。 |
 | Test | 按钮 | 调用 `testConfig`，不保存。 |
@@ -188,4 +188,3 @@ Modal surface
 | 首页 Settings 入口 | 点击首页设置按钮仍打开弹窗。 |
 | 首页其他功能 | 笔记列表、编辑器、手动同步入口不受影响。 |
 | API Client | 不修改 sync client 契约和 DTO 映射。 |
-

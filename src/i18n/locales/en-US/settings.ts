@@ -18,7 +18,6 @@ export const settings = {
     intervalSeconds: "Interval seconds",
     intervalSecondsError: "Interval seconds must be 0 or a positive integer",
     secretKey: "Secret key",
-    secretPlaceholder: "Keep existing",
     title: "Supabase",
     url: "Supabase URL",
   },

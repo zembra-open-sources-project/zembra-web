@@ -50,10 +50,18 @@ export function SupabaseSettingsSection({
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [isTogglingEnabled, setIsTogglingEnabled] = useState(false);
+  const [isSecretKeyEditing, setIsSecretKeyEditing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [successMessage, setSuccessMessage] = useState<string | undefined>();
   const [testResult, setTestResult] =
     useState<SyncConfigTestResultDto | undefined>();
+  const shouldShowConfiguredSecret =
+    Boolean(config?.serviceRoleKeyConfigured) &&
+    !isSecretKeyEditing &&
+    !formState.secretKey;
+  const secretKeyDisplayValue = shouldShowConfiguredSecret
+    ? "••••••••"
+    : formState.secretKey;
   const intervalValidation = useMemo(
     () =>
       validateIntervalSeconds(
@@ -81,6 +89,7 @@ export function SupabaseSettingsSection({
         setConfig(nextConfig);
         setFormState(createFormState(nextConfig));
         setSyncEnabled(nextConfig.enabled);
+        setIsSecretKeyEditing(false);
       } catch (error) {
         if (isMounted) {
           setErrorMessage(formatErrorMessage(error));
@@ -118,6 +127,7 @@ export function SupabaseSettingsSection({
       setConfig(nextConfig);
       setFormState(createFormState(nextConfig));
       setSyncEnabled(nextConfig.enabled);
+      setIsSecretKeyEditing(false);
       setSuccessMessage(t("success.settingsSaved"));
     } catch (error) {
       setErrorMessage(formatErrorMessage(error));
@@ -145,6 +155,7 @@ export function SupabaseSettingsSection({
       setConfig(nextConfig);
       setFormState(createFormState(nextConfig));
       setSyncEnabled(nextConfig.enabled);
+      setIsSecretKeyEditing(false);
       setSuccessMessage(t("success.settingsSaved"));
     } catch (error) {
       setSyncEnabled(previousEnabled);
@@ -226,15 +237,21 @@ export function SupabaseSettingsSection({
           <SettingsFieldRow label={t("supabase.secretKey")}>
             <input
               className={settingsLineInputClassName}
-              placeholder={t("supabase.secretPlaceholder")}
               type="password"
-              value={formState.secretKey}
-              onChange={(event) =>
+              value={secretKeyDisplayValue}
+              onBlur={() => {
+                if (!formState.secretKey) {
+                  setIsSecretKeyEditing(false);
+                }
+              }}
+              onChange={(event) => {
+                setIsSecretKeyEditing(true);
                 setFormState((current) => ({
                   ...current,
                   secretKey: event.target.value,
-                }))
-              }
+                }));
+              }}
+              onFocus={() => setIsSecretKeyEditing(true)}
             />
           </SettingsFieldRow>
 
