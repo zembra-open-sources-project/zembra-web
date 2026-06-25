@@ -1,5 +1,6 @@
 import {
   defaultBackendBaseUrl,
+  defaultWorkspaceId,
   getEffectiveBackendBaseUrl,
 } from "./backendConfig";
 import {
@@ -17,10 +18,40 @@ import {
   createSyncHttpClient,
   type SyncClient,
 } from "./sync.client";
+import { requestJson } from "./http";
+import type { ListWorkspacesResponse } from "./types";
 
 /** Resolves the API base URL from saved user config or Vite defaults. */
 const resolveDefaultApiBaseUrl = () =>
   getEffectiveBackendBaseUrl(defaultBackendBaseUrl);
+
+let cachedDefaultWorkspaceId: string | undefined;
+
+/** Resolves the default workspace scope used by note CRUD requests. */
+async function resolveDefaultWorkspaceId(): Promise<string> {
+  const configuredWorkspaceId = defaultWorkspaceId.trim();
+
+  if (configuredWorkspaceId) {
+    return configuredWorkspaceId;
+  }
+
+  if (cachedDefaultWorkspaceId) {
+    return cachedDefaultWorkspaceId;
+  }
+
+  const response = await requestJson<ListWorkspacesResponse>(
+    resolveDefaultApiBaseUrl(),
+    "/workspaces",
+  );
+  const workspaceId = response.workspaces[0]?.workspace_id;
+
+  if (!workspaceId) {
+    throw new Error("No workspace available for note API requests");
+  }
+
+  cachedDefaultWorkspaceId = workspaceId;
+  return workspaceId;
+}
 
 /** Creates the default notes client configured for the current Vite environment. */
 export function createDefaultNotesClient(): NotesClient {
@@ -28,7 +59,10 @@ export function createDefaultNotesClient(): NotesClient {
     return createMockNotesClient();
   }
 
-  return createNotesHttpClient({ baseUrl: resolveDefaultApiBaseUrl });
+  return createNotesHttpClient({
+    baseUrl: resolveDefaultApiBaseUrl,
+    workspaceId: resolveDefaultWorkspaceId,
+  });
 }
 
 /** Creates the default taxonomy client configured for the current Vite environment. */

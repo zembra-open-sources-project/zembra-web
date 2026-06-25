@@ -42,7 +42,12 @@
 | 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
 | `VITE_ZEMBRA_API_BASE_URL` | `http://127.0.0.1:3000` | 后端 API base URL |
+| `VITE_ZEMBRA_WORKSPACE_ID` | 未配置时读取 `/workspaces` 第一项 | 后端 note CRUD、recent、stats 和 note tags 请求要求的 `workspace_id` scope |
 
 ## 兼容策略
 
 当前列表接口只返回 `NoteRecord`，不包含标签 metadata。client 在获取列表后并发调用 `GET /notes/{note_ref}/tags` 补齐标签。创建接口返回 `NoteResponse`，可直接使用 `metadata.tags` 映射 UI 标签。
+
+## 2026-06-25 workspace scope 更新
+
+根据当前 `/api-docs/openapi.json`，`/notes`、`/notes/recent`、`/notes/stats/daily-counts`、`/notes/{note_ref}` 和 `/notes/{note_ref}/tags` 均要求 query 参数 `workspace_id`。推荐把 workspace id 作为 `createNotesHttpClient` 的必填配置传入，默认 client 优先从 `VITE_ZEMBRA_WORKSPACE_ID` 读取，未配置时调用 `/workspaces` 并缓存第一项；这样 UI 层继续只依赖 `NotesClient`，接口 scope 仍封装在 HTTP client 边界内。

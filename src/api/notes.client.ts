@@ -18,6 +18,9 @@ import type {
   UpdateNoteInput,
 } from "./types";
 
+/** Defines a workspace ID value or lazy resolver. */
+type WorkspaceIdSource = string | (() => string | Promise<string>);
+
 /** Defines the frontend note data access boundary. */
 export interface NotesClient {
   /** Lists recent notes ordered by update time for the home feed. */
@@ -40,22 +43,26 @@ export interface NotesClient {
 export interface NotesHttpClientOptions {
   /** Base URL for the Zembra backend API. */
   baseUrl: BackendBaseUrlSource;
+  /** Workspace UUID sent as the required note CRUD request scope. */
+  workspaceId: WorkspaceIdSource;
 }
 
 /** Creates a notes client backed by the Zembra OpenAPI HTTP server. */
 export function createNotesHttpClient(
   options: NotesHttpClientOptions,
 ): NotesClient {
-  const { baseUrl } = options;
+  const { baseUrl, workspaceId } = options;
 
   return {
     async listRecentNotes(query = {}) {
       const resolvedBaseUrl = resolveBackendBaseUrl(baseUrl);
+      const workspaceQuery = await createWorkspaceQuery(workspaceId);
       const response = await requestJson<ListNotesResponse>(
         resolvedBaseUrl,
         "/notes/recent",
         {
           method: "POST",
+          query: workspaceQuery,
           body: {
             limit: query.limit ?? 50,
             note_uuid: query.noteUuid,
@@ -65,7 +72,10 @@ export function createNotesHttpClient(
       );
       const notes = await Promise.all(
         response.notes.map(async (note) =>
-          mapNoteRecordToDto(note, await listTagNames(resolvedBaseUrl, note.id)),
+          mapNoteRecordToDto(
+            note,
+            await listTagNames(resolvedBaseUrl, workspaceId, note.id),
+          ),
         ),
       );
 
@@ -76,6 +86,9 @@ export function createNotesHttpClient(
       const response = await requestJson<DailyNoteCountsResponse>(
         resolvedBaseUrl,
         "/notes/stats/daily-counts",
+        {
+          query: await createWorkspaceQuery(workspaceId),
+        },
       );
 
       return response.days;
@@ -86,12 +99,15 @@ export function createNotesHttpClient(
         resolvedBaseUrl,
         "/notes",
         {
-          query: { limit: undefined },
+          query: await createWorkspaceQuery(workspaceId),
         },
       );
       const notes = await Promise.all(
         response.notes.map(async (note) =>
-          mapNoteRecordToDto(note, await listTagNames(resolvedBaseUrl, note.id)),
+          mapNoteRecordToDto(
+            note,
+            await listTagNames(resolvedBaseUrl, workspaceId, note.id),
+          ),
         ),
       );
 
@@ -102,6 +118,9 @@ export function createNotesHttpClient(
       const response = await requestJson<NoteResponse>(
         resolvedBaseUrl,
         `/notes/${encodeURIComponent(noteRef)}`,
+        {
+          query: await createWorkspaceQuery(workspaceId),
+        },
       );
       return mapNoteResponseToDto(response);
     },
@@ -112,6 +131,7 @@ export function createNotesHttpClient(
         "/notes",
         {
           method: "POST",
+          query: await createWorkspaceQuery(workspaceId),
           body: {
             content: input.content,
             device_id: input.deviceId,
@@ -132,6 +152,7 @@ export function createNotesHttpClient(
         `/notes/${encodeURIComponent(noteRef)}`,
         {
           method: "PATCH",
+          query: await createWorkspaceQuery(workspaceId),
           body: {
             content: input.content,
             device_id: input.deviceId,
@@ -153,6 +174,7 @@ export function createNotesHttpClient(
         `/notes/${encodeURIComponent(noteRef)}`,
         {
           method: "DELETE",
+          query: await createWorkspaceQuery(workspaceId),
         },
       );
     },
@@ -288,13 +310,31 @@ export function mapNoteRecordToDto(note: NoteRecord, tags: string[] = []): NoteD
 }
 
 /** Loads tag paths for a note from the backend. */
-async function listTagNames(baseUrl: string, noteRef: string): Promise<string[]> {
+async function listTagNames(
+  baseUrl: string,
+  workspaceId: WorkspaceIdSource,
+  noteRef: string,
+): Promise<string[]> {
   const response = await requestJson<ListNoteTagsResponse>(
     baseUrl,
     `/notes/${encodeURIComponent(noteRef)}/tags`,
+    {
+      query: await createWorkspaceQuery(workspaceId),
+    },
   );
 
   return response.tags.map((tag) => tag.path);
+}
+
+/** Creates the required backend workspace query scope for note endpoints. */
+async function createWorkspaceQuery(workspaceId: WorkspaceIdSource): Promise<{
+  /** Workspace UUID sent to the backend as `workspace_id`. */
+  workspace_id: string;
+}> {
+  return {
+    workspace_id:
+      typeof workspaceId === "function" ? await workspaceId() : workspaceId,
+  };
 }
 
 /** Applies UI-level keyword and tag filters to note DTOs. */

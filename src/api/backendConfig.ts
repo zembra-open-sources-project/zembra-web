@@ -11,6 +11,9 @@ export type BackendBaseUrlSource = string | BackendBaseUrlResolver;
 export const defaultBackendBaseUrl =
   import.meta.env.VITE_ZEMBRA_API_BASE_URL ?? "http://127.0.0.1:3000";
 
+/** Default workspace scope required by the backend note CRUD OpenAPI contract. */
+export const defaultWorkspaceId = import.meta.env.VITE_ZEMBRA_WORKSPACE_ID ?? "";
+
 /** Splits a backend service root URL into user-editable host and port fields. */
 export function parseBackendEndpoint(value: string): {
   /** Hostname or IP address used by the backend service. */

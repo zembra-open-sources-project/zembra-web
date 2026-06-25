@@ -20,6 +20,10 @@
 | 标签查询 | `GET /tags`、`GET /notes/{note_ref}/tags` |
 | 领域查询 | `GET /fields` |
 
+## 2026-06-25 补充澄清
+
+后端当前 OpenAPI 已将 note CRUD、recent、daily-counts 和 note tags 接口增加必填 query 参数 `workspace_id`，本次修改只适配新接口，不保留旧接口兼容逻辑。前端 HTTP 模式必须在 notes client 配置中持有 workspace id，并在所有 note 相关请求中传递该 scope；taxonomy 和 sync 接口按当前 OpenAPI 不增加 workspace 参数。
+
 ## 范围
 
 - 实现 Web 端 HTTP client，使用原生 `fetch`，不新增生产依赖。

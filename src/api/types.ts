@@ -240,6 +240,26 @@ export interface ListFieldsResponse {
   names: string[];
 }
 
+/** Represents one workspace summary returned by the backend workspace list API. */
+export interface WorkspaceSummary {
+  /** Full workspace identifier used as the note API request scope. */
+  workspace_id: string;
+  /** Optional user-facing workspace name. */
+  workspace_name?: string | null;
+  /** Short display hash derived from the workspace identifier. */
+  short_hash: string;
+  /** Count of visible notes in this workspace. */
+  visible_note_count: number;
+  /** Creation timestamp of the latest visible note, or null for empty workspaces. */
+  latest_note_created_at?: number | null;
+}
+
+/** Represents the backend workspace list response wrapper. */
+export interface ListWorkspacesResponse {
+  /** Workspace summaries ordered by the backend. */
+  workspaces: WorkspaceSummary[];
+}
+
 /** Represents synchronization configuration shown at the frontend boundary. */
 export interface SyncConfigDto {
   /** Whether background Supabase synchronization is enabled. */

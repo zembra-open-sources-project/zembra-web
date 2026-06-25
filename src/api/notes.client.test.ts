@@ -3,6 +3,7 @@ import { ApiError } from "./http";
 import { createNotesHttpClient, mapNoteResponseToDto } from "./notes.client";
 
 const originalFetch = globalThis.fetch;
+const workspaceId = "workspace-123";
 
 afterEach(() => {
   globalThis.fetch = originalFetch;
@@ -22,7 +23,7 @@ describe("createNotesHttpClient", () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
 
-      if (url.endsWith("/notes/recent")) {
+      if (url === `http://server.test/notes/recent?workspace_id=${workspaceId}`) {
         expect(init?.method).toBe("POST");
         expect(JSON.parse(String(init?.body))).toEqual({ limit: 50 });
 
@@ -54,7 +55,10 @@ describe("createNotesHttpClient", () => {
     });
     globalThis.fetch = fetchMock as typeof fetch;
 
-    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+    const client = createNotesHttpClient({
+      baseUrl: "http://server.test",
+      workspaceId,
+    });
 
     await expect(client.listRecentNotes()).resolves.toEqual([
       {
@@ -74,7 +78,7 @@ describe("createNotesHttpClient", () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
 
-      if (url.endsWith("/notes/recent")) {
+      if (url === `http://server.test/notes/recent?workspace_id=${workspaceId}`) {
         expect(init?.method).toBe("POST");
         expect(JSON.parse(String(init?.body))).toEqual({
           limit: 50,
@@ -99,7 +103,10 @@ describe("createNotesHttpClient", () => {
     });
     globalThis.fetch = fetchMock as typeof fetch;
 
-    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+    const client = createNotesHttpClient({
+      baseUrl: "http://server.test",
+      workspaceId,
+    });
 
     await expect(client.listRecentNotes({ role: "Agent" })).resolves.toEqual([
       {
@@ -115,7 +122,9 @@ describe("createNotesHttpClient", () => {
 
   test("lists daily note counts with the stats endpoint", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      expect(String(input)).toBe("http://server.test/notes/stats/daily-counts");
+      expect(String(input)).toBe(
+        `http://server.test/notes/stats/daily-counts?workspace_id=${workspaceId}`,
+      );
       expect(init?.method).toBe("GET");
 
       return jsonResponse({
@@ -127,7 +136,10 @@ describe("createNotesHttpClient", () => {
     });
     globalThis.fetch = fetchMock as typeof fetch;
 
-    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+    const client = createNotesHttpClient({
+      baseUrl: "http://server.test",
+      workspaceId,
+    });
 
     await expect(client.listDailyNoteCounts()).resolves.toEqual([
       { date: "2026-05-20", count: 2 },
@@ -135,11 +147,29 @@ describe("createNotesHttpClient", () => {
     ]);
   });
 
+  test("waits for an async workspace id resolver before sending requests", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      expect(String(input)).toBe(
+        `http://server.test/notes/stats/daily-counts?workspace_id=${workspaceId}`,
+      );
+
+      return jsonResponse({ days: [] });
+    });
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    const client = createNotesHttpClient({
+      baseUrl: "http://server.test",
+      workspaceId: async () => workspaceId,
+    });
+
+    await expect(client.listDailyNoteCounts()).resolves.toEqual([]);
+  });
+
   test("lists notes using backend records and note tag endpoints", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
 
-      if (url.endsWith("/notes")) {
+      if (url === `http://server.test/notes?workspace_id=${workspaceId}`) {
         return jsonResponse({
           notes: [
             {
@@ -153,6 +183,10 @@ describe("createNotesHttpClient", () => {
           ],
         });
       }
+
+      expect(url).toBe(
+        `http://server.test/notes/abc123/tags?workspace_id=${workspaceId}`,
+      );
 
       return jsonResponse({
         tags: [
@@ -169,7 +203,10 @@ describe("createNotesHttpClient", () => {
     });
     globalThis.fetch = fetchMock as typeof fetch;
 
-    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+    const client = createNotesHttpClient({
+      baseUrl: "http://server.test",
+      workspaceId,
+    });
 
     await expect(client.listNotes({ tag: "work/api" })).resolves.toEqual([
       {
@@ -186,7 +223,10 @@ describe("createNotesHttpClient", () => {
   });
 
   test("creates notes with the OpenAPI request body shape", async () => {
-    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe(
+        `http://server.test/notes?workspace_id=${workspaceId}`,
+      );
       expect(init?.method).toBe("POST");
       expect(JSON.parse(String(init?.body))).toEqual({
         content: "new note",
@@ -213,7 +253,10 @@ describe("createNotesHttpClient", () => {
     });
     globalThis.fetch = fetchMock as typeof fetch;
 
-    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+    const client = createNotesHttpClient({
+      baseUrl: "http://server.test",
+      workspaceId,
+    });
 
     await expect(
       client.createNote({ content: "new note", tags: ["api"] }),
@@ -224,7 +267,10 @@ describe("createNotesHttpClient", () => {
   });
 
   test("creates notes with parsed note links", async () => {
-    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe(
+        `http://server.test/notes?workspace_id=${workspaceId}`,
+      );
       expect(JSON.parse(String(init?.body))).toMatchObject({
         links: [
           {
@@ -258,7 +304,10 @@ describe("createNotesHttpClient", () => {
     });
     globalThis.fetch = fetchMock as typeof fetch;
 
-    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+    const client = createNotesHttpClient({
+      baseUrl: "http://server.test",
+      workspaceId,
+    });
 
     await expect(
       client.createNote({
@@ -288,7 +337,10 @@ describe("createNotesHttpClient", () => {
       ),
     ) as typeof fetch;
 
-    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+    const client = createNotesHttpClient({
+      baseUrl: "http://server.test",
+      workspaceId,
+    });
 
     await expect(client.createNote({ content: "" })).rejects.toMatchObject({
       name: "ApiError",
@@ -301,7 +353,7 @@ describe("createNotesHttpClient", () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
 
-      if (url.endsWith("/notes/abc123")) {
+      if (url === `http://server.test/notes/abc123?workspace_id=${workspaceId}`) {
         expect(init?.method).toBe("PATCH");
         expect(JSON.parse(String(init?.body))).toEqual({
           content: "edited note",
@@ -340,7 +392,10 @@ describe("createNotesHttpClient", () => {
     });
     globalThis.fetch = fetchMock as typeof fetch;
 
-    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+    const client = createNotesHttpClient({
+      baseUrl: "http://server.test",
+      workspaceId,
+    });
 
     await expect(
       client.updateNote("abc123", {
@@ -390,7 +445,10 @@ describe("createNotesHttpClient", () => {
     );
     globalThis.fetch = fetchMock as typeof fetch;
 
-    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+    const client = createNotesHttpClient({
+      baseUrl: "http://server.test",
+      workspaceId,
+    });
 
     await expect(client.getNote("abc123")).resolves.toEqual({
       id: "abc123",
@@ -438,11 +496,14 @@ describe("mapNoteResponseToDto", () => {
     const fetchMock = vi.fn(async () => new Response(null, { status: 204 }));
     globalThis.fetch = fetchMock as typeof fetch;
 
-    const client = createNotesHttpClient({ baseUrl: "http://server.test" });
+    const client = createNotesHttpClient({
+      baseUrl: "http://server.test",
+      workspaceId,
+    });
 
     await expect(client.deleteNote("abc123")).resolves.toBeUndefined();
     expect(fetchMock).toHaveBeenCalledWith(
-      new URL("http://server.test/notes/abc123"),
+      new URL(`http://server.test/notes/abc123?workspace_id=${workspaceId}`),
       expect.objectContaining({ method: "DELETE" }),
     );
   });
