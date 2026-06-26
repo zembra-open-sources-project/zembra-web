@@ -138,8 +138,8 @@ test("saves a reachable backend URL and selected workspace before rendering note
   );
 });
 
-/** Verifies that unnamed workspaces use the first eight ID characters. */
-test("shows an eight-character workspace hash when the workspace has no name", async () => {
+/** Verifies that workspace options separate hashes from note counts. */
+test("formats unnamed workspace options with hash and note count", async () => {
   vi.spyOn(console, "info").mockImplementation(() => undefined);
   vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
     if (String(input).endsWith("/health")) {
@@ -164,7 +164,9 @@ test("shows an eight-character workspace hash when the workspace has no name", a
 
   fireEvent.click(await screen.findByRole("button", { name: "加载 workspace" }));
 
-  expect(await screen.findByDisplayValue(/abcdef12/)).not.toBeNull();
+  expect(
+    await screen.findByDisplayValue("abcdef(note count: 4)"),
+  ).not.toBeNull();
 });
 
 /** Verifies that unreachable user-entered URLs keep the gate visible. */
