@@ -197,7 +197,7 @@
 
 ### Task #4: 浏览器手工回归和计划状态回写
 
-**Status:** Blocked
+**Status:** Finished
 
 **Files:** Modify `docs/exec-plans/active/home-ui/r019-live-markdown-editor.md`, Verify `http://localhost:5173/`
 
