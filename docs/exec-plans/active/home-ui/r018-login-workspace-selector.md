@@ -47,7 +47,7 @@
 
 ### 任务 #1: 扩展 BackendUrlGate 状态模型
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/app/BackendUrlGate.tsx`
 
@@ -59,7 +59,7 @@
 
 ### 任务 #2: 实现 workspace 下拉与刷新图标按钮
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/app/BackendUrlGate.tsx`
 
@@ -71,7 +71,7 @@
 
 ### 任务 #3: 保留底部提交按钮作为进入首页动作
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/app/BackendUrlGate.tsx`
 
@@ -83,7 +83,7 @@
 
 ### 任务 #4: 补充登录入口日志与错误提示
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/app/BackendUrlGate.tsx`
 
@@ -97,7 +97,7 @@
 
 ### 任务 #1: 补齐三语 i18n 文案
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/i18n/locales/zh-CN/common.ts`, Modify `src/i18n/locales/en-US/common.ts`, Modify `src/i18n/locales/zh-TW/common.ts`, Modify `src/i18n/resources.test.ts`
 
@@ -109,7 +109,7 @@
 
 ### 任务 #2: 覆盖 BackendUrlGate workspace 行为
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify/Create `src/app/App.test.tsx` 或 Create `src/app/BackendUrlGate.test.tsx`
 
@@ -121,7 +121,7 @@
 
 ### 任务 #3: 覆盖 API scope 回归
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/api/notes.client.test.ts`, Modify/Create `src/api/client.test.ts`
 
