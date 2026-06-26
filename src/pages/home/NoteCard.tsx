@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import type { FieldDto, NoteDto } from "../../api/types";
+import type { FieldDto, NoteDto, TagDto } from "../../api/types";
 import { NoteEditor } from "./NoteEditor";
 import { NoteMarkdownContent } from "./NoteMarkdownContent";
 import type { ComposerTool } from "./homeTypes";
@@ -38,6 +38,7 @@ export function NoteCard({
   onFieldChange,
   onLoadNotePreview,
   onMention,
+  tags,
   tools,
 }: {
   canStartEditing: boolean;
@@ -57,6 +58,7 @@ export function NoteCard({
   onFieldChange: (note: NoteDto, fieldName: string) => Promise<void>;
   onLoadNotePreview: (noteRef: string) => Promise<NoteDto>;
   onMention: (noteId: string) => void;
+  tags: TagDto[];
   tools: ComposerTool[];
 }) {
   const { t } = useTranslation("home");
@@ -245,6 +247,7 @@ export function NoteCard({
             isSubmitting={isUpdating}
             placeholder={t("composer.placeholder")}
             submitLabel={isUpdating ? t("note.edit.saving") : t("composer.send")}
+            tags={tags}
             tools={tools}
             variant="embedded"
             warning={editWarning}

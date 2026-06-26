@@ -494,6 +494,7 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
                   key={note.id}
                   locale={i18n.resolvedLanguage}
                   note={note}
+                  tags={tags}
                   tools={composerTools}
                 />
               ))}
@@ -527,6 +528,7 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
               })}
               placeholder={t("composer.placeholder")}
               submitLabel={t("composer.send")}
+              tags={tags}
               tools={composerTools}
               variant="floating"
               onDraftChange={setDraft}

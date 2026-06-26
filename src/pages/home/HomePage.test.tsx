@@ -17,6 +17,27 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+/** Returns the Markdown value exposed by the rich text editor DOM. */
+function markdownValue(editor: HTMLElement): string {
+  return editor.getAttribute("data-markdown-value") ?? editor.textContent ?? "";
+}
+
+/** Writes Markdown into the rich text editor through a synthetic input event. */
+function changeMarkdownEditor(editor: HTMLElement, value: string) {
+  editor.textContent = value;
+  fireEvent.input(editor);
+}
+
+/** Finds the composer rich text editor by its accessible placeholder label. */
+async function findComposerEditor(): Promise<HTMLElement> {
+  return screen.findByRole("textbox", { name: "现在的想法是..." });
+}
+
+/** Returns all composer-like rich text editors currently visible. */
+function getComposerEditors(): HTMLElement[] {
+  return screen.getAllByRole("textbox", { name: "现在的想法是..." });
+}
+
 /** Verifies that the sidebar activity heatmap renders daily note counts. */
 test("renders daily note count heatmap from store data", async () => {
   renderHomePage();
@@ -45,7 +66,7 @@ test("edits one note inline and warns when multiple fields are present", async (
   fireEvent.doubleClick(firstCard as HTMLElement);
 
   const editor = within(firstCard as HTMLElement).getByRole("textbox");
-  expect((editor as HTMLTextAreaElement).value).toContain("今天先把卡片笔记");
+  expect(markdownValue(editor)).toContain("今天先把卡片笔记");
 
   const secondNoteText = await screen.findByText(/数据库契约来自/);
   const secondCard = secondNoteText.closest("article");
@@ -54,9 +75,7 @@ test("edits one note inline and warns when multiple fields are present", async (
   fireEvent.doubleClick(secondCard as HTMLElement);
   expect(within(secondCard as HTMLElement).queryByRole("textbox")).toBeNull();
 
-  fireEvent.change(editor, {
-    target: { value: "@project @archive edited content #api #ui" },
-  });
+  changeMarkdownEditor(editor, "@project @archive edited content #api #ui");
 
   expect(
     await within(firstCard as HTMLElement).findByText(
@@ -658,8 +677,7 @@ test("mentions note links and previews linked note content", async () => {
     within(sourceCard as HTMLElement).getByRole("button", { name: "Mention" }),
   );
 
-  expect((screen.getByPlaceholderText("现在的想法是...") as HTMLTextAreaElement).value)
-    .toBe(`[[${sourceNoteId}]]`);
+  expect(markdownValue(await findComposerEditor())).toBe(`[[${sourceNoteId}]]`);
   expect(await within(sourceCard as HTMLElement).findByText("abcdef")).not.toBeNull();
   expect(within(sourceCard as HTMLElement).queryByText(targetNoteId)).toBeNull();
 
@@ -713,11 +731,10 @@ test("mentions note links into the active edit draft", async () => {
     within(targetCard as HTMLElement).getByRole("button", { name: "Mention" }),
   );
 
-  expect((within(editableCard as HTMLElement).getByRole("textbox") as HTMLTextAreaElement).value)
+  expect(markdownValue(within(editableCard as HTMLElement).getByRole("textbox")))
     .toBe("editable content [[bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb]]");
-  const noteEditors = screen.getAllByPlaceholderText("现在的想法是...");
-  expect((noteEditors[noteEditors.length - 1] as HTMLTextAreaElement).value)
-    .toBe("");
+  const noteEditors = getComposerEditors();
+  expect(markdownValue(noteEditors[noteEditors.length - 1])).toBe("");
 });
 
 /** Verifies create and edit submissions include parsed note links. */
@@ -746,10 +763,8 @@ test("submits parsed note links when creating and editing notes", async () => {
     });
   });
 
-  const composer = await screen.findByPlaceholderText("现在的想法是...");
-  fireEvent.change(composer, {
-    target: { value: `new [[${targetNoteId}]] #api` },
-  });
+  const composer = await findComposerEditor();
+  changeMarkdownEditor(composer, `new [[${targetNoteId}]] #api`);
   fireEvent.submit(composer.closest("form") as HTMLFormElement);
 
   await waitFor(() =>
@@ -773,9 +788,7 @@ test("submits parsed note links when creating and editing notes", async () => {
 
   fireEvent.doubleClick(editableCard as HTMLElement);
   const editor = within(editableCard as HTMLElement).getByRole("textbox");
-  fireEvent.change(editor, {
-    target: { value: `edited [[${targetNoteId}]]` },
-  });
+  changeMarkdownEditor(editor, `edited [[${targetNoteId}]]`);
   fireEvent.click(within(editableCard as HTMLElement).getByRole("button", { name: "发送" }));
 
   await waitFor(() =>
@@ -812,10 +825,8 @@ test("submits the first inline field when creating notes", async () => {
     });
   });
 
-  const composer = await screen.findByPlaceholderText("现在的想法是...");
-  fireEvent.change(composer, {
-    target: { value: "@alpha @beta field-driven note #topic" },
-  });
+  const composer = await findComposerEditor();
+  changeMarkdownEditor(composer, "@alpha @beta field-driven note #topic");
   fireEvent.submit(composer.closest("form") as HTMLFormElement);
 
   await waitFor(() =>
@@ -846,10 +857,8 @@ test("uses the selected field when creating notes without inline fields", async 
     });
   });
 
-  const composer = await screen.findByPlaceholderText("现在的想法是...");
-  fireEvent.change(composer, {
-    target: { value: "field fallback note #topic" },
-  });
+  const composer = await findComposerEditor();
+  changeMarkdownEditor(composer, "field fallback note #topic");
   fireEvent.submit(composer.closest("form") as HTMLFormElement);
 
   await waitFor(() =>
@@ -877,10 +886,8 @@ test("uses inbox when creating notes without inline or selected fields", async (
     });
   });
 
-  const composer = await screen.findByPlaceholderText("现在的想法是...");
-  fireEvent.change(composer, {
-    target: { value: "default field note #topic" },
-  });
+  const composer = await findComposerEditor();
+  changeMarkdownEditor(composer, "default field note #topic");
   fireEvent.submit(composer.closest("form") as HTMLFormElement);
 
   await waitFor(() =>

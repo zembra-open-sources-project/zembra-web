@@ -21,7 +21,7 @@
 
 ### Task #2: 确认成熟编辑器依赖组合和安装清单
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `package.json`, Modify `package-lock.json`, Verify `docs/references/dependency-constraints.md`
 
@@ -33,7 +33,7 @@
 
 ### Task #3: 建立编辑器测试入口和基础 mock
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Create `src/pages/home/liveMarkdownEditorUtils.test.ts`, Modify `src/pages/home/HomePage.test.tsx`, Verify existing test setup
 
@@ -47,7 +47,7 @@
 
 ### Task #1: 新增 LiveMarkdownEditor 核心组件
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Create `src/pages/home/LiveMarkdownEditor.tsx`, Modify `src/pages/home/NoteEditor.tsx`
 
@@ -59,7 +59,7 @@
 
 ### Task #2: 实现 Markdown 扩展集合
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/LiveMarkdownEditor.tsx`, Modify `src/styles/main.css`
 
@@ -71,7 +71,7 @@
 
 ### Task #3: 迁移工具栏插入行为
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/NoteEditor.tsx`, Modify `src/pages/home/LiveMarkdownEditor.tsx`, Verify `src/pages/home/homeTypes.ts`
 
@@ -85,7 +85,7 @@
 
 ### Task #1: 锁定普通多行文本回归测试
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/HomePage.test.tsx`, Modify `src/pages/home/liveMarkdownEditorUtils.test.ts`
 
@@ -97,7 +97,7 @@
 
 ### Task #2: 实现 serializer 换行保真规则
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/LiveMarkdownEditor.tsx`, Create/Modify `src/pages/home/liveMarkdownEditorUtils.ts`
 
@@ -109,7 +109,7 @@
 
 ### Task #3: 对齐展示态软换行显示
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/NoteMarkdownContent.tsx`, Modify `src/styles/main.css`, Modify `src/pages/home/HomePage.test.tsx`
 
@@ -123,7 +123,7 @@
 
 ### Task #1: 实现 tag 候选过滤纯函数
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Create `src/pages/home/liveMarkdownEditorUtils.ts`, Modify `src/pages/home/liveMarkdownEditorUtils.test.ts`
 
@@ -135,7 +135,7 @@
 
 ### Task #2: 实现编辑器内 tag chip 和 suggestion popup
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/LiveMarkdownEditor.tsx`, Modify `src/pages/home/NoteEditor.tsx`, Modify `src/pages/home/HomePage.tsx`, Modify `src/pages/home/NoteCard.tsx`, Modify `src/styles/main.css`
 
@@ -147,7 +147,7 @@
 
 ### Task #3: 补齐 tag suggestion i18n
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/i18n/locales/zh-CN/home.ts`, Modify `src/i18n/locales/zh-TW/home.ts`, Modify `src/i18n/locales/en-US/home.ts`, Verify `src/i18n/resources.test.ts`
 
@@ -161,7 +161,7 @@
 
 ### Task #1: 集成创建态和编辑态数据流
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/HomePage.tsx`, Modify `src/pages/home/NoteCard.tsx`, Modify `src/pages/home/NoteEditor.tsx`
 
@@ -173,7 +173,7 @@
 
 ### Task #2: 完成组件行为测试
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/HomePage.test.tsx`, Modify `src/pages/home/liveMarkdownEditorUtils.test.ts`
 
@@ -185,7 +185,7 @@
 
 ### Task #3: 运行自动化验证
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Verify `package.json`, Verify `package-lock.json`, Verify `src/pages/home/HomePage.test.tsx`, Verify `src/features/notes/noteStore.ts`
 
@@ -197,7 +197,7 @@
 
 ### Task #4: 浏览器手工回归和计划状态回写
 
-**Status:** Designed
+**Status:** Blocked
 
 **Files:** Modify `docs/exec-plans/active/home-ui/r019-live-markdown-editor.md`, Verify `http://localhost:5173/`
 
@@ -206,3 +206,5 @@
 **实现说明:** 启动或复用 Vite dev server，检查创建态和编辑态：列表、任务列表、引用、表格、代码、链接、普通多行、空行分段、tag suggestion、隐式创建 tag、提交后展示。每个 Stage 完成后按项目规则进行原子提交。未经用户验收，不移动到 `docs/exec-plans/completed/`，不更新 `docs/PROGRESS.md` 归档项。
 
 **预期验证结果:** 浏览器手工路径可用；计划状态准确；工作区不包含无关改动。
+
+**执行记录:** 已启动本地 Vite dev server，地址为 `http://127.0.0.1:5173/`。内置浏览器插件当前返回 `Browser is not available: iab`，`agent.browsers.list()` 为空，因此本轮无法完成浏览器手工回归。已完成 `npm run test -- src/pages/home/liveMarkdownEditorUtils.test.ts src/pages/home/HomePage.test.tsx`、`npm run test` 和 `npm run build`。

@@ -1,14 +1,12 @@
 import { SendHorizontal } from "lucide-react";
-import { KeyboardEvent, MouseEvent, useLayoutEffect, useRef } from "react";
+import { KeyboardEvent, MouseEvent, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import type { TagDto } from "../../api/types";
+import {
+  LiveMarkdownEditor,
+  type LiveMarkdownEditorHandle,
+} from "./LiveMarkdownEditor";
 import type { ComposerTool } from "./homeTypes";
-
-const TEXTAREA_MAX_VISIBLE_LINES = 5;
-const TEXTAREA_LINE_HEIGHT_PX = 24;
-const TEXTAREA_VERTICAL_PADDING_PX = 22;
-const TEXTAREA_MAX_HEIGHT_PX =
-  TEXTAREA_MAX_VISIBLE_LINES * TEXTAREA_LINE_HEIGHT_PX +
-  TEXTAREA_VERTICAL_PADDING_PX;
 
 /** Renders a reusable note text editor shared by creation and card editing. */
 export function NoteEditor({
@@ -19,6 +17,7 @@ export function NoteEditor({
   onDraftChange,
   placeholder,
   submitLabel,
+  tags,
   tools,
   variant,
   warning,
@@ -30,19 +29,16 @@ export function NoteEditor({
   onDraftChange: (draft: string) => void;
   placeholder: string;
   submitLabel: string;
+  tags: TagDto[];
   tools: ComposerTool[];
   variant: "floating" | "embedded";
   warning?: string;
 }) {
   const { t } = useTranslation("home");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useLayoutEffect(() => {
-    resizeTextareaToDraft(textareaRef.current);
-  }, [draft]);
+  const editorRef = useRef<LiveMarkdownEditorHandle>(null);
 
   /** Handles keyboard shortcuts scoped to this editor. */
-  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key === "Escape" && onCancel) {
       event.preventDefault();
       onCancel();
@@ -55,24 +51,7 @@ export function NoteEditor({
     tool: ComposerTool,
   ) {
     event.preventDefault();
-    const textarea = textareaRef.current;
-    const start = textarea?.selectionStart ?? draft.length;
-    const end = textarea?.selectionEnd ?? draft.length;
-    const selection = draft.slice(start, end);
-    const nextDraft = `${draft.slice(0, start)}${tool.before}${selection}${
-      tool.after ?? ""
-    }${draft.slice(end)}`;
-    const cursorPosition =
-      start +
-      (selection
-        ? tool.before.length + selection.length + (tool.after?.length ?? 0)
-        : tool.cursorOffset ?? tool.before.length);
-
-    onDraftChange(nextDraft);
-    window.requestAnimationFrame(() => {
-      textarea?.focus();
-      textarea?.setSelectionRange(cursorPosition, cursorPosition);
-    });
+    editorRef.current?.insertMarkdown(tool.before, tool.after);
   }
 
   return (
@@ -83,15 +62,16 @@ export function NoteEditor({
           ? "shadow-[var(--color-shadow-float)] backdrop-blur"
           : "shadow-[inset_0_0_0_1px_var(--color-border-subtle)]",
       ].join(" ")}
+      onKeyDown={handleKeyDown}
     >
-      <textarea
-        className="min-h-[54px] w-full resize-none overflow-y-auto bg-transparent px-[18px] pb-1.5 pt-4 text-base font-medium leading-6 text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
+      <LiveMarkdownEditor
+        disabled={isSubmitting}
         placeholder={placeholder}
-        ref={textareaRef}
-        rows={1}
         value={draft}
-        onChange={(event) => onDraftChange(event.target.value)}
-        onKeyDown={handleKeyDown}
+        tags={tags}
+        variant={variant}
+        ref={editorRef}
+        onChange={onDraftChange}
       />
       {warning ? (
         <div className="mx-4 mb-2 rounded-[9px] border border-[var(--color-warning-border)] bg-[var(--color-warning-soft)] px-3 py-2 text-sm text-[var(--color-warning)]">
@@ -142,17 +122,4 @@ export function NoteEditor({
       </div>
     </div>
   );
-}
-
-/** Resizes the editor textarea to fit the draft until the five-line cap is reached. */
-function resizeTextareaToDraft(textarea: HTMLTextAreaElement | null) {
-  if (!textarea) {
-    return;
-  }
-
-  textarea.style.height = "auto";
-  textarea.style.height = `${Math.min(
-    textarea.scrollHeight,
-    TEXTAREA_MAX_HEIGHT_PX,
-  )}px`;
 }

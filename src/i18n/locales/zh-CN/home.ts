@@ -11,6 +11,11 @@ export const home = {
     placeholder: "现在的想法是...",
     saveTo: "Default field for note is @{{field}}",
     send: "发送",
+    tagSuggestion: {
+      create: "创建 #{{tag}}",
+      empty: "没有匹配标签",
+      saveHint: "标签将在保存时创建",
+    },
     tools: {
       bold: "加粗",
       field: "插入 Field",

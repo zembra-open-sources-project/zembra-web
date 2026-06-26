@@ -1,6 +1,7 @@
 import type { Components } from "react-markdown";
 import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import { useTranslation } from "react-i18next";
+import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import { useRef, useState, type ReactNode } from "react";
 import type { NoteDto } from "../../api/types";
@@ -43,7 +44,7 @@ export function NoteMarkdownContent({
     <div className="note-markdown">
       <ReactMarkdown
         components={components}
-        remarkPlugins={[remarkGfm, remarkNoteLinks]}
+        remarkPlugins={[remarkGfm, remarkBreaks, remarkNoteLinks]}
         urlTransform={(url) =>
           url.startsWith(noteLinkUrlPrefix)
             ? url

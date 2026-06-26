@@ -11,6 +11,11 @@ export const home = {
     placeholder: "What are you thinking now?",
     saveTo: "Default field for note is @{{field}}",
     send: "Send",
+    tagSuggestion: {
+      create: "Create #{{tag}}",
+      empty: "No matching tags",
+      saveHint: "Tag will be created on save",
+    },
     tools: {
       bold: "Bold",
       field: "Insert Field",
