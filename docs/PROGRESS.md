@@ -17,3 +17,4 @@
 - R017 `bb7e229` 根据 `docs/exec-plans/active/home-ui/r017-note-card-markdown-rendering.md` 完成 NoteCard 展示态 GFM Markdown 渲染，采用成熟 renderer 保留 `[[note_ref]]` 双链预览、外链新窗口、HTML 转义、行内代码样式和 tag/field 去重，并恢复 Markdown 列表 marker。
 - R018 `41caa62` 根据 `docs/exec-plans/completed/home-ui/r018-login-workspace-selector.md` 完成登录入口 workspace 选择流程：复用现有 API 基础设施加载 `GET /workspaces`，持久化选中 workspace id，默认选择笔记最多 workspace，并将 note 请求 scope 改为环境变量或本地选择来源。
 - R019 `4965261` 完成首页 note card field 快速切换：将卡片头部 `@field` 改为当前 note 专属切换入口，点击后以覆盖正文的浮层展示 field 列表，选择后复用 note 更新接口只迁移当前 note 的 field，不改变 sidebar 筛选、搜索或其它全局导航状态，并补充行为测试覆盖。
+- R020 `62f3141` 调整首页 note editor 文本框高度行为：输入区随草稿内容自动增高，最多展示 5 行文本，超过后在文本框内部滚动，保持外层编辑器、工具栏和提交按钮布局职责不变，并通过测试与构建验证。
