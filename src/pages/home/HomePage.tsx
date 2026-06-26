@@ -254,6 +254,16 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
     }
   }
 
+  /** Persists a field-only change for one note without changing navigation filters. */
+  async function handleNoteFieldChange(note: NoteDto, field: string) {
+    await updateNote(note.id, {
+      content: note.content,
+      field,
+      links: parseNoteLinks(note.content),
+      tags: parseTagNames(note.content),
+    });
+  }
+
   /** Triggers a manual synchronization cycle from the home workspace. */
   async function handleManualSync() {
     setIsSyncing(true);
@@ -465,11 +475,13 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
                   canStartEditing={!editingNoteId || editingNoteId === note.id}
                   editDraft={editingNoteId === note.id ? editDraft : undefined}
                   editWarning={editingNoteId === note.id ? editWarning : undefined}
+                  fields={fields}
                   onDelete={deleteNote}
                   onEditCancel={handleEditCancel}
                   onEditDraftChange={setEditDraft}
                   onEditStart={handleEditStart}
                   onEditSubmit={handleEditSubmit}
+                  onFieldChange={handleNoteFieldChange}
                   onLoadNotePreview={loadNotePreview}
                   onMention={handleMentionNote}
                   fieldName={note.fieldId ? fieldNameById.get(note.fieldId) : undefined}

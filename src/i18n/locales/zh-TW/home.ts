@@ -38,6 +38,9 @@ export const home = {
     mention: "Mention",
     empty: "暫無最近筆記",
     expand: "展開",
+    fieldMenu: {
+      switch: "切換 Field：{{field}}",
+    },
     linkPreview: {
       label: "引用筆記 {{id}}",
       loading: "載入中",

@@ -1,4 +1,4 @@
-import { Bot, MoreHorizontal, User } from "lucide-react";
+import { Bot, Check, ChevronDown, MoreHorizontal, User } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import type { NoteDto } from "../../api/types";
+import type { FieldDto, NoteDto } from "../../api/types";
 import { NoteEditor } from "./NoteEditor";
 import { NoteMarkdownContent } from "./NoteMarkdownContent";
 import type { ComposerTool } from "./homeTypes";
@@ -24,6 +24,7 @@ export function NoteCard({
   canStartEditing,
   editDraft,
   editWarning,
+  fields,
   fieldName,
   isEditing,
   isUpdating,
@@ -34,6 +35,7 @@ export function NoteCard({
   onEditDraftChange,
   onEditStart,
   onEditSubmit,
+  onFieldChange,
   onLoadNotePreview,
   onMention,
   tools,
@@ -41,6 +43,7 @@ export function NoteCard({
   canStartEditing: boolean;
   editDraft?: string;
   editWarning?: string;
+  fields: FieldDto[];
   fieldName?: string;
   isEditing: boolean;
   isUpdating: boolean;
@@ -51,6 +54,7 @@ export function NoteCard({
   onEditDraftChange: (draft: string) => void;
   onEditStart: (note: NoteDto) => void;
   onEditSubmit: () => Promise<void>;
+  onFieldChange: (note: NoteDto, fieldName: string) => Promise<void>;
   onLoadNotePreview: (noteRef: string) => Promise<NoteDto>;
   onMention: (noteId: string) => void;
   tools: ComposerTool[];
@@ -59,6 +63,8 @@ export function NoteCard({
   const [expanded, setExpanded] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
+  const [isFieldMenuOpen, setIsFieldMenuOpen] = useState(false);
+  const [isFieldUpdating, setIsFieldUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const displayRole = note.role || t("sidebar.unknownRole");
   const displayContent = useMemo(
@@ -114,6 +120,22 @@ export function NoteCard({
     }
   }
 
+  /** Changes this note to the selected field and closes the metadata menu. */
+  async function handleFieldSelect(nextFieldName: string) {
+    if (nextFieldName === fieldName || isFieldUpdating) {
+      setIsFieldMenuOpen(false);
+      return;
+    }
+
+    setIsFieldUpdating(true);
+    try {
+      await onFieldChange(note, nextFieldName);
+      setIsFieldMenuOpen(false);
+    } finally {
+      setIsFieldUpdating(false);
+    }
+  }
+
   return (
     <article
       className="relative rounded-[18px] border border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-3 py-3"
@@ -123,7 +145,46 @@ export function NoteCard({
         <div className="min-w-0">
           {formatNoteTimestamp(note.updatedAt, locale)}
           {fieldName ? (
-            <span className="ml-1 font-bold text-[var(--color-text-secondary)]">@{fieldName}</span>
+            <span className="relative ml-1 inline-flex">
+              <button
+                aria-expanded={isFieldMenuOpen}
+                aria-label={t("note.fieldMenu.switch", { field: fieldName })}
+                className="inline-flex items-center gap-0.5 rounded-[6px] font-bold text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)] disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={isEditing || fields.length === 0 || isFieldUpdating}
+                onClick={() => setIsFieldMenuOpen((current) => !current)}
+                type="button"
+              >
+                @{fieldName}
+                <ChevronDown className="size-3" aria-hidden="true" />
+              </button>
+              {isFieldMenuOpen ? (
+                <div
+                  className="absolute left-0 top-6 z-40 min-w-36 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] py-1 shadow-[var(--color-shadow-float)]"
+                  role="menu"
+                >
+                  {fields.map((field) => {
+                    const selected = field.name === fieldName;
+
+                    return (
+                      <button
+                        aria-checked={selected}
+                        className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm font-semibold text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)] disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled={isFieldUpdating}
+                        key={field.id}
+                        onClick={() => void handleFieldSelect(field.name)}
+                        role="menuitemradio"
+                        type="button"
+                      >
+                        <span>@{field.name}</span>
+                        {selected ? (
+                          <Check className="size-4 text-[var(--color-accent)]" aria-hidden="true" />
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </span>
           ) : null}
         </div>
         <div className="flex shrink-0 items-start gap-1.5">

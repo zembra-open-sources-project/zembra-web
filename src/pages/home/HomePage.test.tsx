@@ -126,6 +126,60 @@ test("renders field metadata without repeating inline field markers", async () =
     .toBeNull();
 });
 
+/** Verifies card field menus update only the current note field. */
+test("switches a note field from the card metadata menu", async () => {
+  renderHomePage();
+
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
+
+  const updateNote = vi.fn(async () => undefined);
+
+  act(() => {
+    useNotesStore.setState({
+      fields: [
+        { id: "inbox-field", name: "inbox", createdAt: 1 },
+        { id: "project-field", name: "project", createdAt: 2 },
+      ],
+      notes: [
+        {
+          id: "field-note",
+          content: "field menu note #topic",
+          role: "Human",
+          fieldId: "inbox-field",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          tags: ["topic"],
+        },
+      ],
+      selectedField: "inbox-field",
+      updateNote,
+    });
+  });
+
+  const noteText = await screen.findByText("field menu note");
+  const noteCard = noteText.closest("article");
+  expect(noteCard).not.toBeNull();
+
+  fireEvent.click(
+    within(noteCard as HTMLElement).getByRole("button", { name: "切换 Field：inbox" }),
+  );
+  fireEvent.click(
+    within(noteCard as HTMLElement).getByRole("menuitemradio", { name: "@project" }),
+  );
+
+  await waitFor(() =>
+    expect(updateNote).toHaveBeenCalledWith(
+      "field-note",
+      expect.objectContaining({
+        content: "field menu note #topic",
+        field: "project",
+        tags: ["topic"],
+      }),
+    ),
+  );
+  expect(useNotesStore.getState().selectedField).toBe("inbox-field");
+});
+
 /** Verifies two-level tag chips render as raw paths without duplicate markers. */
 test("renders hierarchical tag chips as raw paths", async () => {
   renderHomePage();

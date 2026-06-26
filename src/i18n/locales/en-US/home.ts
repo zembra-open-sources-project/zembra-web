@@ -38,6 +38,9 @@ export const home = {
     mention: "Mention",
     empty: "No recent notes yet",
     expand: "Expand",
+    fieldMenu: {
+      switch: "Switch Field: {{field}}",
+    },
     linkPreview: {
       label: "Linked note {{id}}",
       loading: "Loading",

@@ -38,6 +38,9 @@ export const home = {
     mention: "Mention",
     empty: "暂无最近笔记",
     expand: "展开",
+    fieldMenu: {
+      switch: "切换 Field：{{field}}",
+    },
     linkPreview: {
       label: "引用笔记 {{id}}",
       loading: "加载中",
