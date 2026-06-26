@@ -147,7 +147,7 @@
 
 ### 任务 #2: 手工 UI 检查
 
-**Status:** Testing
+**Status:** Finished
 
 **Files:** Verify `http://localhost:5173/`
 
@@ -161,7 +161,7 @@
 
 ### 任务 #3: 更新计划状态并提交
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `docs/exec-plans/active/home-ui/r018-login-workspace-selector.md`
 
