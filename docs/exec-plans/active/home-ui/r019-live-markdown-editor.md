@@ -208,3 +208,5 @@
 **预期验证结果:** 浏览器手工路径可用；计划状态准确；工作区不包含无关改动。
 
 **执行记录:** 已启动本地 Vite dev server，地址为 `http://127.0.0.1:5173/`。内置浏览器插件当前返回 `Browser is not available: iab`，`agent.browsers.list()` 为空，因此本轮无法完成浏览器手工回归。已完成 `npm run test -- src/pages/home/liveMarkdownEditorUtils.test.ts src/pages/home/HomePage.test.tsx`、`npm run test` 和 `npm run build`。
+
+**验收阻塞修复记录:** 实际验收发现输入框在空内容和输入列表内容后高度出现跳变。根因是编辑器内部 paragraph、list 和 list item 的默认 block margin 共同参与输入区高度计算，空 paragraph 与单个列表 block 的高度基线不一致。修复为由 `.live-markdown-editor-content` 统一负责最小高度、滚动和内边距，单个编辑 block 不贡献上下 margin，仅多个相邻 block 之间增加间距，列表项内部 paragraph margin 归零。已完成 `npm run test -- src/pages/home/liveMarkdownEditorUtils.test.ts src/pages/home/HomePage.test.tsx`、`npm run test` 和 `npm run build`。

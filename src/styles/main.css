@@ -217,19 +217,6 @@ button[data-active="true"] {
   overflow-wrap: anywhere;
 }
 
-.live-markdown-editor-content .ProseMirror {
-  min-height: 2rem;
-  outline: none;
-}
-
-.live-markdown-editor-content .ProseMirror > :first-child {
-  margin-top: 0;
-}
-
-.live-markdown-editor-content .ProseMirror > :last-child {
-  margin-bottom: 0;
-}
-
 .live-markdown-editor-content p,
 .live-markdown-editor-content h1,
 .live-markdown-editor-content h2,
@@ -238,7 +225,11 @@ button[data-active="true"] {
 .live-markdown-editor-content pre,
 .live-markdown-editor-content ul,
 .live-markdown-editor-content ol {
-  margin: 0.35rem 0;
+  margin: 0;
+}
+
+.live-markdown-editor-content > * + * {
+  margin-top: 0.35rem;
 }
 
 .live-markdown-editor-content h1,
@@ -259,6 +250,15 @@ button[data-active="true"] {
 
 .live-markdown-editor-content ol {
   list-style-type: decimal;
+}
+
+.live-markdown-editor-content li {
+  margin: 0;
+  padding-left: 0.1rem;
+}
+
+.live-markdown-editor-content li > p {
+  margin: 0;
 }
 
 .live-markdown-editor-content blockquote {
