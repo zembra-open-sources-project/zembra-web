@@ -4,10 +4,14 @@ import {
   checkBackendReachability,
   createBackendHealthUrl,
   createBackendBaseUrl,
+  clearConfiguredWorkspaceId,
+  getConfiguredWorkspaceId,
   getConfiguredBackendBaseUrl,
   normalizeBackendBaseUrl,
   parseBackendEndpoint,
   setConfiguredBackendBaseUrl,
+  setConfiguredWorkspaceId,
+  workspaceIdStorageKey,
 } from "./backendConfig";
 
 const originalFetch = globalThis.fetch;
@@ -40,6 +44,19 @@ describe("backend config", () => {
       "http://127.0.0.1:3000",
     );
     expect(getConfiguredBackendBaseUrl()).toBe("http://127.0.0.1:3000");
+  });
+
+  test("stores trimmed workspace IDs separately from backend URLs", () => {
+    setConfiguredWorkspaceId(" workspace-123 ");
+
+    expect(window.localStorage.getItem(workspaceIdStorageKey)).toBe(
+      "workspace-123",
+    );
+    expect(getConfiguredWorkspaceId()).toBe("workspace-123");
+
+    clearConfiguredWorkspaceId();
+
+    expect(getConfiguredWorkspaceId()).toBeUndefined();
   });
 
   test("creates health URLs from backend service root URLs", () => {

@@ -1,6 +1,9 @@
 /** Local storage key used to persist the configured backend API base URL. */
 export const backendBaseUrlStorageKey = "zembra.backendBaseUrl";
 
+/** Local storage key used to persist the selected workspace ID. */
+export const workspaceIdStorageKey = "zembra.workspaceId";
+
 /** Function that resolves the current backend API base URL. */
 export type BackendBaseUrlResolver = () => string;
 
@@ -61,6 +64,22 @@ export function setConfiguredBackendBaseUrl(baseUrl: string): void {
 /** Removes the configured backend API base URL from browser storage. */
 export function clearConfiguredBackendBaseUrl(): void {
   window.localStorage.removeItem(backendBaseUrlStorageKey);
+}
+
+/** Reads the configured workspace ID from browser storage. */
+export function getConfiguredWorkspaceId(): string | undefined {
+  const value = window.localStorage.getItem(workspaceIdStorageKey)?.trim();
+  return value ? value : undefined;
+}
+
+/** Saves the configured workspace ID to browser storage. */
+export function setConfiguredWorkspaceId(workspaceId: string): void {
+  window.localStorage.setItem(workspaceIdStorageKey, workspaceId.trim());
+}
+
+/** Removes the configured workspace ID from browser storage. */
+export function clearConfiguredWorkspaceId(): void {
+  window.localStorage.removeItem(workspaceIdStorageKey);
 }
 
 /** Resolves a string or lazy base URL source into a concrete URL. */

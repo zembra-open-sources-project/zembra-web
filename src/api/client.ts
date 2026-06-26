@@ -1,6 +1,7 @@
 import {
   defaultBackendBaseUrl,
   defaultWorkspaceId,
+  getConfiguredWorkspaceId,
   getEffectiveBackendBaseUrl,
 } from "./backendConfig";
 import {
@@ -25,32 +26,29 @@ import type { ListWorkspacesResponse } from "./types";
 const resolveDefaultApiBaseUrl = () =>
   getEffectiveBackendBaseUrl(defaultBackendBaseUrl);
 
-let cachedDefaultWorkspaceId: string | undefined;
-
 /** Resolves the default workspace scope used by note CRUD requests. */
-async function resolveDefaultWorkspaceId(): Promise<string> {
+export async function resolveDefaultWorkspaceId(): Promise<string> {
   const configuredWorkspaceId = defaultWorkspaceId.trim();
 
   if (configuredWorkspaceId) {
     return configuredWorkspaceId;
   }
 
-  if (cachedDefaultWorkspaceId) {
-    return cachedDefaultWorkspaceId;
-  }
+  const savedWorkspaceId = getConfiguredWorkspaceId();
 
-  const response = await requestJson<ListWorkspacesResponse>(
-    resolveDefaultApiBaseUrl(),
-    "/workspaces",
-  );
-  const workspaceId = response.workspaces[0]?.workspace_id;
-
-  if (!workspaceId) {
+  if (!savedWorkspaceId) {
     throw new Error("No workspace available for note API requests");
   }
 
-  cachedDefaultWorkspaceId = workspaceId;
-  return workspaceId;
+  return savedWorkspaceId;
+}
+
+/** Loads workspace summaries from the currently configured backend API. */
+export async function listWorkspaces(): Promise<ListWorkspacesResponse> {
+  return requestJson<ListWorkspacesResponse>(
+    resolveDefaultApiBaseUrl(),
+    "/workspaces",
+  );
 }
 
 /** Creates the default notes client configured for the current Vite environment. */

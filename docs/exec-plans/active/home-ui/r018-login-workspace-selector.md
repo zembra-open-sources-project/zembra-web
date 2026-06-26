@@ -9,7 +9,7 @@
 
 ### 任务 #1: 增加 workspace 本地配置 helper
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/api/backendConfig.ts`, Modify/Create `src/api/backendConfig.test.ts`
 
@@ -21,7 +21,7 @@
 
 ### 任务 #2: 增加轻量 workspace 列表读取函数
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/api/client.ts`, Modify/Create `src/api/client.test.ts`
 
@@ -33,7 +33,7 @@
 
 ### 任务 #3: 调整默认 notes client workspace scope
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/api/client.ts`, Modify `src/api/notes.client.test.ts`
 
