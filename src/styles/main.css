@@ -206,7 +206,7 @@ button[data-active="true"] {
 
 .live-markdown-editor-content {
   max-height: 142px;
-  min-height: 54px;
+  min-height: 70px;
   overflow-y: auto;
   padding: 0.9rem 1.125rem 0.45rem;
   color: var(--color-text-primary);

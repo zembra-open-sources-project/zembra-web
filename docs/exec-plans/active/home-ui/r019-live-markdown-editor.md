@@ -210,3 +210,5 @@
 **执行记录:** 已启动本地 Vite dev server，地址为 `http://127.0.0.1:5173/`。内置浏览器插件当前返回 `Browser is not available: iab`，`agent.browsers.list()` 为空，因此本轮无法完成浏览器手工回归。已完成 `npm run test -- src/pages/home/liveMarkdownEditorUtils.test.ts src/pages/home/HomePage.test.tsx`、`npm run test` 和 `npm run build`。
 
 **验收阻塞修复记录:** 实际验收发现输入框在空内容和输入列表内容后高度出现跳变。根因是编辑器内部 paragraph、list 和 list item 的默认 block margin 共同参与输入区高度计算，空 paragraph 与单个列表 block 的高度基线不一致。修复为由 `.live-markdown-editor-content` 统一负责最小高度、滚动和内边距，单个编辑 block 不贡献上下 margin，仅多个相邻 block 之间增加间距，列表项内部 paragraph margin 归零。已完成 `npm run test -- src/pages/home/liveMarkdownEditorUtils.test.ts src/pages/home/HomePage.test.tsx`、`npm run test` 和 `npm run build`。
+
+**二次验收阻塞修复记录:** 复测确认空输入框和输入 `- ` 后高度仍不一致。真实浏览器测量显示根因是 `StarterKit` 默认启用 `TrailingNode`，输入 `- ` 后文档包含一个空列表和一个额外 trailing 空段落，导致输入区从一个 24px 行盒变成两个 24px 行盒。已关闭 `trailingNode`，并按验收反馈将空输入框最小高度提升到 `70px`。Headless Chrome 复测结果为空状态 `70px`，输入 `- ` 后 `70px`，高度差为 `0`。

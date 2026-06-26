@@ -67,6 +67,7 @@ export const LiveMarkdownEditor = forwardRef<
         codeBlock: {},
         hardBreak: {},
         link: false,
+        trailingNode: false,
       }),
       Link.configure({
         autolink: true,
