@@ -41,6 +41,7 @@ import {
   parseFieldNames,
   parseNoteLinks,
   parseTagNames,
+  sortNotesByCreatedAt,
 } from "./homeUtils";
 
 interface HomePageProps {
@@ -98,12 +99,15 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
     [selectedTag, tagTree],
   );
   const visibleNotes = useMemo(
-    () => filterVisibleNotes(notes, {
-      fieldId: selectedField,
-      keyword,
-      tag: selectedTag,
-      tagMatch: selectedTagMatch,
-    }),
+    () =>
+      sortNotesByCreatedAt(
+        filterVisibleNotes(notes, {
+          fieldId: selectedField,
+          keyword,
+          tag: selectedTag,
+          tagMatch: selectedTagMatch,
+        }),
+      ),
     [keyword, notes, selectedField, selectedTag, selectedTagMatch],
   );
   const fieldUsage = useMemo(() => countFields(notes), [notes]);

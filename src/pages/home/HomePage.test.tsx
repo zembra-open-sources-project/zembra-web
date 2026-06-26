@@ -6,6 +6,7 @@ import { i18next } from "../../i18n";
 import { useNotesStore } from "../../features/notes/noteStore";
 import { ThemeProvider } from "../../app/ThemeProvider";
 import { HomePage } from "./HomePage";
+import { formatNoteTimestamp } from "./homeUtils";
 
 beforeEach(async () => {
   await i18next.changeLanguage("zh-CN");
@@ -178,6 +179,87 @@ test("switches a note field from the card metadata menu", async () => {
     ),
   );
   expect(useNotesStore.getState().selectedField).toBe("inbox-field");
+});
+
+/** Verifies note cards show creation time instead of update time. */
+test("renders note metadata with creation time", async () => {
+  renderHomePage();
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
+
+  const createdAt = 1_779_382_320;
+  const updatedAt = createdAt + 86_400;
+
+  act(() => {
+    useNotesStore.setState({
+      fields: [
+        { id: "field-alpha", name: "alpha", createdAt: 1 },
+      ],
+      notes: [
+        {
+          id: "created-time-note",
+          content: "creation timestamp note",
+          role: "Human",
+          fieldId: "field-alpha",
+          createdAt,
+          updatedAt,
+          tags: [],
+        },
+      ],
+    });
+  });
+
+  const noteText = await screen.findByText("creation timestamp note");
+  const noteCard = noteText.closest("article");
+  expect(noteCard).not.toBeNull();
+
+  expect(
+    within(noteCard as HTMLElement).getByText(
+      new RegExp(formatNoteTimestamp(createdAt)),
+    ),
+  ).not.toBeNull();
+  expect(
+    within(noteCard as HTMLElement).queryByText(
+      new RegExp(formatNoteTimestamp(updatedAt)),
+    ),
+  ).toBeNull();
+});
+
+/** Verifies the home feed is ordered by note creation time. */
+test("orders the note feed by creation time", async () => {
+  renderHomePage();
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
+
+  act(() => {
+    useNotesStore.setState({
+      notes: [
+        {
+          id: "older-note",
+          content: "older created note",
+          role: "Human",
+          createdAt: 10,
+          updatedAt: 100,
+          tags: [],
+        },
+        {
+          id: "newer-note",
+          content: "newer created note",
+          role: "Human",
+          createdAt: 20,
+          updatedAt: 20,
+          tags: [],
+        },
+      ],
+    });
+  });
+
+  const olderNote = await screen.findByText("older created note");
+  const newerNote = await screen.findByText("newer created note");
+
+  expect(
+    (newerNote.closest("article") as HTMLElement).compareDocumentPosition(
+      olderNote.closest("article") as HTMLElement,
+    ) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
 });
 
 /** Verifies two-level tag chips render as raw paths without duplicate markers. */

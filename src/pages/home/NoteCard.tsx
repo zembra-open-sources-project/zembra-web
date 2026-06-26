@@ -143,7 +143,7 @@ export function NoteCard({
     >
       <div className="mb-[3px] flex items-start justify-between gap-3 text-[13px] text-[var(--color-text-muted)]">
         <div className="min-w-0">
-          {formatNoteTimestamp(note.updatedAt, locale)}
+          {formatNoteTimestamp(note.createdAt, locale)}
           {fieldName ? (
             <span className="relative ml-1 inline-flex">
               <button

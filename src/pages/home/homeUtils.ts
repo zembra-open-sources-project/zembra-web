@@ -36,6 +36,19 @@ export function filterVisibleNotes(
   });
 }
 
+/** Sorts notes by creation time descending for the home message flow. */
+export function sortNotesByCreatedAt(notes: NoteDto[]): NoteDto[] {
+  return [...notes].sort((left, right) => {
+    const createdAtDelta = right.createdAt - left.createdAt;
+
+    if (createdAtDelta !== 0) {
+      return createdAtDelta;
+    }
+
+    return right.id.localeCompare(left.id);
+  });
+}
+
 /** Counts tag usage in recent notes for the sidebar tag navigation. */
 export function countTags(notes: NoteDto[]): Map<string, number> {
   const counts = new Map<string, number>();
