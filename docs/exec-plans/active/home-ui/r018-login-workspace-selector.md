@@ -135,7 +135,7 @@
 
 ### 任务 #1: 运行自动化验证
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Verify `package.json`, Verify `src/app/BackendUrlGate.tsx`, Verify `src/api/client.ts`
 
@@ -147,7 +147,7 @@
 
 ### 任务 #2: 手工 UI 检查
 
-**Status:** Designed
+**Status:** Testing
 
 **Files:** Verify `http://localhost:5173/`
 
@@ -156,6 +156,8 @@
 **实现说明:** 启动或复用 Vite dev server。检查未连接后端、workspace 已加载、下拉展开、空 workspace 四个状态。重点检查 Backend label、Workspace label、Backend 输入、Workspace 下拉、Workspace 右侧图标按钮、底部提交按钮都存在；Backend 行没有图标按钮；Backend 输入组合和 Workspace 主框视觉宽度一致；长 workspace 名不挤掉 note count。
 
 **预期验证结果:** UI 和设计文档一致；没有控件缺失、重叠、错位或误导性动作。
+
+**执行记录:** 2026-06-26：`npm run dev -- --host 127.0.0.1` 已启动成功并提供 `http://127.0.0.1:5173/`，但当前 Codex 内置浏览器不可用，`agent.browsers.list()` 返回空列表，因此本轮未完成浏览器手工 UI 检查。已停止 dev server。
 
 ### 任务 #3: 更新计划状态并提交
 
