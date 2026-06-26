@@ -40,7 +40,7 @@
 | tag 选单触发 | 单独输入 `#` 不弹出；输入至少一个 tag 字符后才弹出。 |
 | tag 匹配 | 同时匹配完整 path 和当前层级 name。 |
 | 无匹配项 | 显示“创建 #xxx”。 |
-| 创建 tag | 选择“创建 #xxx”时调用独立 tag 创建接口，不等 note 提交时隐式创建。 |
+| 创建 tag | 选择“创建 #xxx”时只将 `#xxx` 写入编辑器内容，真正创建在 note create/update 提交时通过现有 `tags` payload 隐式完成。 |
 | 键盘交互 | 用户未要求，不作为本轮需求边界。 |
 
 ## 联网调研结论
@@ -54,11 +54,11 @@
 | 模块 | 当前状态 | 本需求影响 |
 | --- | --- | --- |
 | `src/pages/home/NoteEditor.tsx` | 原生 `textarea`，通过 toolbar 插入 Markdown 片段 | 需要替换为成熟编辑器库封装的实时 Markdown 编辑器。 |
-| `src/pages/home/HomePage.tsx` | 创建态持有 `draft` 字符串，提交时解析 field、tag 和 note link | 继续持有纯字符串，但需要传入 tags、创建 tag 回调和编辑器配置。 |
+| `src/pages/home/HomePage.tsx` | 创建态持有 `draft` 字符串，提交时解析 field、tag 和 note link | 继续持有纯字符串，并把现有 tags 传给编辑器用于候选匹配。 |
 | `src/pages/home/NoteCard.tsx` | 编辑态复用 `NoteEditor`，展示态使用 `NoteMarkdownContent` | 编辑态同样切换到新编辑器；展示态保留现有 renderer。 |
 | `src/pages/home/NoteMarkdownContent.tsx` | 展示态 GFM renderer，保留双链 preview | 可复用展示样式经验，但不能当作编辑器实现。 |
 | `src/pages/home/homeUtils.ts` | 提供 `parseTagNames()`、`parseFieldNames()`、`parseNoteLinks()` 等字符串解析 | 保存链路继续复用这些函数，保证输出契约不变。 |
-| `src/api/taxonomy.client.ts` | 只支持 `listTags()` 和 `listFields()` | 需要新增独立创建 tag 的 API client，但实现前必须用实时 OpenAPI 核实接口路径、请求体和 workspace scope。 |
+| `src/api/taxonomy.client.ts` | 只支持 `listTags()` 和 `listFields()` | 不需要新增创建 tag client；tag 创建继续由 note create/update 的 `tags` payload 在后端隐式完成。 |
 | `docs/references/dependency-constraints.md` | 条件允许 Tiptap 或同类富文本编辑器依赖 | 本需求已经确认富文本需求，允许进入依赖设计。 |
 
 ## 范围确认
@@ -72,11 +72,11 @@
 | 完整 GFM 编辑态渲染 | 标题、段落、强调、删除线、无序列表、有序列表、任务列表、引用、分割线、链接、行内代码、代码块和表格都需要在编辑态实时显示。 |
 | tag chip | `#tag` 和 `#root/child` 在文本内部显示为 chip。 |
 | tag suggestion | 输入至少一个 tag 字符后弹出候选，候选同时匹配完整 path 和当前层级 name。 |
-| 创建 tag 候选 | 无匹配时显示“创建 #xxx”，选中后调用独立 tag 创建接口。 |
+| 创建 tag 候选 | 无匹配时显示“创建 #xxx”，选中后把 `#xxx` 写入编辑器内容，提交 note 时由现有 tags payload 隐式创建。 |
 | 纯字符串输出 | 编辑器对外输出 Markdown 字符串，保存时继续使用现有解析函数生成 tags、field 和 links。 |
 | 换行保真 | 普通换行、空行分段、列表项换行、引用内换行和代码块内换行必须在编辑态、Markdown 字符串输出和保存后展示态之间保持一致。 |
 | 成熟库引入 | 选择成熟编辑器库，优先考虑 Tiptap，必要时比较 Milkdown 或 Lexical。 |
-| 自动化测试 | 覆盖编辑态 Markdown 语义渲染、字符串输出、tag suggestion、创建 tag 调用和提交 payload。 |
+| 自动化测试 | 覆盖编辑态 Markdown 语义渲染、字符串输出、tag suggestion、隐式创建 tag 的提交 payload。 |
 
 ### Out of Scope
 
@@ -101,7 +101,7 @@
 | A4 | 输入 `#` 不弹出 tag 选单；输入 `#h` 后弹出候选。 |
 | A5 | 候选同时匹配完整 path 和当前层级 name，例如 `hands-on-gpt` 可匹配 `books/hands-on-gpt`。 |
 | A6 | 无匹配时显示“创建 #xxx”。 |
-| A7 | 选择“创建 #xxx”时调用独立 tag 创建接口，成功后当前 token 替换为新 tag chip，并刷新或合并本地 tag 列表。 |
+| A7 | 选择“创建 #xxx”时当前 token 替换为新 tag chip，最终 Markdown 字符串包含 `#xxx`，提交 note 时 payload 的 `tags` 包含 `xxx`。 |
 | A8 | 选择已有 tag 时，当前 token 替换为对应完整 path 的 tag chip，最终 Markdown 字符串包含对应 `#path`。 |
 | A9 | 创建和编辑提交仍调用现有 note create/update 链路，并通过字符串解析得到 tags、field 和 links。 |
 | A10 | 实现不包含自研核心 Markdown 编辑器、手写 Markdown parser 或 `textarea + preview` 降级方案。 |

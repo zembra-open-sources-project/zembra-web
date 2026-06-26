@@ -7,17 +7,17 @@
 
 ## Stage #1: 契约、依赖和测试夹具预检
 
-### Task #1: 核实实时 OpenAPI 中的独立 tag 创建契约
+### Task #1: 核实 tag 创建改为 note 提交隐式创建
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Verify `src/api/taxonomy.client.ts`, Verify `src/api/types.ts`, Verify live OpenAPI endpoint
 
-**功能:** 在实现前确认独立 tag 创建接口的路径、方法、请求体、响应体和 `workspace_id` scope。
+**功能:** 确认当前实现不需要独立 tag 创建接口，tag 创建通过 note create/update 的 `tags` payload 隐式完成。
 
-**实现说明:** 按项目 API 契约规范读取实时 OpenAPI 或后端文档，禁止凭经验假设 `POST /tags`。如果 OpenAPI 不存在独立 tag 创建接口，停止实现并反馈契约缺失，因为 r019 已确认“创建 #xxx”必须调用独立接口。记录确认到的路径、请求字段、响应字段和错误形态，后续 `TaxonomyClient` 只能按该契约实现。
+**实现说明:** 已读取实时 OpenAPI，当前后端没有独立 tag 创建接口。用户已确认改为 note 提交隐式创建，因此不新增 `taxonomyClient.createTag()`，不猜测 `POST /tags`。编辑器创建项只把 `#xxx` 写入 Markdown 字符串，提交时继续由 `parseTagNames(content)` 生成 `tags` payload，后端在 note create/update 中创建或关联 tag。
 
-**预期验证结果:** 明确可实现的 tag 创建 HTTP 契约；或者确认后端缺少接口并停止进入编码。
+**预期验证结果:** Stage #1 不再被缺失的独立 tag 创建接口阻塞；后续实现只验证 note create/update payload 中包含新 tag path。
 
 ### Task #2: 确认成熟编辑器依赖组合和安装清单
 
@@ -53,7 +53,7 @@
 
 **功能:** 用成熟编辑器库承载实时 Markdown 编辑体验，并保持 `NoteEditor` 对外 props 语义稳定。
 
-**实现说明:** `LiveMarkdownEditor` 接收 `value: string`、`onChange: (value: string) => void`、`tags`、`onCreateTag` 等必要 props。内部初始化成熟编辑器 document model，加载外部 Markdown 字符串，并在内容变化时通过官方 Markdown serializer 输出纯字符串。`NoteEditor` 保留提交按钮、取消按钮、warning、meta 和 toolbar 容器职责，把原有 `textarea` 替换为 `LiveMarkdownEditor`。避免在 `HomePage` 中持有编辑器 document model。
+**实现说明:** `LiveMarkdownEditor` 接收 `value: string`、`onChange: (value: string) => void`、`tags` 等必要 props。内部初始化成熟编辑器 document model，加载外部 Markdown 字符串，并在内容变化时通过官方 Markdown serializer 输出纯字符串。`NoteEditor` 保留提交按钮、取消按钮、warning、meta 和 toolbar 容器职责，把原有 `textarea` 替换为 `LiveMarkdownEditor`。避免在 `HomePage` 中持有编辑器 document model。
 
 **预期验证结果:** 创建态和编辑态仍能输入并回写 `draft` / `editDraft` 字符串；提交按钮禁用规则继续基于字符串 `trim()`；没有引入第二份页面级内容状态。
 
@@ -119,7 +119,7 @@
 
 **预期验证结果:** 保存后的普通多行 note 在 NoteCard 中可见为换行或独立段落；列表、引用和代码块仍保持语义化结构。
 
-## Stage #4: Tag chip、suggestion 和独立创建
+## Stage #4: Tag chip、suggestion 和隐式创建
 
 ### Task #1: 实现 tag 候选过滤纯函数
 
@@ -133,19 +133,7 @@
 
 **预期验证结果:** 过滤测试覆盖 path 匹配、name 匹配、无匹配创建项、单独 `#` 不弹出。
 
-### Task #2: 新增 taxonomy 创建 tag client 和 store action
-
-**Status:** Designed
-
-**Files:** Modify `src/api/types.ts`, Modify `src/api/taxonomy.client.ts`, Modify `src/api/taxonomy.client.test.ts`, Modify `src/features/notes/noteStore.ts`
-
-**功能:** 接入独立 tag 创建接口，并让新 tag 合并进当前 tags 列表。
-
-**实现说明:** 严格按 Stage #1 确认的 OpenAPI 契约实现。`TaxonomyClient` 新增创建 tag 方法并映射返回 `TagDto`。`noteStore` 暴露创建 tag action，成功后把新 tag 合并进 `tags`，避免丢失已有列表；如后端返回完整 tag 列表则按契约处理。错误向调用方抛出，由编辑器 suggestion 显示失败状态。
-
-**预期验证结果:** API 测试断言路径、query、请求体和响应映射正确；store 测试断言新 tag 合并且已有 tag 保留。
-
-### Task #3: 实现编辑器内 tag chip 和 suggestion popup
+### Task #2: 实现编辑器内 tag chip 和 suggestion popup
 
 **Status:** Designed
 
@@ -153,19 +141,19 @@
 
 **功能:** 在编辑器内部把 `#path` 渲染为 chip，并在输入 `#query` 时展示候选或创建项。
 
-**实现说明:** 使用成熟库 Mention/Suggestion 或等价官方扩展机制，触发字符为 `#`。选择已有 tag 后替换当前 token 为完整 `#path` chip；选择创建项时调用 store action，成功后插入新 tag chip并更新列表；失败时保留当前 token 并显示错误。serializer 必须把 tag chip 输出为可被 `parseTagNames()` 解析的 `#path`，不能输出隐藏 id、HTML span 或不可解析格式。
+**实现说明:** 使用成熟库 Mention/Suggestion 或等价官方扩展机制，触发字符为 `#`。选择已有 tag 后替换当前 token 为完整 `#path` chip；选择创建项时插入 `#query` chip，不调用独立 API。serializer 必须把 tag chip 输出为可被 `parseTagNames()` 解析的 `#path`，不能输出隐藏 id、HTML span 或不可解析格式。
 
-**预期验证结果:** 输入 `#h` 出现候选；选择 `books/hands-on-gpt` 后编辑器显示 chip，字符串包含 `#books/hands-on-gpt`；无匹配创建成功后插入新 chip；创建失败不丢草稿。
+**预期验证结果:** 输入 `#h` 出现候选；选择 `books/hands-on-gpt` 后编辑器显示 chip，字符串包含 `#books/hands-on-gpt`；无匹配选择创建项后字符串包含 `#query`，提交 payload 的 `tags` 包含 `query`。
 
-### Task #4: 补齐 tag suggestion i18n
+### Task #3: 补齐 tag suggestion i18n
 
 **Status:** Designed
 
 **Files:** Modify `src/i18n/locales/zh-CN/home.ts`, Modify `src/i18n/locales/zh-TW/home.ts`, Modify `src/i18n/locales/en-US/home.ts`, Verify `src/i18n/resources.test.ts`
 
-**功能:** 增加创建项、空状态和创建失败文案。
+**功能:** 增加创建项、空状态和保存提示文案。
 
-**实现说明:** 增加 `composer.tagSuggestion.create`、`composer.tagSuggestion.empty`、`composer.tagSuggestion.error`，如实现需要 suggestion list 或 tag chip 的 aria label，同步补齐三语言。用户 note content、tag path、field name 不翻译。
+**实现说明:** 增加 `composer.tagSuggestion.create`、`composer.tagSuggestion.empty` 和必要的保存时创建提示；如实现需要 suggestion list 或 tag chip 的 aria label，同步补齐三语言。用户 note content、tag path、field name 不翻译。
 
 **预期验证结果:** i18n 资源完整性测试通过；UI 中不出现裸英文临时文案。
 
@@ -177,7 +165,7 @@
 
 **Files:** Modify `src/pages/home/HomePage.tsx`, Modify `src/pages/home/NoteCard.tsx`, Modify `src/pages/home/NoteEditor.tsx`
 
-**功能:** 将 tags、创建 tag 回调和编辑器状态接入创建 composer 与 note card 编辑态。
+**功能:** 将 tags 和编辑器状态接入创建 composer 与 note card 编辑态。
 
 **实现说明:** `HomePage` 继续持有 `draft` 和 `editDraft` 字符串，不持有编辑器 document model。创建提交和编辑提交继续调用 `parseFieldNames()`、`parseTagNames()`、`parseNoteLinks()`。`NoteCard` 编辑态只通过 props 接收字符串和变更回调，展示态继续使用 `NoteMarkdownContent`，双链 preview 不受影响。
 
@@ -191,7 +179,7 @@
 
 **功能:** 覆盖 r019 验收标准的用户可观察行为。
 
-**实现说明:** 测试覆盖列表、任务列表、引用、代码、表格、链接、tag suggestion、创建 tag、换行保真和提交 payload。避免断言编辑器库内部 class 或 DOM 细节；只断言语义结构、可访问文本、请求体和字符串输出。对异步 suggestion 和创建 tag 使用 Testing Library 的 async 查询。
+**实现说明:** 测试覆盖列表、任务列表、引用、代码、表格、链接、tag suggestion、隐式创建 tag、换行保真和提交 payload。避免断言编辑器库内部 class 或 DOM 细节；只断言语义结构、可访问文本、请求体和字符串输出。对异步 suggestion 使用 Testing Library 的 async 查询。
 
 **预期验证结果:** 定向 HomePage 和工具函数测试通过，能证明不是局部 tag 或列表的缩水实现。
 
@@ -199,11 +187,11 @@
 
 **Status:** Designed
 
-**Files:** Verify `package.json`, Verify `package-lock.json`, Verify `src/pages/home/HomePage.test.tsx`, Verify `src/api/taxonomy.client.test.ts`, Verify `src/features/notes/noteStore.ts`
+**Files:** Verify `package.json`, Verify `package-lock.json`, Verify `src/pages/home/HomePage.test.tsx`, Verify `src/features/notes/noteStore.ts`
 
 **功能:** 确认测试、类型检查和生产构建通过。
 
-**实现说明:** 至少运行 `npm run test -- src/pages/home/HomePage.test.tsx src/pages/home/liveMarkdownEditorUtils.test.ts src/api/taxonomy.client.test.ts`，再运行 `npm run test` 和 `npm run build`。如新增依赖需要安装，先完成 `npm install` 并提交 lockfile。若测试环境缺少编辑器所需 DOM API，应增加最小 test setup，而不是跳过核心测试。
+**实现说明:** 至少运行 `npm run test -- src/pages/home/HomePage.test.tsx src/pages/home/liveMarkdownEditorUtils.test.ts`，再运行 `npm run test` 和 `npm run build`。如新增依赖需要安装，先完成 `npm install` 并提交 lockfile。若测试环境缺少编辑器所需 DOM API，应增加最小 test setup，而不是跳过核心测试。
 
 **预期验证结果:** 定向测试、全量测试和 build 全部通过。
 
@@ -215,6 +203,6 @@
 
 **功能:** 在真实页面确认 r019 编辑器体验，并按执行结果更新计划状态。
 
-**实现说明:** 启动或复用 Vite dev server，检查创建态和编辑态：列表、任务列表、引用、表格、代码、链接、普通多行、空行分段、tag suggestion、创建 tag、提交后展示。每个 Stage 完成后按项目规则进行原子提交。未经用户验收，不移动到 `docs/exec-plans/completed/`，不更新 `docs/PROGRESS.md` 归档项。
+**实现说明:** 启动或复用 Vite dev server，检查创建态和编辑态：列表、任务列表、引用、表格、代码、链接、普通多行、空行分段、tag suggestion、隐式创建 tag、提交后展示。每个 Stage 完成后按项目规则进行原子提交。未经用户验收，不移动到 `docs/exec-plans/completed/`，不更新 `docs/PROGRESS.md` 归档项。
 
 **预期验证结果:** 浏览器手工路径可用；计划状态准确；工作区不包含无关改动。
