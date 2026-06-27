@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ThemeToggle } from "../../app/ThemeToggle";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { syncClient as defaultSyncClient } from "../../api/client";
 import { ApiError } from "../../api/http";
 import type { SyncClient } from "../../api/sync.client";
@@ -20,7 +20,7 @@ import { useNotesStore } from "../../features/notes/noteStore";
 import type { FieldDto, NoteDto } from "../../api/types";
 import { SettingsModule } from "../settings/SettingsModule";
 import { NoteCard } from "./NoteCard";
-import { NoteEditor } from "./NoteEditor";
+import { NoteEditor, type NoteEditorHandle } from "./NoteEditor";
 import {
   DailyNotesHeatmap,
   NavItem,
@@ -52,6 +52,7 @@ interface HomePageProps {
 /** Renders the redesigned Zembra note workspace shell. */
 export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
   const { i18n, t } = useTranslation("home");
+  const composerRef = useRef<NoteEditorHandle>(null);
   const [draft, setDraft] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState<string>();
@@ -182,6 +183,7 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
         tags,
       });
       setDraft("");
+      composerRef.current?.clear();
     } finally {
       setIsSubmitting(false);
     }
@@ -582,6 +584,7 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
         >
           <div className="min-w-0 lg:col-start-2">
             <NoteEditor
+              ref={composerRef}
               draft={draft}
               isSubmitting={isSubmitting}
               meta={t("composer.saveTo", {

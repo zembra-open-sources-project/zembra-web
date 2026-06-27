@@ -1,5 +1,11 @@
 import { SendHorizontal } from "lucide-react";
-import { KeyboardEvent, MouseEvent, useRef } from "react";
+import {
+  forwardRef,
+  KeyboardEvent,
+  MouseEvent,
+  useImperativeHandle,
+  useRef,
+} from "react";
 import { useTranslation } from "react-i18next";
 import type { TagDto } from "../../api/types";
 import {
@@ -8,20 +14,15 @@ import {
 } from "./LiveMarkdownEditor";
 import type { ComposerTool } from "./homeTypes";
 
+export interface NoteEditorHandle {
+  /** Clears the visible editor content after a successful submission. */
+  clear: () => void;
+}
+
 /** Renders a reusable note text editor shared by creation and card editing. */
-export function NoteEditor({
-  draft,
-  isSubmitting,
-  meta,
-  onCancel,
-  onDraftChange,
-  placeholder,
-  submitLabel,
-  tags,
-  tools,
-  variant,
-  warning,
-}: {
+export const NoteEditor = forwardRef<
+  NoteEditorHandle,
+  {
   draft: string;
   isSubmitting: boolean;
   meta?: string;
@@ -33,9 +34,35 @@ export function NoteEditor({
   tools: ComposerTool[];
   variant: "floating" | "embedded";
   warning?: string;
-}) {
+  }
+>(function NoteEditor(
+  {
+    draft,
+    isSubmitting,
+    meta,
+    onCancel,
+    onDraftChange,
+    placeholder,
+    submitLabel,
+    tags,
+    tools,
+    variant,
+    warning,
+  },
+  ref,
+) {
   const { t } = useTranslation("home");
   const editorRef = useRef<LiveMarkdownEditorHandle>(null);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      clear() {
+        editorRef.current?.clear();
+      },
+    }),
+    [],
+  );
 
   /** Handles keyboard shortcuts scoped to this editor. */
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -122,4 +149,4 @@ export function NoteEditor({
       </div>
     </div>
   );
-}
+});

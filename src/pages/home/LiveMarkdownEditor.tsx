@@ -34,6 +34,8 @@ import {
 export interface LiveMarkdownEditorHandle {
   /** Applies a composer toolbar tool to the current editor selection. */
   applyTool: (tool: ComposerTool) => void;
+  /** Clears the editor document and mirrored Markdown DOM value. */
+  clear: () => void;
 }
 
 /** Renders a Tiptap-backed Markdown editor with inline tag chips. */
@@ -167,9 +169,27 @@ export const LiveMarkdownEditor = forwardRef<
       applyTool(tool: ComposerTool) {
         applyComposerTool(tool);
       },
+      clear() {
+        clearEditorContent();
+      },
     }),
     [editor],
   );
+
+  /** Clears visible editor content after a successful composer submission. */
+  function clearEditorContent() {
+    if (!editor) {
+      return;
+    }
+
+    editor.commands.setContent("", {
+      contentType: "markdown",
+      emitUpdate: false,
+    });
+    editor.view.dom.textContent = "";
+    editor.view.dom.setAttribute("data-markdown-value", "");
+    setTagMenu(undefined);
+  }
 
   /** Applies a composer toolbar tool through the matching editor command. */
   function applyComposerTool(tool: ComposerTool) {

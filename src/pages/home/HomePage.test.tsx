@@ -927,6 +927,26 @@ test("submits parsed note links when creating and editing notes", async () => {
   );
 });
 
+/** Verifies the composer clears its visible editor content after creating a note. */
+test("clears the composer editor after creating a note", async () => {
+  renderHomePage();
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
+
+  const createNote = vi.fn(async () => undefined);
+
+  act(() => {
+    useNotesStore.setState({ createNote });
+  });
+
+  const composer = await findComposerEditor();
+  changeMarkdownEditor(composer, "note to clear after send");
+  fireEvent.submit(composer.closest("form") as HTMLFormElement);
+
+  await waitFor(() => expect(createNote).toHaveBeenCalled());
+  await waitFor(() => expect(markdownValue(composer)).toBe(""));
+  expect(composer.textContent).not.toContain("note to clear after send");
+});
+
 /** Verifies create submissions prefer inline fields before sidebar defaults. */
 test("submits the first inline field when creating notes", async () => {
   renderHomePage();
