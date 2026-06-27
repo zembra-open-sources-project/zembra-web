@@ -23,6 +23,18 @@ export const home = {
       tag: "插入標籤",
     },
   },
+  field: {
+    delete: {
+      action: "刪除 Field @{{field}}",
+      cancel: "取消",
+      confirm: "刪除",
+      deleting: "刪除中",
+      description: "確認刪除 @{{field}}？此操作只允許用於沒有筆記的 Field。",
+      errorGeneric: "刪除 Field 失敗",
+      errorInUse: "該 Field 仍有筆記，不能刪除",
+      title: "刪除 Field",
+    },
+  },
   heatmap: {
     ariaLabel: "最近30天筆記熱力圖",
     dayLabel: "{{date}}：{{count}} 則筆記",

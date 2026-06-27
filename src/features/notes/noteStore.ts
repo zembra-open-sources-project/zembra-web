@@ -48,6 +48,8 @@ interface NotesState {
   updateNote: (noteRef: string, input: UpdateNoteInput) => Promise<void>;
   /** Deletes a note and removes it from the recent feed. */
   deleteNote: (noteRef: string) => Promise<void>;
+  /** Deletes an unused field and refreshes field navigation state. */
+  deleteField: (fieldId: string) => Promise<void>;
   /** Loads a note for link preview without changing the recent feed. */
   loadNotePreview: (noteRef: string) => Promise<NoteDto>;
   /** Loads fields from the active taxonomy client. */
@@ -156,6 +158,16 @@ export const useNotesStore = create<NotesState>((set, get) => ({
       roleNavigationNotes: state.roleNavigationNotes.filter(
         (note) => note.id !== noteRef,
       ),
+    }));
+  },
+  deleteField: async (fieldId) => {
+    await taxonomyClient.deleteField(fieldId);
+    const fields = await taxonomyClient.listFields();
+
+    set((state) => ({
+      fields,
+      selectedField:
+        state.selectedField === fieldId ? undefined : state.selectedField,
     }));
   },
   loadNotePreview: async (noteRef) => {

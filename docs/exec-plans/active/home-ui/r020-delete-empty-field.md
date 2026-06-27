@@ -9,7 +9,7 @@
 
 ### 任务 #1: 扩展 taxonomy 删除 API
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/api/types.ts`, Modify `src/api/taxonomy.client.ts`, Modify `src/api/client.ts`, Modify `src/api/taxonomy.client.test.ts`
 
@@ -19,9 +19,11 @@
 
 **预期验证结果:** `src/api/taxonomy.client.test.ts` 覆盖成功请求 URL、method 和 body；错误响应沿用 `requestJson` 抛出 `ApiError`。运行定向 API 测试通过。
 
+**执行记录:** 已新增 `DeleteFieldRequest`、`DeleteFieldResponse`、`TaxonomyClient.deleteField()` 和 HTTP 实现，默认 taxonomy client 复用 `resolveDefaultWorkspaceId()` 作为 workspace scope。定向测试通过。
+
 ### 任务 #2: 扩展 note store field 删除 action
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/features/notes/noteStore.ts`, Verify `src/pages/home/HomePage.test.tsx`
 
@@ -31,11 +33,13 @@
 
 **预期验证结果:** 通过 Home 集成测试或 store 级断言证明删除当前 selected field 后切回 All，删除失败不改变本地 field 状态。
 
+**执行记录:** 已新增 `useNotesStore.deleteField()`，成功后刷新 fields，并在当前 field 被删除时将 `selectedField` 置为 `undefined`。失败时错误向页面抛出，不修改本地状态。
+
 ## Stage #2: Fields 侧栏删除交互
 
 ### 任务 #1: 为 NavItem 增加可选删除 slot
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/HomeSidebar.tsx`, Modify `src/pages/home/HomePage.test.tsx`
 
@@ -45,9 +49,11 @@
 
 **预期验证结果:** UI 测试覆盖 count 为 0 的 field 存在删除按钮，count 大于 0 的 field 不存在删除按钮；点击删除按钮不触发 field 筛选。
 
+**执行记录:** 已为 `NavItem` 增加可选删除 slot，使用 `Trash2` 图标和现有 error token。为避免嵌套 button，`NavItem` 外层改为布局容器，导航点击和删除点击拆成独立按钮。
+
 ### 任务 #2: 实现应用内确认弹层和页面状态
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `src/pages/home/HomePage.tsx`, Modify `src/i18n/locales/zh-CN/home.ts`, Modify `src/i18n/locales/zh-TW/home.ts`, Modify `src/i18n/locales/en-US/home.ts`, Modify `src/i18n/resources.test.ts`, Modify `src/pages/home/HomePage.test.tsx`
 
@@ -57,11 +63,13 @@
 
 **预期验证结果:** Home UI 测试覆盖打开弹层、取消不调用删除、确认成功后 field 消失且 All 选中、失败时弹层保留并显示错误文案。i18n 资源完整性测试通过。
 
+**执行记录:** 已在 `HomePage` 增加应用内确认弹层、删除中状态、取消路径、409 错误反馈和三语言文案。测试覆盖取消不调用、成功后 field 消失并切 All、失败时弹层保留并显示错误。
+
 ## Stage #3: 验证、计划回写和提交
 
 ### 任务 #1: 运行定向和全量验证
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Verify `src/api/taxonomy.client.test.ts`, Verify `src/pages/home/HomePage.test.tsx`, Verify `src/i18n/resources.test.ts`, Verify `src/features/notes/noteStore.ts`, Verify `src/pages/home/HomeSidebar.tsx`
 
@@ -71,9 +79,11 @@
 
 **预期验证结果:** 定向测试、全量测试和 build 通过；没有新增依赖；工作区只包含 r020 相关代码和文档改动。
 
+**执行记录:** Homebrew Node 仍受 `libllhttp.9.3.dylib` 缺失影响，本轮使用 bundled Node 执行等价入口。`./node_modules/vitest/vitest.mjs run src/api/taxonomy.client.test.ts src/pages/home/HomePage.test.tsx src/i18n/resources.test.ts` 通过 34 个测试，`./node_modules/vitest/vitest.mjs run` 通过 114 个测试，`./node_modules/typescript/bin/tsc -b` 通过，`./node_modules/vite/bin/vite.js build` 通过。
+
 ### 任务 #2: 更新计划状态并提交
 
-**Status:** Designed
+**Status:** Finished
 
 **Files:** Modify `docs/exec-plans/active/home-ui/r020-delete-empty-field.md`, Verify git status
 

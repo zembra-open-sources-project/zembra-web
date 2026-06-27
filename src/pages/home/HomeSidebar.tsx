@@ -1,5 +1,5 @@
-import { CalendarDays, ChevronDown, ChevronRight } from "lucide-react";
-import { ReactNode } from "react";
+import { CalendarDays, ChevronDown, ChevronRight, Trash2 } from "lucide-react";
+import { MouseEvent, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { DailyNoteCount } from "../../api/types";
 import type { TagTreeNode } from "./homeUtils";
@@ -104,32 +104,71 @@ export function SidebarSection({
 export function NavItem({
   active,
   count,
+  deleteDisabled = false,
+  deleteLabel,
   disabled = false,
   label,
   onClick,
+  onDelete,
   prefix,
 }: {
   active: boolean;
   count: number;
+  deleteDisabled?: boolean;
+  deleteLabel?: string;
   disabled?: boolean;
   label: string;
   onClick: () => void;
+  onDelete?: () => void;
   prefix: ReactNode;
 }) {
+  const canDelete = Boolean(onDelete && deleteLabel);
+
+  /** Runs the optional delete action without selecting the navigation row. */
+  function handleDeleteClick(event: MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    onDelete?.();
+  }
+
   return (
-    <button
-      className="grid min-h-9 grid-cols-[24px_1fr_auto] items-center gap-2.5 rounded-[9px] px-3 py-2 text-left text-[15px] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted)] disabled:cursor-default disabled:opacity-45 disabled:hover:bg-transparent data-[active=true]:bg-[var(--color-accent-soft)] data-[active=true]:text-[var(--color-text-primary)] data-[active=true]:shadow-[inset_0_0_0_1px_var(--color-border-strong)]"
+    <div
+      className="group/nav grid min-h-9 grid-cols-[24px_1fr_28px] items-center gap-2.5 rounded-[9px] px-3 py-2 text-left text-[15px] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted)] data-[active=true]:bg-[var(--color-accent-soft)] data-[active=true]:text-[var(--color-text-primary)] data-[active=true]:shadow-[inset_0_0_0_1px_var(--color-border-strong)] data-[disabled=true]:opacity-45 data-[disabled=true]:hover:bg-transparent"
       data-active={active}
-      disabled={disabled}
-      type="button"
-      onClick={onClick}
+      data-disabled={disabled}
     >
-      <span className="flex min-w-0 items-center justify-center text-center text-lg font-bold leading-none text-[var(--color-accent)]">
-        {prefix}
+      <button
+        className="col-span-2 grid min-w-0 grid-cols-[24px_1fr] items-center gap-2.5 text-left disabled:cursor-default"
+        disabled={disabled}
+        type="button"
+        onClick={onClick}
+      >
+        <span className="flex min-w-0 items-center justify-center text-center text-lg font-bold leading-none text-[var(--color-accent)]">
+          {prefix}
+        </span>
+        <span className="min-w-0 truncate">{label}</span>
+      </button>
+      <span className="flex min-w-0 items-center justify-end">
+        {canDelete ? (
+          <>
+            <span className="text-xs text-[var(--color-text-muted)] group-hover/nav:hidden group-focus-within/nav:hidden">
+              {count}
+            </span>
+            <button
+              aria-label={deleteLabel}
+              className="hidden size-6 items-center justify-center rounded-[7px] text-[var(--color-error)] hover:bg-[var(--color-error-soft)] disabled:cursor-not-allowed disabled:opacity-60 group-hover/nav:flex group-focus-within/nav:flex"
+              disabled={deleteDisabled}
+              type="button"
+              onClick={handleDeleteClick}
+            >
+              <Trash2 className="size-3.5" aria-hidden="true" />
+            </button>
+          </>
+        ) : (
+          <span className="text-xs text-[var(--color-text-muted)]">{count}</span>
+        )}
       </span>
-      <span className="min-w-0 truncate">{label}</span>
-      <span className="text-xs text-[var(--color-text-muted)]">{count}</span>
-    </button>
+    </div>
   );
 }
 

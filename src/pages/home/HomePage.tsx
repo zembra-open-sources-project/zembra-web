@@ -17,7 +17,7 @@ import { syncClient as defaultSyncClient } from "../../api/client";
 import { ApiError } from "../../api/http";
 import type { SyncClient } from "../../api/sync.client";
 import { useNotesStore } from "../../features/notes/noteStore";
-import type { NoteDto } from "../../api/types";
+import type { FieldDto, NoteDto } from "../../api/types";
 import { SettingsModule } from "../settings/SettingsModule";
 import { NoteCard } from "./NoteCard";
 import { NoteEditor } from "./NoteEditor";
@@ -60,6 +60,9 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncFeedback, setSyncFeedback] = useState<string | undefined>();
   const [syncError, setSyncError] = useState<string | undefined>();
+  const [pendingDeleteField, setPendingDeleteField] = useState<FieldDto>();
+  const [isFieldDeleting, setIsFieldDeleting] = useState(false);
+  const [fieldDeleteError, setFieldDeleteError] = useState<string | undefined>();
   const {
     notes,
     roleNavigationNotes,
@@ -81,6 +84,7 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
     loadRecentNotes,
     loadTags,
     deleteNote,
+    deleteField,
     updateNote,
   } = useNotesStore();
 
@@ -268,6 +272,54 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
     });
   }
 
+  /** Opens the in-app confirmation dialog for deleting an unused field. */
+  function handleFieldDeleteRequest(field: FieldDto) {
+    setPendingDeleteField(field);
+    setFieldDeleteError(undefined);
+  }
+
+  /** Closes the field deletion dialog when no deletion request is running. */
+  function handleFieldDeleteCancel() {
+    if (isFieldDeleting) {
+      return;
+    }
+
+    setPendingDeleteField(undefined);
+    setFieldDeleteError(undefined);
+  }
+
+  /** Confirms deletion of the pending unused field. */
+  async function handleFieldDeleteConfirm() {
+    if (!pendingDeleteField) {
+      return;
+    }
+
+    setIsFieldDeleting(true);
+    setFieldDeleteError(undefined);
+    console.info("[zembra] Deleting unused field", {
+      fieldId: pendingDeleteField.id,
+      fieldName: pendingDeleteField.name,
+    });
+
+    try {
+      await deleteField(pendingDeleteField.id);
+      console.info("[zembra] Deleted unused field", {
+        fieldId: pendingDeleteField.id,
+        fieldName: pendingDeleteField.name,
+      });
+      setPendingDeleteField(undefined);
+    } catch (error) {
+      console.warn("[zembra] Failed to delete unused field", {
+        error,
+        fieldId: pendingDeleteField.id,
+        fieldName: pendingDeleteField.name,
+      });
+      setFieldDeleteError(formatFieldDeleteError(error, t));
+    } finally {
+      setIsFieldDeleting(false);
+    }
+  }
+
   /** Triggers a manual synchronization cycle from the home workspace. */
   async function handleManualSync() {
     setIsSyncing(true);
@@ -400,9 +452,20 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
                 <NavItem
                   active={selectedField === field.id}
                   count={fieldUsage.get(field.id) ?? 0}
+                  deleteDisabled={isFieldDeleting}
+                  deleteLabel={
+                    (fieldUsage.get(field.id) ?? 0) === 0
+                      ? t("field.delete.action", { field: field.name })
+                      : undefined
+                  }
                   key={field.id}
                   label={field.name}
                   prefix="@"
+                  onDelete={
+                    (fieldUsage.get(field.id) ?? 0) === 0
+                      ? () => handleFieldDeleteRequest(field)
+                      : undefined
+                  }
                   onClick={() => setSelectedField(field.id)}
                 />
               ))}
@@ -535,6 +598,16 @@ export function HomePage({ syncClient = defaultSyncClient }: HomePageProps) {
             />
           </div>
         </form>
+        {pendingDeleteField ? (
+          <FieldDeleteDialog
+            error={fieldDeleteError}
+            field={pendingDeleteField}
+            isDeleting={isFieldDeleting}
+            t={t}
+            onCancel={handleFieldDeleteCancel}
+            onConfirm={() => void handleFieldDeleteConfirm()}
+          />
+        ) : null}
       </div>
     </main>
   );
@@ -547,6 +620,87 @@ function formatErrorMessage(error: unknown): string {
   }
 
   return "Request failed";
+}
+
+/** Formats field deletion errors into localized user-facing copy. */
+function formatFieldDeleteError(
+  error: unknown,
+  t: (key: string) => string,
+): string {
+  if (error instanceof ApiError && error.status === 409) {
+    return t("field.delete.errorInUse");
+  }
+
+  if (error instanceof ApiError || error instanceof Error) {
+    return error.message || t("field.delete.errorGeneric");
+  }
+
+  return t("field.delete.errorGeneric");
+}
+
+/** Renders the in-app confirmation dialog for deleting an unused field. */
+function FieldDeleteDialog({
+  error,
+  field,
+  isDeleting,
+  onCancel,
+  onConfirm,
+  t,
+}: {
+  error?: string;
+  field: FieldDto;
+  isDeleting: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+  t: (key: string, options?: Record<string, string>) => string;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 px-4">
+      <section
+        aria-modal="true"
+        className="w-full max-w-sm rounded-[14px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-5 shadow-[var(--color-shadow-float)]"
+        role="dialog"
+        aria-labelledby="field-delete-title"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2
+              className="text-base font-semibold text-[var(--color-text-primary)]"
+              id="field-delete-title"
+            >
+              {t("field.delete.title")}
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
+              {t("field.delete.description", { field: field.name })}
+            </p>
+          </div>
+        </div>
+        {error ? (
+          <div className="mt-4 rounded-[10px] border border-[var(--color-error-border)] bg-[var(--color-error-soft)] px-3 py-2 text-sm text-[var(--color-error)]">
+            {error}
+          </div>
+        ) : null}
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            className="h-9 rounded-[10px] px-3 text-sm font-semibold text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)] disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={isDeleting}
+            type="button"
+            onClick={onCancel}
+          >
+            {t("field.delete.cancel")}
+          </button>
+          <button
+            className="h-9 rounded-[10px] bg-[var(--color-error)] px-3 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={isDeleting}
+            type="button"
+            onClick={onConfirm}
+          >
+            {isDeleting ? t("field.delete.deleting") : t("field.delete.confirm")}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
 }
 
 /** Creates toolbar definitions for the composer insertion buttons. */

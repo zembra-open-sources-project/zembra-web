@@ -69,7 +69,10 @@ export function createDefaultTaxonomyClient(): TaxonomyClient {
     return createMockTaxonomyClient();
   }
 
-  return createTaxonomyHttpClient({ baseUrl: resolveDefaultApiBaseUrl });
+  return createTaxonomyHttpClient({
+    baseUrl: resolveDefaultApiBaseUrl,
+    workspaceId: resolveDefaultWorkspaceId,
+  });
 }
 
 /** Creates the default sync client configured for the current Vite environment. */

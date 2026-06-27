@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import { createRootRoute, createRoute, createRouter, RouterProvider } from "@tanstack/react-router";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import type { SyncClient } from "../../api/sync.client";
+import { ApiError } from "../../api/http";
 import { i18next } from "../../i18n";
 import { useNotesStore } from "../../features/notes/noteStore";
 import { ThemeProvider } from "../../app/ThemeProvider";
@@ -450,6 +451,88 @@ test("renders actual note counts for all and field navigation", async () => {
   expect(await sidebarNavCount("inbox")).toBe("1");
   expect(await sidebarNavCount("project")).toBe("1");
   expect(await sidebarNavCount("empty")).toBe("0");
+});
+
+/** Verifies empty fields expose an in-app delete confirmation flow. */
+test("deletes an empty field from the sidebar after in-app confirmation", async () => {
+  renderHomePage();
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
+  const deleteField = vi.fn(async (fieldId: string) => {
+    useNotesStore.setState((state) => ({
+      fields: state.fields.filter((field) => field.id !== fieldId),
+      selectedField:
+        state.selectedField === fieldId ? undefined : state.selectedField,
+    }));
+  });
+
+  act(() => {
+    useNotesStore.setState({
+      deleteField,
+      fields: [
+        { id: "used-field", name: "used", createdAt: 1_779_382_320 },
+        { id: "empty-field", name: "empty", createdAt: 1_779_382_320 },
+      ],
+      notes: [
+        {
+          id: "note-1",
+          content: "used note",
+          role: "Human",
+          createdAt: 1_779_382_320,
+          updatedAt: 1_779_382_320,
+          fieldId: "used-field",
+          tags: [],
+        },
+      ],
+      selectedField: "empty-field",
+    });
+  });
+
+  expect(screen.queryByRole("button", { name: "删除 Field @used" })).toBeNull();
+  fireEvent.click(await screen.findByRole("button", { name: "删除 Field @empty" }));
+
+  expect(await screen.findByRole("dialog", { name: "删除 Field" })).not.toBeNull();
+
+  fireEvent.click(screen.getByRole("button", { name: "取消" }));
+  await waitFor(() =>
+    expect(screen.queryByRole("dialog", { name: "删除 Field" })).toBeNull(),
+  );
+  expect(deleteField).not.toHaveBeenCalled();
+  expect(await screen.findByText("empty")).not.toBeNull();
+
+  fireEvent.click(screen.getByRole("button", { name: "删除 Field @empty" }));
+  fireEvent.click(await screen.findByRole("button", { name: "删除" }));
+
+  await waitFor(() => expect(deleteField).toHaveBeenCalledWith("empty-field"));
+  await waitFor(() => expect(screen.queryByText("empty")).toBeNull());
+  expect(useNotesStore.getState().selectedField).toBeUndefined();
+});
+
+/** Verifies field deletion errors stay inside the confirmation dialog. */
+test("keeps an empty field when deletion fails", async () => {
+  renderHomePage();
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
+  const deleteField = vi.fn(async () => {
+    throw new ApiError(409, {
+      code: "field_in_use",
+      details: {},
+      message: "field is still used",
+    });
+  });
+
+  act(() => {
+    useNotesStore.setState({
+      deleteField,
+      fields: [{ id: "empty-field", name: "empty", createdAt: 1_779_382_320 }],
+      notes: [],
+    });
+  });
+
+  fireEvent.click(await screen.findByRole("button", { name: "删除 Field @empty" }));
+  fireEvent.click(await screen.findByRole("button", { name: "删除" }));
+
+  expect(await screen.findByText("该 Field 仍有笔记，不能删除")).not.toBeNull();
+  expect(await screen.findByText("empty")).not.toBeNull();
+  expect(screen.getByRole("dialog", { name: "删除 Field" })).not.toBeNull();
 });
 
 /** Verifies role navigation is optional and filters the feed when selected. */
@@ -989,7 +1072,7 @@ async function sidebarNavCount(label: string, index = 0): Promise<string> {
     return matchingButtons[index];
   });
 
-  return row?.querySelector("span:last-child")?.textContent ?? "";
+  return row?.parentElement?.querySelector(":scope > span:last-child")?.textContent ?? "";
 }
 
 /** Finds the sidebar button whose visible label text matches exactly. */

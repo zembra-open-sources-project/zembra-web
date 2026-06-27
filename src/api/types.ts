@@ -240,6 +240,22 @@ export interface ListFieldsResponse {
   names: string[];
 }
 
+/** Represents the backend request body for deleting an unused field. */
+export interface DeleteFieldRequest {
+  /** Stable field identifier to delete. */
+  field_id: string;
+  /** Workspace UUID used as the deletion scope. */
+  workspace_id: string;
+}
+
+/** Represents the backend response body for deleting an unused field. */
+export interface DeleteFieldResponse {
+  /** Stable field identifier deleted by the request. */
+  field_id: string;
+  /** Whether the backend deleted the requested field. */
+  deleted: boolean;
+}
+
 /** Represents one workspace summary returned by the backend workspace list API. */
 export interface WorkspaceSummary {
   /** Full workspace identifier used as the note API request scope. */

@@ -23,6 +23,18 @@ export const home = {
       tag: "Insert tag",
     },
   },
+  field: {
+    delete: {
+      action: "Delete Field @{{field}}",
+      cancel: "Cancel",
+      confirm: "Delete",
+      deleting: "Deleting",
+      description: "Delete @{{field}}? This is only allowed for Fields with no notes.",
+      errorGeneric: "Failed to delete Field",
+      errorInUse: "This Field still has notes and cannot be deleted",
+      title: "Delete Field",
+    },
+  },
   heatmap: {
     ariaLabel: "Last 30 days note heatmap",
     dayLabel: "{{date}}: {{count}} notes",

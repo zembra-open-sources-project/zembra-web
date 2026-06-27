@@ -93,6 +93,33 @@ describe("createTaxonomyHttpClient", () => {
       "http://server.test/tags?all=true",
     );
   });
+
+  test("deletes an unused field with the OpenAPI request shape", async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
+      jsonResponse({
+        deleted: true,
+        field_id: "field-empty",
+      }),
+    );
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    const client = createTaxonomyHttpClient({
+      baseUrl: "http://server.test",
+      workspaceId: "workspace-1",
+    });
+
+    await expect(client.deleteField("field-empty")).resolves.toBeUndefined();
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+      "http://server.test/fields/delete",
+    );
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
+      method: "POST",
+      body: JSON.stringify({
+        field_id: "field-empty",
+        workspace_id: "workspace-1",
+      }),
+    });
+  });
 });
 
 describe("mapFieldRecordToDto", () => {

@@ -23,6 +23,18 @@ export const home = {
       tag: "插入标签",
     },
   },
+  field: {
+    delete: {
+      action: "删除 Field @{{field}}",
+      cancel: "取消",
+      confirm: "删除",
+      deleting: "删除中",
+      description: "确认删除 @{{field}}？此操作只允许用于没有笔记的 Field。",
+      errorGeneric: "删除 Field 失败",
+      errorInUse: "该 Field 仍有笔记，不能删除",
+      title: "删除 Field",
+    },
+  },
   heatmap: {
     ariaLabel: "最近30天笔记热力图",
     dayLabel: "{{date}}：{{count}} 条笔记",
