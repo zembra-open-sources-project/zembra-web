@@ -23,6 +23,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import type { TagDto } from "../../api/types";
+import type { ComposerTool } from "./homeTypes";
 import {
   findActiveTagQuery,
   getTagSuggestions,
@@ -31,8 +32,8 @@ import {
 } from "./liveMarkdownEditorUtils";
 
 export interface LiveMarkdownEditorHandle {
-  /** Inserts plain Markdown text at the current editor selection. */
-  insertMarkdown: (before: string, after?: string) => void;
+  /** Applies a composer toolbar tool to the current editor selection. */
+  applyTool: (tool: ComposerTool) => void;
 }
 
 /** Renders a Tiptap-backed Markdown editor with inline tag chips. */
@@ -163,12 +164,72 @@ export const LiveMarkdownEditor = forwardRef<
   useImperativeHandle(
     ref,
     () => ({
-      insertMarkdown(before: string, after = "") {
-        editor?.chain().focus().insertContent(`${before}${after}`).run();
+      applyTool(tool: ComposerTool) {
+        applyComposerTool(tool);
       },
     }),
     [editor],
   );
+
+  /** Applies a composer toolbar tool through the matching editor command. */
+  function applyComposerTool(tool: ComposerTool) {
+    if (!editor) {
+      return;
+    }
+
+    if (tool.id === "bold") {
+      const textSelection = getEditorTextSelection();
+      const chain = editor.chain().focus();
+
+      if (textSelection) {
+        chain.setTextSelection(textSelection);
+      }
+
+      chain.toggleBold().run();
+      return;
+    }
+
+    if (tool.id === "list") {
+      editor.chain().focus().toggleBulletList().run();
+      return;
+    }
+
+    editor.chain().focus().insertContent(`${tool.before}${tool.after ?? ""}`).run();
+  }
+
+  /** Converts the current DOM selection into this editor's text selection range. */
+  function getEditorTextSelection(): { from: number; to: number } | undefined {
+    if (!editor) {
+      return undefined;
+    }
+
+    const selection = window.getSelection();
+
+    if (
+      !selection ||
+      selection.rangeCount === 0 ||
+      !selection.anchorNode ||
+      !selection.focusNode ||
+      !editor.view.dom.contains(selection.anchorNode) ||
+      !editor.view.dom.contains(selection.focusNode)
+    ) {
+      return undefined;
+    }
+
+    const anchor = editor.view.posAtDOM(selection.anchorNode, selection.anchorOffset);
+    const focus = editor.view.posAtDOM(selection.focusNode, selection.focusOffset);
+    const from = Math.min(anchor, focus);
+    const to = Math.max(anchor, focus);
+
+    if (from === to) {
+      return undefined;
+    }
+
+    return {
+      from: Math.max(1, from),
+      to: Math.min(editor.state.doc.content.size, to),
+    };
+  }
 
   /** Inserts a chosen tag path at the active hash token range. */
   function handleTagSelect(option: TagSuggestion) {

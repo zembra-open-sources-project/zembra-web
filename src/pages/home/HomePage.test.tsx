@@ -38,6 +38,15 @@ function getComposerEditors(): HTMLElement[] {
   return screen.getAllByRole("textbox", { name: "现在的想法是..." });
 }
 
+/** Selects all visible text inside an editor element for toolbar command tests. */
+function selectElementText(element: HTMLElement) {
+  const range = document.createRange();
+  range.selectNodeContents(element);
+  const selection = window.getSelection();
+  selection?.removeAllRanges();
+  selection?.addRange(range);
+}
+
 /** Verifies that the sidebar activity heatmap renders daily note counts. */
 test("renders daily note count heatmap from store data", async () => {
   renderHomePage();
@@ -89,6 +98,33 @@ test("edits one note inline and warns when multiple fields are present", async (
   await waitFor(() =>
     expect(screen.queryByText("检测到多个 Field，本次只使用 @project")).toBeNull(),
   );
+});
+
+/** Verifies toolbar buttons use live editor semantics instead of raw Markdown text insertion. */
+test("previews composer toolbar actions in the live Markdown editor", async () => {
+  renderHomePage();
+  await waitFor(() => expect(useNotesStore.getState().notes.length).toBe(2));
+
+  const composer = await findComposerEditor();
+  const form = composer.closest("form");
+  expect(form).not.toBeNull();
+
+  fireEvent.click(within(form as HTMLElement).getByRole("button", { name: "插入标签" }));
+  expect(markdownValue(composer)).toBe("#");
+
+  fireEvent.click(within(form as HTMLElement).getByRole("button", { name: "插入 Field" }));
+  expect(markdownValue(composer)).toBe("#@");
+
+  changeMarkdownEditor(composer, "list item");
+  fireEvent.click(within(form as HTMLElement).getByRole("button", { name: "插入列表" }));
+  expect(composer.querySelector("li")?.textContent).toBe("list item");
+  expect(markdownValue(composer)).toBe("- list item");
+
+  changeMarkdownEditor(composer, "important");
+  selectElementText(composer);
+  fireEvent.click(within(form as HTMLElement).getByRole("button", { name: "加粗" }));
+  expect(composer.querySelector("strong")?.textContent).toBe("important");
+  expect(markdownValue(composer)).toBe("**important**");
 });
 
 /** Verifies rendered tag chips are not duplicated in note body text. */

@@ -51,7 +51,7 @@ export function NoteEditor({
     tool: ComposerTool,
   ) {
     event.preventDefault();
-    editorRef.current?.insertMarkdown(tool.before, tool.after);
+    editorRef.current?.applyTool(tool);
   }
 
   return (

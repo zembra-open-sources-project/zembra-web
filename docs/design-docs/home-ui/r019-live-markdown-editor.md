@@ -186,3 +186,19 @@ note create/update 成功后，现有 store 已刷新 `taxonomyClient.listTags()
 | 编译检查 | `npm run build` 通过。 |
 | 自动化回归 | `npm run test` 通过，测试不绑定颜色、间距、固定尺寸、Tailwind class 或编辑器库内部 DOM class。 |
 | 手工检查 | 在创建态和编辑态输入列表、任务列表、引用、表格、代码、链接和 tag，确认实时渲染、suggestion、隐式创建 tag 和提交后展示一致。 |
+
+## 补充设计：工具栏按钮实时预览
+
+日期：2026-06-27
+
+r019 初版实现中，工具栏按钮沿用了 Markdown 片段插入链路，点击按钮只向 Tiptap 文档插入普通文本，没有调用编辑器 command，因此按钮生成的内容不会立即变成编辑态实时节点。补充实现推荐复用现有 `ComposerTool` 的 `id` 作为最小行为分派，不新增独立 toolbar service 或额外状态层。`tag` 和 `field` 继续插入 `#`、`@` 文本并同步 Markdown 字符串；`bold` 改为调用 Tiptap mark command，使当前选区或后续输入进入粗体 mark；`list` 改为调用 Tiptap list command，使当前段落进入无序列表结构。所有命令执行后仍通过 `onUpdate -> getMarkdown()` 回写父级 `draft` 或 `editDraft`，保存链路继续只依赖 Markdown 字符串。
+
+```text
+工具栏按钮
+  -> NoteEditor 按 tool.id 分派
+  -> LiveMarkdownEditor 执行 Tiptap command 或文本插入
+  -> 编辑器内部实时显示 mark/list/tag 前缀
+  -> getMarkdown() 同步纯 Markdown 字符串
+```
+
+该补充只修复按钮交互和 Markdown 字符串同步，不调整输入框尺寸、按钮布局、视觉主题或提交 payload 结构。测试应覆盖用户可观察行为：点击加粗后输入文字，编辑器内出现 `strong` 语义且 Markdown 字符串包含粗体标记；点击列表后输入文字，编辑器内出现 list item 语义且 Markdown 字符串包含列表项；点击 tag 和 field 后 Markdown 字符串仍分别插入 `#` 和 `@`。
