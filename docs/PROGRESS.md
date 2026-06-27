@@ -21,3 +21,4 @@
 - R021 `74e32cf` 调整首页消息流时间语义：note card 头部时间改为展示创建时间，消息流渲染前按 `createdAt` 倒序排序，避免编辑或切换 field 后因为 `updatedAt` 变化打乱时间线，并补充创建时间展示与排序行为测试。
 - R022 `24e35b6` 调整登录页 workspace 下拉展示格式：未命名 workspace 优先使用后端 `short_hash`，并将笔记数量显示为 `<note-hash>(note count: <count>)`，避免 hash 和数量混在一起，同时补充选项文案测试并通过测试与构建验证。
 - R023 `721d9a0` 完成首页 note 输入框实时 Markdown 富文本化：使用 Tiptap 现成编辑能力在文本内部渲染 Markdown 和 tag chip，输入 `#query` 后展示匹配或创建项，tag 创建改为随 note 提交隐式完成；同时修复普通换行展示、列表输入高度跳变和空输入框高度基线问题。
+- R024 `7870c07` 修复首页 composer 发送成功后可见内容未清空的问题：保留 `draft` 状态清空，同时通过 `NoteEditor` 暴露显式 `clear()` 命令，让 `LiveMarkdownEditor` 直接清空 Tiptap 文档、可见 DOM 文本和镜像 Markdown 值，并补充回归测试覆盖发送后输入框显示为空。
