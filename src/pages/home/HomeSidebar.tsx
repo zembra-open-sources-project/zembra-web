@@ -24,10 +24,13 @@ export function DailyNotesHeatmap({
   days,
   locale = "zh-CN",
   onDayCountChange,
+  workspaceId,
 }: {
   days: DailyNoteCount[];
   locale?: string;
   onDayCountChange: (dayCount: number) => void;
+  /** Active workspace scope that determines the represented daily counts. */
+  workspaceId: string;
 }) {
   const { t } = useTranslation("home");
   const heatmapRef = useRef<HTMLElement>(null);
@@ -71,7 +74,7 @@ export function DailyNotesHeatmap({
     if (columnCount > 0) {
       onDayCountChange(columnCount * heatmapDaysPerWeek);
     }
-  }, [columnCount, onDayCountChange]);
+  }, [columnCount, onDayCountChange, workspaceId]);
 
   if (days.length === 0) {
     return (

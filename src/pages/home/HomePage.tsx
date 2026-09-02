@@ -134,7 +134,7 @@ export function HomePage() {
     void loadFields();
     void loadTags();
     void loadRecentNotes();
-  }, [loadDailyNoteCounts, loadFields, loadRecentNotes, loadTags, workspace.id]);
+  }, [loadFields, loadRecentNotes, loadTags, workspace.id]);
 
   useEffect(() => {
     const rootPath = findSelectedTagRootPath(tagTree, selectedTag);
@@ -387,6 +387,7 @@ export function HomePage() {
               days={dailyNoteCounts}
               locale={i18n.resolvedLanguage}
               onDayCountChange={loadDailyNoteCounts}
+              workspaceId={workspace.id}
             />
           </div>
 

@@ -2,8 +2,6 @@
 
 ## 项目流程记录
 
-- R058 `eb9d449` 完成 Supabase Direct 空 Tag 子树删除：聚合数为 0 的 Tag 悬停或聚焦时显示垃圾桶，确认句为“确认删除 #路径？”，父 Tag 按深度倒序连同空后代删除；store 乐观移除、失败回滚并清空受影响筛选。21 个测试文件、140 项测试及两种生产构建通过，用户已验收并归档，版本升至 `0.3.4`。
-- R057 `6093225` 将首页 note card 编辑入口从双击展示态迁移至右上角三点菜单；复用既有菜单与单草稿锁定，新增三语言“编辑笔记”文案和菜单语义，覆盖双击无效、菜单编辑、锁定与 Mention 回归测试。定向 31 项测试及 Backend、Supabase 两种生产构建均通过，等待用户验收。
 - R001 `aa038b50` 完成 agent 基础设施初始化，记录前端技术栈澄清，引入 `vendor/zembra-schema` 共享数据库契约 submodule，并固定到 `v0.1.0`。`4ded053` 根据当前 OpenAPI 将 HTTP 模式 note CRUD、recent、daily-counts 和 note tags 请求统一增加 `workspace_id` scope，默认优先读取 `VITE_ZEMBRA_WORKSPACE_ID`，未配置时从 `/workspaces` 取第一项并缓存，不保留旧接口兼容逻辑。
 - R002 `aa038b50` 完成数据库契约相关依赖约束初始化，记录前端允许、条件允许和默认禁止依赖，明确不引入 SQLite driver、ORM 或组件内 Supabase 直连。
 - R003 `aa038b50` 初始化前端工程，建立 Vite、React、TypeScript、Tailwind CSS v4、TanStack Router、Zustand、Vitest 基础结构，补充 Docker 静态部署和 Vercel SPA rewrite，验证 `npm run test` 与 `npm run build` 通过。
@@ -42,3 +40,7 @@
 - R054 `d6a1e34` 将创建与编辑笔记共用的发送按钮改为透明点击区域，使用强调色实心发送图标，移除圆角背景和阴影；保留原有点击范围、禁用条件与可访问性名称。20 个测试文件、137 项测试及 Backend、Supabase 两种生产构建均通过，用户已验收并归档执行计划。
 - R055 `3bdb970` 完成 Supabase 模式的紧凑活动热力图：侧栏根据实际宽度与主题化的 16px 方块、4px 间距和最多 1px 圆角动态计算列数，再以列数乘 7 显式传入 store 和 client，Supabase 聚合随参数生成连续日期；移除可见日期和首末标签，保留 hover 与无障碍信息。20 个测试文件、137 项测试及两种生产构建均通过，等待用户验收。
 - R056 `0da58f2` 完成全局主题样式分层：将单一 CSS 拆为入口、基础、`zembra-bonofix` 主题、语义 token 与 Markdown 内容层，亮暗主题只维护 palette；同步固化目录边界和 Zembra 前缀规则。20 个测试文件、137 项测试及两种生产构建均通过，等待用户验收。
+- R057 `6093225` 将首页 note card 编辑入口从双击展示态迁移至右上角三点菜单；复用既有菜单与单草稿锁定，新增三语言“编辑笔记”文案和菜单语义，覆盖双击无效、菜单编辑、锁定与 Mention 回归测试。定向 31 项测试及 Backend、Supabase 两种生产构建均通过，等待用户验收。
+- R058 `eb9d449` 完成 Supabase Direct 空 Tag 子树删除：聚合数为 0 的 Tag 悬停或聚焦时显示垃圾桶，确认句为“确认删除 #路径？”，父 Tag 按深度倒序连同空后代删除；store 乐观移除、失败回滚并清空受影响筛选。21 个测试文件、140 项测试及两种生产构建通过，用户已验收并归档，版本升至 `0.3.4`。
+- R059 `c2f91bd` 将创建和编辑笔记共用的输入区高度改为最小两行、最大十行，继续复用既有自动扩展和内部滚动；Backend 与 Supabase 两种生产构建、`git diff --check` 均通过，等待用户验收。
+- R060 `026b735` 将首页热力图统计绑定到当前 workspace：切换时沿用侧栏宽度计算出的相同日数重新加载每日统计，不改变网格列数或日期范围；无笔记 workspace 的同数量格子均按 0 计数呈现为空白。22 个测试文件、141 项测试和 Backend、Supabase 两种生产构建均通过，等待用户验收。
